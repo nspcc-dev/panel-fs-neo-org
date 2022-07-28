@@ -6,14 +6,14 @@ all:
 	docker run \
 	-u `stat -c "%u:%g" .` \
 	-v `pwd`:/usr/src/app \
-	-w /usr/src/app node:12-alpine \
+	-w /usr/src/app node:14-alpine \
 	sh -c 'npm install --silent && npm run build'
 
 start:
 	docker run \
 	-p $(PORT):3000 \
 	-v `pwd`:/usr/src/app \
-	-w /usr/src/app node:12-alpine \
+	-w /usr/src/app node:14-alpine \
 	sh -c 'npm install --silent && npm run build && npm install -g serve && serve -s output -p 3000'
 
 release: all
