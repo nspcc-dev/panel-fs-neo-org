@@ -121,10 +121,7 @@ ul {
 }
 
 .container_panel {
-    padding: 15px 30px;
-    border: 2px solid #3e8ed0;
-    border-radius: 0 6px 6px 6px;
-    margin-bottom: 10px;
+    margin: 20px 0 10px;
 }
 
 .container_panel .title span {
@@ -322,13 +319,14 @@ a.navbar-item:hover {
     padding: 20px 30px;
     font-size: 14px;
     background: transparent;
-    border: 1px dashed rgb(43, 74, 127);
-    color: rgb(43, 74, 127);
+    border: 1px dashed #dadada;
+    color: #dadada;
     cursor: pointer;
 }
 
 .input_block:hover label {
-    border: 1px solid rgb(43, 74, 127);
+    border: 1px solid #fff;
+    color: #fff;
 }
 
 .input_block input {
