@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import $ from "jquery";
 import {
   Routes,
   Route,
@@ -12,6 +11,7 @@ import {
 	Button,
 	Footer,
 	Columns,
+	Form,
 } from 'react-bulma-components';
 import Home from './Home';
 import Profile from './Profile';
@@ -24,6 +24,8 @@ import './App.css';
 export const App = () => {
 	const location = useLocation();
 	const walletConnectCtx = useWalletConnect();
+	const [isLoadContainers, setLoadContainers] = useState(false);
+	const [containerNameCreate, setContainerNameCreate] = useState('');
 	const [walletData, setWalletData] = useState(null);
 
   const [popup, setPopup] = useState({
@@ -102,6 +104,67 @@ export const App = () => {
 				}
 			}
 		});
+	};
+
+  const onCreateContainer = () => {
+		if (walletData.tokens.container.PUT) {
+			if (containerNameCreate.length > 0) {
+				onPopup('loading');
+				api('PUT', '/containers?walletConnect=true&name-scope-global=true', {
+					"containerName": containerNameCreate,
+					"placementPolicy": "REP 1",
+					"basicAcl": "public-read-write",
+					"attributes": [],
+				}, {
+					"Content-Type": "application/json",
+					"X-Bearer-Owner-Id": walletData.account.replace('neo3:testnet:', ''),
+					'X-Bearer-Signature': walletData.tokens.container.PUT.signature,
+					'X-Bearer-Signature-Key': walletData.publicKey,
+					'Authorization': `Bearer ${walletData.tokens.container.PUT.token}`
+				}).then(() => {
+					setLoadContainers(true);
+					setContainerNameCreate('');
+				});
+			} else {
+				onPopup('failed', 'Incorrect container name');
+			}
+		} else {
+			onPopup('signTokens', 'container.PUT');
+		}
+	};
+
+  const onDeleteContainer = (containerName) => {
+		if (walletData.tokens.container.DELETE) {
+			onPopup('loading');
+			api('DELETE', `/containers/${containerName}?walletConnect=true`, {}, {
+				"Content-Type": "application/json",
+				"X-Bearer-Owner-Id": walletData.account.replace('neo3:testnet:', ''),
+				'X-Bearer-Signature': walletData.tokens.container.DELETE.signature,
+				'X-Bearer-Signature-Key': walletData.publicKey,
+				'Authorization': `Bearer ${walletData.tokens.container.DELETE.token}`
+			}).then(() => {
+				setLoadContainers(true);
+			});
+		} else {
+			onPopup('signTokens', 'container.DELETE');
+		}
+	};
+
+  const onDeleteObject = (containerId, objectId) => {
+		if (walletData.tokens.object.DELETE) {
+			onPopup('loading');
+			api('DELETE', `/objects/${containerId}/${objectId}?walletConnect=true`, {}, {
+				"Content-Type": "application/json",
+				"X-Bearer-Owner-Id": walletData.account.replace('neo3:testnet:', ''),
+				'X-Bearer-Signature': walletData.tokens.object.DELETE.signature,
+				'X-Bearer-Signature-Key': walletData.publicKey,
+				'Authorization': `Bearer ${walletData.tokens.object.DELETE.token}`
+			}).then(() => {
+				setLoadContainers(true);
+			});
+		} else {
+			onPopup('signTokens', 'object.DELETE');
+		}
 	};
 
 	const onConnectWallet = async () => {
@@ -201,144 +264,142 @@ export const App = () => {
 						<Heading align="center" size={5}>Please sign your tokens</Heading>
 						<Heading align="center" size={6} weight="normal">To use all functions, you must use signed user tokens</Heading>
 						<Columns>
-							<Columns.Column>
-								<Heading align="center" size={6}>Containers</Heading>
-								<div
-									className="token_status_panel"
-									style={popup.text === 'container.PUT' ? { background: '#f14668', color: '#fff' } : {}}
-								>
-									<div>For creation operations</div>
-									{walletData && walletData.tokens.container.PUT ? (
-										<img
-											src="./img/success.svg"
-											height={25}
-											width={25}
-											alt="success"
-										/>
-									) : (
-										<Button
-											color="primary"
-											size="small"
-											onClick={() => onAuth('container', 'PUT')}
-										>
-											Sign
-										</Button>
+							{(popup.text === '' || popup.text === 'container.PUT' || popup.text === 'container.DELETE' || popup.text === 'container.SETEACL') && (
+								<Columns.Column>
+									<Heading align="center" size={6}>Containers</Heading>
+									{(popup.text === '' || popup.text === 'container.PUT') && (
+										<div className="token_status_panel">
+											<div>For creation operations</div>
+											{walletData && walletData.tokens.container.PUT ? (
+												<img
+													src="./img/success.svg"
+													height={25}
+													width={25}
+													alt="success"
+												/>
+											) : (
+												<Button
+													color="primary"
+													size="small"
+													onClick={() => onAuth('container', 'PUT')}
+												>
+													Sign
+												</Button>
+											)}
+										</div>
 									)}
-								</div>
-								<div
-									className="token_status_panel"
-									style={popup.text === 'container.DELETE' ? { background: '#f14668', color: '#fff' } : {}}
-								>
-									<div>For deletion operations</div>
-									{walletData && walletData.tokens.container.DELETE ? (
-										<img
-											src="./img/success.svg"
-											height={25}
-											width={25}
-											alt="success"
-										/>
-									) : (
-										<Button
-											color="primary"
-											size="small"
-											onClick={() => onAuth('container', 'DELETE')}
-										>
-											Sign
-										</Button>
+									{(popup.text === '' || popup.text === 'container.DELETE') && (
+										<div className="token_status_panel">
+											<div>For deletion operations</div>
+											{walletData && walletData.tokens.container.DELETE ? (
+												<img
+													src="./img/success.svg"
+													height={25}
+													width={25}
+													alt="success"
+												/>
+											) : (
+												<Button
+													color="primary"
+													size="small"
+													onClick={() => onAuth('container', 'DELETE')}
+												>
+													Sign
+												</Button>
+											)}
+										</div>
 									)}
-								</div>
-								<div
-									className="token_status_panel"
-									style={popup.text === 'container.SETEACL' ? { background: '#f14668', color: '#fff' } : {}}
-								>
-									<div>For eACL management</div>
-									{walletData && walletData.tokens.container.SETEACL ? (
-										<img
-											src="./img/success.svg"
-											height={25}
-											width={25}
-											alt="success"
-										/>
-									) : (
-										<Button
-											color="primary"
-											size="small"
-											onClick={() => onAuth('container', 'SETEACL')}
-										>
-											Sign
-										</Button>
+									{(popup.text === '' || popup.text === 'container.SETEACL') && (
+										<div className="token_status_panel">
+											<div>For eACL management</div>
+											{walletData && walletData.tokens.container.SETEACL ? (
+												<img
+													src="./img/success.svg"
+													height={25}
+													width={25}
+													alt="success"
+												/>
+											) : (
+												<Button
+													color="primary"
+													size="small"
+													onClick={() => onAuth('container', 'SETEACL')}
+												>
+													Sign
+												</Button>
+											)}
+										</div>
 									)}
-								</div>
-							</Columns.Column>
-							<Columns.Column>
-								<Heading align="center" size={6}>Objects</Heading>
-								<div
-									className="token_status_panel"
-									style={popup.text === 'object.PUT' ? { background: '#f14668', color: '#fff' } : {}}
-								>
-									<div>For creation operations</div>
-									{walletData && walletData.tokens.object.PUT ? (
-										<img
-											src="./img/success.svg"
-											height={25}
-											width={25}
-											alt="success"
-										/>
-									) : (
-										<Button
-											color="primary"
-											size="small"
-											onClick={() => onAuth('object', 'PUT')}
-										>
-											Sign
-										</Button>
+								</Columns.Column>
+							)}
+							{(popup.text === '' || popup.text === 'object.PUT' || popup.text === 'object.DELETE' || popup.text === 'object.GET') && (
+								<Columns.Column>
+									<Heading align="center" size={6}>Objects</Heading>
+									{(popup.text === '' || popup.text === 'object.PUT') && (
+										<div className="token_status_panel">
+											<div>For creation operations</div>
+											{walletData && walletData.tokens.object.PUT ? (
+												<img
+													src="./img/success.svg"
+													height={25}
+													width={25}
+													alt="success"
+												/>
+											) : (
+												<Button
+													color="primary"
+													size="small"
+													onClick={() => onAuth('object', 'PUT')}
+												>
+													Sign
+												</Button>
+											)}
+										</div>
 									)}
-								</div>
-								<div
-									className="token_status_panel"
-									style={popup.text === 'object.DELETE' ? { background: '#f14668', color: '#fff' } : {}}
-								>
-									<div>For deletion operations</div>
-									{walletData && walletData.tokens.object.DELETE ? (
-										<img
-											src="./img/success.svg"
-											height={25}
-											width={25}
-											alt="success"
-										/>
-									) : (
-										<Button
-											color="primary"
-											size="small"
-											onClick={() => onAuth('object', 'DELETE')}
-										>
-											Sign
-										</Button>
+									{(popup.text === '' || popup.text === 'object.DELETE') && (
+										<div className="token_status_panel">
+											<div>For deletion operations</div>
+											{walletData && walletData.tokens.object.DELETE ? (
+												<img
+													src="./img/success.svg"
+													height={25}
+													width={25}
+													alt="success"
+												/>
+											) : (
+												<Button
+													color="primary"
+													size="small"
+													onClick={() => onAuth('object', 'DELETE')}
+												>
+													Sign
+												</Button>
+											)}
+										</div>
 									)}
-								</div>
-								<div
-									className="token_status_panel"
-									style={popup.text === 'object.GET' ? { background: '#f14668', color: '#fff' } : {}}
-								>
-									<div>For getting operations</div>
-									{walletData && walletData.tokens.object.GET ? (
-										<img
-											src="./img/success.svg"
-											height={25}
-											width={25}
-											alt="success"
-										/>
-									) : (
-										<Button
-											color="primary"
-											size="small"
-											onClick={() => onAuth('object', 'GET')}
-										>
-											Sign
-										</Button>
+									{(popup.text === '' || popup.text === 'object.GET') && (
+										<div className="token_status_panel">
+											<div>For getting operations</div>
+											{walletData && walletData.tokens.object.GET ? (
+												<img
+													src="./img/success.svg"
+													height={25}
+													width={25}
+													alt="success"
+												/>
+											) : (
+												<Button
+													color="primary"
+													size="small"
+													onClick={() => onAuth('object', 'GET')}
+												>
+													Sign
+												</Button>
+											)}
+										</div>
 									)}
-								</div>
-							</Columns.Column>
+								</Columns.Column>
+							)}
 						</Columns>
 						{walletData && walletData.tokens.container.PUT && walletData.tokens.container.DELETE && walletData.tokens.container.SETEACL
 							&& walletData.tokens.object.PUT && walletData.tokens.object.DELETE && walletData.tokens.object.GET && (
@@ -351,6 +412,121 @@ export const App = () => {
 								Start
 							</Button>
 						)}
+          </div>
+        </div>
+      )}
+			{popup.current === 'createContainer' && (
+        <div className="popup">
+          <div
+            className="popup_close_panel"
+            onClick={onPopup}
+          />
+          <div className="popup_content">
+						<div
+							className="popup_close"
+							onClick={onPopup}
+						>
+							<img
+								src="./img/close.svg"
+								height={30}
+								width={30}
+								alt="loader"
+							/>
+						</div>
+						<Heading align="center" size={5}>New container</Heading>
+						<Form.Field>
+							<Form.Label size="small">Name</Form.Label>
+							<Form.Control>
+								<Form.Input
+									type="text"
+									value={containerNameCreate}
+									onChange={(e) => setContainerNameCreate(e.target.value)}
+								/>
+							</Form.Control>
+						</Form.Field>
+						<Button
+							color="primary"
+							onClick={onCreateContainer}
+							style={{ display: 'flex', margin: 'auto' }}
+						>
+							Create
+						</Button>
+          </div>
+        </div>
+      )}
+			{popup.current === 'deleteContainer' && (
+        <div className="popup">
+          <div
+            className="popup_close_panel"
+            onClick={onPopup}
+          />
+          <div className="popup_content">
+						<div
+							className="popup_close"
+							onClick={onPopup}
+						>
+							<img
+								src="./img/close.svg"
+								height={30}
+								width={30}
+								alt="loader"
+							/>
+						</div>
+						<Heading align="center" size={5}>Container Deletion</Heading>
+						<Heading align="center" size={6}>Are you sure you want to delete container?</Heading>
+						<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
+							<Button
+								color="gray"
+								onClick={onPopup}
+								style={{ marginRight: 10 }}
+							>
+								No
+							</Button>
+							<Button
+								color="danger"
+								onClick={() => onDeleteContainer(popup.text)}
+							>
+								Yes
+							</Button>
+						</div>
+          </div>
+        </div>
+      )}
+			{popup.current === 'deleteObject' && (
+        <div className="popup">
+          <div
+            className="popup_close_panel"
+            onClick={onPopup}
+          />
+          <div className="popup_content">
+						<div
+							className="popup_close"
+							onClick={onPopup}
+						>
+							<img
+								src="./img/close.svg"
+								height={30}
+								width={30}
+								alt="loader"
+							/>
+						</div>
+						<Heading align="center" size={5}>Object Deletion</Heading>
+						<Heading align="center" size={6}>Are you sure you want to delete object?</Heading>
+						<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
+							<Button
+								color="gray"
+								onClick={onPopup}
+								style={{ marginRight: 10 }}
+							>
+								No
+							</Button>
+							<Button
+								color="danger"
+								onClick={() => onDeleteObject(popup.text.containerId, popup.text.objectId)}
+							>
+								Yes
+							</Button>
+						</div>
           </div>
         </div>
       )}
@@ -420,7 +596,7 @@ export const App = () => {
 							<img
 								src="/img/logo.svg"
 								height={28}
-								width={112}
+								width={75}
 								alt="logo"
 							/>
 						</Link>
@@ -442,6 +618,8 @@ export const App = () => {
 						walletData={walletData}
 						setWalletData={setWalletData}
 						walletConnectCtx={walletConnectCtx}
+						isLoadContainers={isLoadContainers}
+						setLoadContainers={setLoadContainers}
 						onPopup={onPopup}
 					/>}
 				/>
