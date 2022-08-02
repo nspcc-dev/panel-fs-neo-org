@@ -444,7 +444,7 @@ const Profile = ({
 									<Tile
 										kind="child"
 										renderAs={Notification}
-										color="info"
+										color="gray"
 									>
 										<Heading
 											size={5}
@@ -537,16 +537,16 @@ const Profile = ({
 																	style={objectItem.isActive ? {
 																    alignItems: 'center',
 																		cursor: 'pointer',
-																		border: '1px solid #fff',
+																		border: '1px solid #363636',
 																		display: 'inline-flex',
 																		padding: '5px 10px',
 																		borderRadius: 4,
-																		background: '#fff',
-																		color: '#3e8ed0',
+																		background: '#363636',
+																		color: '#fff',
 																	} : {
 																    alignItems: 'center',
 																		cursor: 'pointer',
-																		border: '1px solid #fff',
+																		border: '1px solid #363636',
 																		display: 'inline-flex',
 																		padding: '5px 10px',
 																		borderRadius: 4,
