@@ -114,7 +114,7 @@ const Profile = ({
 			'Authorization': `Bearer ${walletData.tokens.object.GET.token}`
 		}).then((e) => {
 			const containersTemp = [ ...containers ];
-			containersTemp[index] = { ...containersTemp[index], objects: e.objects && e.objects.map((item) => item.address), isActive: true };
+			containersTemp[index] = { ...containersTemp[index], objects: e.objects, isActive: true };
 			setContainers(containersTemp);
 		});
 	};
@@ -128,7 +128,11 @@ const Profile = ({
 			'Authorization': `Bearer ${walletData.tokens.object.GET.token}`
 		}).then((e) => {
 			const containersTemp = [ ...containers ];
-			containersTemp[containerIndex].objects[objectIndex] = { ...e, isActive: true };
+			containersTemp[containerIndex].objects[objectIndex] = {
+				...e,
+				...containersTemp[containerIndex].objects[objectIndex],
+				isActive: true,
+			};
 			setContainers(containersTemp);
 		});
 	};
@@ -470,7 +474,7 @@ const Profile = ({
 												}
 											}}
 										>
-											{`${containerItem.attributes.filter((attribute) => attribute.key === 'Name')[0].value} (${containerItem.containerId})`}
+											{containerItem.attributes.filter((attribute) => attribute.key === 'Name')[0].value}
 											{containerItem.isActive && (
 												<img
 													src="./img/close_red.svg"
@@ -478,11 +482,7 @@ const Profile = ({
 													height={30}
 													fill="#f14668"
 													alt="sign_tokens"
-													style={{ 
-														cursor: 'pointer', 
-														background: '#fff',
-														borderRadius: '50%',
-													}}
+													style={{ cursor: 'pointer' }}
 													onClick={(e) => {
 														onPopup('deleteContainer', containerItem.containerId);
 														e.stopPropagation();
@@ -495,12 +495,16 @@ const Profile = ({
 												{containerItem.ownerId ? (
 													<div>
 														<Heading size={6} weight="light">
-															<span>{`Creation: `}</span>
-															{new Date(containerItem.attributes[0].value * 1000).toLocaleDateString()}
+															<span>{`Container id: `}</span>
+															{containerItem.containerId}
 														</Heading>
 														<Heading size={6} weight="light">
-															<span>{`Name: `}</span>
-															{containerItem.attributes[1].value}
+															<span>{`Owner id: `}</span>
+															{containerItem.ownerId}
+														</Heading>
+														<Heading size={6} weight="light">
+															<span>{`Creation: `}</span>
+															{new Date(containerItem.attributes[0].value * 1000).toLocaleDateString()}
 														</Heading>
 														<Heading size={6} weight="light">
 															<span>{`Zone: `}</span>
@@ -509,10 +513,6 @@ const Profile = ({
 														<Heading size={6} weight="light">
 															<span>{`Basic acl: `}</span>
 															{containerItem.basicAcl}
-														</Heading>
-														<Heading size={6} weight="light">
-															<span>{`Owner id: `}</span>
-															{containerItem.ownerId}
 														</Heading>
 														<Heading size={6} weight="light">
 															<span>{`Placement policy: `}</span>
@@ -529,7 +529,7 @@ const Profile = ({
 														>Set eACL</Button>
 														<Heading size={6} weight="semibold">Objects</Heading>
 														{containerItem.objects && containerItem.objects.map((objectItem, objectIndex) => (
-															<div key={objectItem.objectId}>
+															<div key={objectItem.address.objectId}>
 																<Heading
 																	size={6}
 																	weight="semibold"
@@ -559,11 +559,11 @@ const Profile = ({
 																		} else {
 																			containersTemp[index].objects[objectIndex].isActive = true;
 																			setContainers(containersTemp);
-																			onGetObjectData(containerItem.containerId, objectItem.objectId, index, objectIndex);
+																			onGetObjectData(containerItem.containerId, objectItem.address.objectId, index, objectIndex);
 																		}
 																	}}
 																>
-																	{objectItem.objectId}
+																	{objectItem.name}
 																	{objectItem.isActive && (
 																		<img
 																			src="./img/close_red.svg"
@@ -571,9 +571,9 @@ const Profile = ({
 																			height={22}
 																			fill="#f14668"
 																			alt="sign_tokens"
-																			style={{ marginLeft: 5, cursor: 'pointer' }}
+																			style={{ marginLeft: 10, cursor: 'pointer' }}
 																			onClick={(e) => {
-																				onPopup('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.objectId });
+																				onPopup('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.address.objectId });
 																				e.stopPropagation();
 																			}}
 																		/>
@@ -584,21 +584,21 @@ const Profile = ({
 																		{objectItem.ownerId ? (
 																			<div>
 																				<Heading size={6} weight="light">
-																					<span>{`Name: `}</span>
+																					<span>{`Object id: `}</span>
 																					<a
-																						href={`${process.env.REACT_APP_NGINX}/get/${containerItem.containerId}/${objectItem.objectId}`}
+																						href={`${process.env.REACT_APP_NGINX}/get/${containerItem.containerId}/${objectItem.address.objectId}`}
 																						target="_blank"
 																						rel="noopener noreferrer"
 																						style={{ textDecoration: 'underline' }}
-																					>{objectItem.attributes[0].value}</a>
-																				</Heading>
-																				<Heading size={6} weight="light">
-																					<span>{`Object size: `}</span>
-																					{objectItem.objectSize}
+																					>{objectItem.address.objectId}</a>
 																				</Heading>
 																				<Heading size={6} weight="light">
 																					<span>{`Owner id: `}</span>
 																					{objectItem.ownerId}
+																				</Heading>
+																				<Heading size={6} weight="light">
+																					<span>{`Object size: `}</span>
+																					{objectItem.objectSize}
 																				</Heading>
 																				<Heading size={6} weight="light">
 																					<span>{`Payload size: `}</span>
