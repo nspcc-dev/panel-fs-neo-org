@@ -319,14 +319,14 @@ a.navbar-item:hover {
     padding: 20px 30px;
     font-size: 14px;
     background: transparent;
-    border: 1px dashed #dadada;
-    color: #dadada;
+    border: 1px dashed #363636;
+    color: #363636;
     cursor: pointer;
 }
 
 .input_block:hover label {
-    border: 1px solid #fff;
-    color: #fff;
+    border: 1px solid #222;
+    color: #222;
 }
 
 .input_block input {
