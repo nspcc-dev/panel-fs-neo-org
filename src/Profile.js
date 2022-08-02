@@ -477,7 +477,7 @@ const Profile = ({
 											{containerItem.attributes.filter((attribute) => attribute.key === 'Name')[0].value}
 											{containerItem.isActive && (
 												<img
-													src="./img/close_red.svg"
+													src="./img/trashbin.svg"
 													width={30}
 													height={30}
 													fill="#f14668"
@@ -566,7 +566,7 @@ const Profile = ({
 																	{objectItem.name}
 																	{objectItem.isActive && (
 																		<img
-																			src="./img/close_red.svg"
+																			src="./img/trashbin.svg"
 																			width={22}
 																			height={22}
 																			fill="#f14668"
