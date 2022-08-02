@@ -512,7 +512,7 @@ const Profile = ({
 														</Heading>
 														<Heading size={6} weight="light">
 															<span>{`Basic acl: `}</span>
-															{containerItem.basicAcl}
+															{`0x${containerItem.basicAcl}`}
 														</Heading>
 														<Heading size={6} weight="light">
 															<span>{`Placement policy: `}</span>
