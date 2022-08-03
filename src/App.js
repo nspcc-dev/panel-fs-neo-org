@@ -46,7 +46,9 @@ export const App = () => {
 	useEffect(() => {
 		if (walletConnectCtx.accounts.length !== 0) {
 			setWalletData({
-				account: walletConnectCtx.accounts[0],
+				type: walletConnectCtx.accounts[0].split(':')[0],
+				net: walletConnectCtx.accounts[0].split(':')[1],
+				account: walletConnectCtx.accounts[0].split(':')[2],
 				data: walletConnectCtx.session.peer,
 				tokens: {
 					container: {},
@@ -81,7 +83,7 @@ export const App = () => {
 		const headers = {
 			"Content-Type": "application/json",
 			"X-Bearer-Scope": type,
-			"X-Bearer-Owner-Id": walletData.account.replace('neo3:testnet:', ''),
+			"X-Bearer-Owner-Id": walletData.account,
 		}
 		api('POST', '/auth', body, headers).then((e) => {
 			onSignMessage(e[0].token, type, operation);
@@ -117,7 +119,7 @@ export const App = () => {
 					"attributes": [],
 				}, {
 					"Content-Type": "application/json",
-					"X-Bearer-Owner-Id": walletData.account.replace('neo3:testnet:', ''),
+					"X-Bearer-Owner-Id": walletData.account,
 					'X-Bearer-Signature': walletData.tokens.container.PUT.signature,
 					'X-Bearer-Signature-Key': walletData.publicKey,
 					'Authorization': `Bearer ${walletData.tokens.container.PUT.token}`
@@ -138,7 +140,7 @@ export const App = () => {
 			onPopup('loading');
 			api('DELETE', `/containers/${containerName}?walletConnect=true`, {}, {
 				"Content-Type": "application/json",
-				"X-Bearer-Owner-Id": walletData.account.replace('neo3:testnet:', ''),
+				"X-Bearer-Owner-Id": walletData.account,
 				'X-Bearer-Signature': walletData.tokens.container.DELETE.signature,
 				'X-Bearer-Signature-Key': walletData.publicKey,
 				'Authorization': `Bearer ${walletData.tokens.container.DELETE.token}`
@@ -155,7 +157,7 @@ export const App = () => {
 			onPopup('loading');
 			api('DELETE', `/objects/${containerId}/${objectId}?walletConnect=true`, {}, {
 				"Content-Type": "application/json",
-				"X-Bearer-Owner-Id": walletData.account.replace('neo3:testnet:', ''),
+				"X-Bearer-Owner-Id": walletData.account,
 				'X-Bearer-Signature': walletData.tokens.object.DELETE.signature,
 				'X-Bearer-Signature-Key': walletData.publicKey,
 				'Authorization': `Bearer ${walletData.tokens.object.DELETE.token}`
