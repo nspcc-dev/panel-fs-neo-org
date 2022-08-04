@@ -5,7 +5,7 @@ import { WalletConnectContextProvider } from "@cityofzion/wallet-connect-sdk-rea
 import { BrowserRouter } from "react-router-dom";
 
 const wcOptions = {
-  chains: ["neo3:testnet", "neo3:mainnet", "neo3:privatenet"],
+  chains: ["neo3:testnet", "neo3:mainnet"],
   logger: "debug",
   methods: ["invokeFunction", "testInvoke", "signMessage", "verifyMessage"],
   relayServer: "wss://relay.walletconnect.org",
