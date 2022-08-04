@@ -8,6 +8,7 @@ import {
 	Tile,
 	Button,
 	Box,
+	Tag,
 } from 'react-bulma-components';
 import api from './api';
 
@@ -82,7 +83,7 @@ const Profile = ({
 
 	const onNeoFSBalance = async () => {
 		setIsLoadingNeoFSBalance(true);
-		api('GET', `/accounting/balance/${walletData.account.replace('neo3:testnet:', '')}`).then((e) => {
+		api('GET', `/accounting/balance/${walletData.account}`).then((e) => {
 			setNeoFSBalance(e.value);
 			setTimeout(() => {
 				setIsLoadingNeoFSBalance(false);
@@ -92,7 +93,7 @@ const Profile = ({
 
 	const onGetContainers = () => {
 		setIsLoadingContainers(true);
-		api('GET', `/containers?ownerId=${walletData.account.replace('neo3:testnet:', '')}`).then((e) => {
+		api('GET', `/containers?ownerId=${walletData.account}`).then((e) => {
 			const containersTemp = [ ...e.containers ];
 			containersTemp.map((container) => container.isActive = false);
 			setContainers(e.containers);
@@ -108,7 +109,7 @@ const Profile = ({
 			"filters": [],
 		}, {
 			"Content-Type": "application/json",
-			"X-Bearer-Owner-Id": walletData.account.replace('neo3:testnet:', ''),
+			"X-Bearer-Owner-Id": walletData.account,
 			'X-Bearer-Signature': walletData.tokens.object.GET.signature,
 			'X-Bearer-Signature-Key': walletData.publicKey,
 			'Authorization': `Bearer ${walletData.tokens.object.GET.token}`
@@ -122,7 +123,7 @@ const Profile = ({
 	const onGetObjectData = (containerId, objectId, containerIndex, objectIndex) => {
 		api('GET', `/objects/${containerId}/${objectId}?walletConnect=true`, {}, {
 			"Content-Type": "application/json",
-			"X-Bearer-Owner-Id": walletData.account.replace('neo3:testnet:', ''),
+			"X-Bearer-Owner-Id": walletData.account,
 			'X-Bearer-Signature': walletData.tokens.object.GET.signature,
 			'X-Bearer-Signature-Key': walletData.publicKey,
 			'Authorization': `Bearer ${walletData.tokens.object.GET.token}`
@@ -155,7 +156,7 @@ const Profile = ({
 				]
 			}, {
 				"Content-Type": "application/json",
-				"X-Bearer-Owner-Id": walletData.account.replace('neo3:testnet:', ''),
+				"X-Bearer-Owner-Id": walletData.account,
 				'X-Bearer-Signature': walletData.tokens.container.SETEACL.signature,
 				'X-Bearer-Signature-Key': walletData.publicKey,
 				'Authorization': `Bearer ${walletData.tokens.container.SETEACL.token}`
@@ -187,7 +188,7 @@ const Profile = ({
 					]
 				}, {
 					"Content-Type": "application/json",
-					"X-Bearer-Owner-Id": walletData.account.replace('neo3:testnet:', ''),
+					"X-Bearer-Owner-Id": walletData.account,
 					'X-Bearer-Signature': walletData.tokens.object.PUT.signature,
 					'X-Bearer-Signature-Key': walletData.publicKey,
 					'Authorization': `Bearer ${walletData.tokens.object.PUT.token}`
@@ -285,15 +286,15 @@ const Profile = ({
 		<Container style={{ minHeight: 'calc(100vh - 212px)' }}>
 			{walletData ? (
 				<Section>
-					<Box style={{ fontSize: 14, wordBreak: 'break-all', display: 'flex' }}>
-						{`«${walletData.data.metadata.name}» connected`}
-					</Box>
 					<Box
 						id="account"
 						style={{ marginTop: '1.5rem' }}
 					>
 						<Heading style={{ display: 'flex', justifyContent: 'space-between' }}>
-							<span>Account</span>
+							<span>
+								Account
+								<Tag style={{ margin: '0 0px 0 15px' }}>{`«${walletData.data.metadata.name}»`}</Tag>
+							</span>
 							<img
 								src="./img/logout.svg"
 								width={25}
@@ -303,6 +304,11 @@ const Profile = ({
 								onClick={onDisconnectWallet}
 							/>
 						</Heading>
+						{walletData.net !== 'testnet' && (
+							<Box style={{ fontSize: 14, wordBreak: 'break-all', background: '#f14668', color: '#fff' }}>
+								<div>1</div>
+							</Box>
+						)}
 						<Tile kind="ancestor">
 							<Tile kind="parent">
 								<Tile
@@ -310,48 +316,74 @@ const Profile = ({
 									renderAs={Notification}
 									color="grey"
 								>
-									<Heading size={6} weight="bold" style={{ display: 'flex' }}>
-										{`GAS Balance: `}
-										<span>{walletData.balance ? `${(walletData.balance * 0.00000001).toFixed(8)} GAS` : '-'}</span>
-										<img
-											src="./img/sync.svg"
-											width={20}
-											height={20}
-											alt="logout"
-											style={isLoadingBalance ? {
-												marginLeft: 5,
-												cursor: 'pointer',
-												animation: 'spin 1.5s infinite linear',
-											} : {
-												marginLeft: 5,
-												cursor: 'pointer',
-											}}
-											onClick={onBalance}
-										/>
-									</Heading>
-									<Heading size={6} weight="bold" style={{ display: 'flex' }}>
-										{`NeoFS Balance: `}
-										<span>{neoFSBalance ? `${(neoFSBalance * 0.00000001).toFixed(8)} GAS` : '-'}</span>
-										<img
-											src="./img/sync.svg"
-											width={20}
-											height={20}
-											alt="logout"
-											style={isLoadingNeoFSBalance ? {
-												marginLeft: 5,
-												cursor: 'pointer',
-												animation: 'spin 1.5s infinite linear',
-											} : {
-												marginLeft: 5,
-												cursor: 'pointer',
-											}}
-											onClick={onNeoFSBalance}
-										/>
-									</Heading>
-									<Heading size={6} weight="normal" style={{ overflow: 'scroll' }}>
+									<Heading size={6} style={{ marginBottom: 15 }}>
 										{`Address: `}
 										<span>{walletData.account}</span>
 									</Heading>
+									<Tile kind="ancestor">
+										<Tile kind="parent">
+											<Tile
+												kind="child"
+												renderAs={Notification}
+												color="gray"
+												style={{
+													border: '1px solid #dbdbdc',
+													boxShadow: '0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)',
+												}}
+											>
+												<Heading size={6} weight="bold" style={{ display: 'flex' }}>
+													<span>{neoFSBalance ? `${(neoFSBalance * 0.00000001).toFixed(8)} GAS` : '-'}</span>
+													<img
+														src="./img/sync.svg"
+														width={20}
+														height={20}
+														alt="logout"
+														style={isLoadingNeoFSBalance ? {
+															marginLeft: 5,
+															cursor: 'pointer',
+															animation: 'spin 1.5s infinite linear',
+														} : {
+															marginLeft: 5,
+															cursor: 'pointer',
+														}}
+														onClick={onNeoFSBalance}
+													/>
+												</Heading>
+												<Heading size={6} >NeoFS Balance</Heading>
+											</Tile>
+										</Tile>
+										<Tile kind="parent">
+											<Tile
+												kind="child"
+												renderAs={Notification}
+												color="gray"
+												style={{
+													border: '1px solid #dbdbdc',
+													boxShadow: '0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)',
+												}}
+											>
+												<Heading size={6} weight="bold" style={{ display: 'flex' }}>
+													<span>{walletData.balance ? `${(walletData.balance * 0.00000001).toFixed(8)} GAS` : '-'}</span>
+													<img
+														src="./img/sync.svg"
+														width={20}
+														height={20}
+														alt="logout"
+														style={isLoadingBalance ? {
+															marginLeft: 5,
+															cursor: 'pointer',
+															animation: 'spin 1.5s infinite linear',
+														} : {
+															marginLeft: 5,
+															cursor: 'pointer',
+														}}
+														onClick={onBalance}
+													/>
+												</Heading>
+												<Heading size={6}>CDN Balance</Heading>
+											</Tile>
+										</Tile>
+									</Tile>
 								</Tile>
 							</Tile>
 						</Tile>
@@ -362,7 +394,7 @@ const Profile = ({
 									renderAs={Notification}
 									color="grey"
 								>
-									<Heading size={5}>Deposit</Heading>
+									<Heading size={5}>Deposit CDN</Heading>
 									<Form.Field>
 										<Form.Label size="small">Quantity (GAS)</Form.Label>
 										<Form.Control>
@@ -388,7 +420,7 @@ const Profile = ({
 									renderAs={Notification}
 									color="grey"
 								>
-									<Heading size={5}>Withdraw</Heading>
+									<Heading size={5}>Withdraw CDN</Heading>
 									<Form.Field>
 										<Form.Label size="small">Quantity (GAS)</Form.Label>
 										<Form.Control>
@@ -527,106 +559,123 @@ const Profile = ({
 															onClick={() => onSetEacl(containerItem.containerId, index)}
 															style={{ margin: '10px 0', display: 'block' }}
 														>Set eACL</Button>
-														<Heading size={6} weight="semibold">Objects</Heading>
-														{containerItem.objects && containerItem.objects.map((objectItem, objectIndex) => (
-															<div key={objectItem.address.objectId}>
-																<Heading
-																	size={6}
-																	weight="semibold"
-																	className={objectItem.isActive ? 'active' : ''}
-																	style={objectItem.isActive ? {
-																    alignItems: 'center',
-																		cursor: 'pointer',
-																		border: '1px solid #363636',
-																		display: 'inline-flex',
-																		padding: '5px 10px',
-																		borderRadius: 4,
-																		background: '#363636',
-																		color: '#fff',
-																	} : {
-																    alignItems: 'center',
-																		cursor: 'pointer',
-																		border: '1px solid #363636',
-																		display: 'inline-flex',
-																		padding: '5px 10px',
-																		borderRadius: 4,
-																	}}
-																	onClick={() => {
-																		const containersTemp = [ ...containers ];
-																		if (objectItem.isActive) {
-																			containersTemp[index].objects[objectIndex].isActive = false;
-																			setContainers(containersTemp);
-																		} else {
-																			containersTemp[index].objects[objectIndex].isActive = true;
-																			setContainers(containersTemp);
-																			onGetObjectData(containerItem.containerId, objectItem.address.objectId, index, objectIndex);
-																		}
-																	}}
-																>
-																	{objectItem.name}
-																	{objectItem.isActive && (
-																		<img
-																			src="./img/trashbin.svg"
-																			width={22}
-																			height={22}
-																			fill="#f14668"
-																			alt="sign_tokens"
-																			style={{ marginLeft: 10, cursor: 'pointer' }}
-																			onClick={(e) => {
-																				onPopup('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.address.objectId });
-																				e.stopPropagation();
+														<Box 
+															style={{
+																marginTop: 20,
+																border: '1px solid #dbdbdc',
+																boxShadow: '0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)',
+															}}
+														>
+															<Heading size={6} weight="semibold">Objects</Heading>
+															<div style={{ display: 'flex', flexWrap: 'wrap' }}>
+																{containerItem.objects && containerItem.objects.map((objectItem, objectIndex) => (
+																	<div key={objectItem.address.objectId}>
+																		<Heading
+																			size={6}
+																			weight="semibold"
+																			className={objectItem.isActive ? 'active' : ''}
+																			style={objectItem.isActive ? {
+																				alignItems: 'center',
+																				cursor: 'pointer',
+																				display: 'table',
+																				padding: 10,
+																				margin: 5,
+																				borderRadius: 4,
+																				background: '#363636',
+																				color: '#fff',
+																			} : {
+																				alignItems: 'center',
+																				cursor: 'pointer',
+																				display: 'table',
+																				padding: 10,
+																				margin: 5,
+																				borderRadius: 4,
 																			}}
-																		/>
-																	)}
-																</Heading>
-																{objectItem.isActive === true && (
-																	<div style={{ padding: '5px 10px' }}>
-																		{objectItem.ownerId ? (
-																			<div>
-																				<Heading size={6} weight="light">
-																					<span>{`Object id: `}</span>
-																					<a
-																						href={`${process.env.REACT_APP_NGINX}/get/${containerItem.containerId}/${objectItem.address.objectId}`}
-																						target="_blank"
-																						rel="noopener noreferrer"
-																						style={{ textDecoration: 'underline' }}
-																					>{objectItem.address.objectId}</a>
-																				</Heading>
-																				<Heading size={6} weight="light">
-																					<span>{`Owner id: `}</span>
-																					{objectItem.ownerId}
-																				</Heading>
-																				<Heading size={6} weight="light">
-																					<span>{`Object size: `}</span>
-																					{objectItem.objectSize}
-																				</Heading>
-																				<Heading size={6} weight="light">
-																					<span>{`Payload size: `}</span>
-																					{objectItem.payloadSize}
-																				</Heading>
-																			</div>
-																		) : (
+																			onClick={() => {
+																				const containersTemp = [ ...containers ];
+																				if (objectItem.isActive) {
+																					containersTemp[index].objects[objectIndex].isActive = false;
+																					setContainers(containersTemp);
+																				} else {
+																					containersTemp[index].objects[objectIndex].isActive = true;
+																					setContainers(containersTemp);
+																					onGetObjectData(containerItem.containerId, objectItem.address.objectId, index, objectIndex);
+																				}
+																			}}
+																		>
 																			<img
-																				className="popup_loader"
-																				src="./img/loader.svg"
-																				height={30}
+																				src="./img/file.svg"
 																				width={30}
-																				alt="loader"
+																				height={30}
+																				alt="file"
+																				style={{ display: 'block', margin: '0 auto 10px' }}
 																			/>
+																			{objectItem.name}
+																			{objectItem.isActive && (
+																				<img
+																					src="./img/trashbin.svg"
+																					width={22}
+																					height={22}
+																					fill="#f14668"
+																					alt="sign_tokens"
+																					style={{ marginLeft: 10, cursor: 'pointer' }}
+																					onClick={(e) => {
+																						onPopup('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.address.objectId });
+																						e.stopPropagation();
+																					}}
+																				/>
+																			)}
+																		</Heading>
+																		{objectItem.isActive === true && (
+																			<div style={{ padding: '5px 10px' }}>
+																				{objectItem.ownerId ? (
+																					<div>
+																						<Heading size={6} weight="light">
+																							<span>{`Object id: `}</span>
+																							<a
+																								href={`${process.env.REACT_APP_NGINX}/get/${containerItem.containerId}/${objectItem.address.objectId}`}
+																								target="_blank"
+																								rel="noopener noreferrer"
+																								style={{ textDecoration: 'underline' }}
+																							>{objectItem.address.objectId}</a>
+																						</Heading>
+																						<Heading size={6} weight="light">
+																							<span>{`Owner id: `}</span>
+																							{objectItem.ownerId}
+																						</Heading>
+																						<Heading size={6} weight="light">
+																							<span>{`Object size: `}</span>
+																							{objectItem.objectSize}
+																						</Heading>
+																						<Heading size={6} weight="light">
+																							<span>{`Payload size: `}</span>
+																							{objectItem.payloadSize}
+																						</Heading>
+																					</div>
+																				) : (
+																					<img
+																						className="popup_loader"
+																						src="./img/loader.svg"
+																						height={30}
+																						width={30}
+																						alt="loader"
+																					/>
+																				)}
+																			</div>
 																		)}
 																	</div>
-																)}
+																))}
 															</div>
-														))}
-														<div className="input_block">
-															<label htmlFor="upload">Upload object</label>
-															<input
-																id="upload"
-																type="file"
-																name="Upload"
-																onChange={(e) => onCreateObject(e, containerItem.containerId, index)}
-															/>
-														</div>
+															<div className="input_block">
+																<label htmlFor="upload">Upload object</label>
+																<input
+																	id="upload"
+																	type="file"
+																	name="Upload"
+																	onChange={(e) => onCreateObject(e, containerItem.containerId, index)}
+																/>
+															</div>
+														</Box>
 													</div>
 												) : (
 													<img
