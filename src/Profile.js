@@ -20,17 +20,17 @@ const Profile = ({
 		isLoadContainers,
 		setLoadContainers,
 	}) => {
-	const [CDNContract] = useState({
-		scriptHash: process.env.REACT_APP_SCRIPT_HASH,
-		account: process.env.REACT_APP_ACCOUNT,
-		gasToken: process.env.REACT_APP_GAS_TOKEN,
+	const [NeoFSContract] = useState({
+		scriptHash: process.env.REACT_APP_NEOFS_SCRIPT_HASH,
+		account: process.env.REACT_APP_NEOFS_ACCOUNT,
+		gasToken: process.env.REACT_APP_NEOFS_GAS_TOKEN,
 	});
 	const [containers, setContainers] = useState([]);
 	const [isLoadingContainers, setIsLoadingContainers] = useState(false);
 
-	const [isLoadingBalance, setIsLoadingBalance] = useState(false);
 	const [neoFSBalance, setNeoFSBalance] = useState(0);
 	const [isLoadingNeoFSBalance, setIsLoadingNeoFSBalance] = useState(false);
+
 	const [depositQuantity, setDepositQuantity] = useState(0);
 	const [withdrawQuantity, setWithdrawQuantity] = useState(0);
 
@@ -46,40 +46,10 @@ const Profile = ({
 			document.location.href = "/";
 		}
 		if (walletData && !walletData.balance && walletData.account) {
-			onBalance();
 			onNeoFSBalance();
 			onGetContainers();
 		}
 	}, [walletData]); // eslint-disable-line react-hooks/exhaustive-deps
-
-	const onBalance = async () => {
-		setIsLoadingBalance(true);
-		const targetAddress = walletConnectCtx.getAccountAddress(0);
-		const invocations = [{
-			scriptHash: CDNContract.scriptHash,
-			operation: 'balanceOf',
-			args: [
-				{ type: 'Address', value: targetAddress },
-			]
-		}];
-
-		const signers = [{
-			scopes: 1, // WitnessScope.CalledByEntry
-		}];
-
-		const response = await walletConnectCtx.testInvoke({ invocations, signers });
-		setTimeout(() => {
-			setIsLoadingBalance(false);
-		}, 500);
-		if (!response.result.error && response.result.stack.length > 0) {
-			setWalletData({
-				...walletData,
-				balance: response.result.stack[0].value,
-			});
-		} else if (response.result.exception) {
-			onPopup('failed', response.result.exception);
-		}
-	};
 
 	const onNeoFSBalance = async () => {
 		setIsLoadingNeoFSBalance(true);
@@ -168,7 +138,7 @@ const Profile = ({
 		}
 	};
 
-  const onCreateObject = (e, containerId, index) => {
+  const onCreateObject = (e, containerId) => {
 		if (walletData.tokens.object.PUT) {
 			onPopup('loading');
 			const file = e.target.files;
@@ -210,11 +180,11 @@ const Profile = ({
 			onPopup('approveRequest');
 			const senderAddress = walletConnectCtx.getAccountAddress(0);
 			const invocations = [{
-				scriptHash: CDNContract.gasToken,
+				scriptHash: NeoFSContract.gasToken,
 				operation: 'transfer',
 				args: [
 					{ type: 'Address', value: senderAddress },
-					{ type: 'Address', value: CDNContract.account },
+					{ type: 'Address', value: NeoFSContract.account },
 					{ type: 'Integer', value: depositQuantity * 100000000 },
 					{ type: 'ByteArray', value: '' },
 				]
@@ -244,7 +214,7 @@ const Profile = ({
 			onPopup('approveRequest');
 			const senderAddress = walletConnectCtx.getAccountAddress(0);
 			const invocations = [{
-				scriptHash: CDNContract.scriptHash,
+				scriptHash: NeoFSContract.scriptHash,
 				operation: 'withdraw',
 				args: [
 					{ type: 'Address', value: senderAddress },
@@ -337,7 +307,7 @@ const Profile = ({
 														src="./img/sync.svg"
 														width={20}
 														height={20}
-														alt="logout"
+														alt="sync"
 														style={isLoadingNeoFSBalance ? {
 															marginLeft: 5,
 															cursor: 'pointer',
@@ -352,37 +322,6 @@ const Profile = ({
 												<Heading size={6} >NeoFS Balance</Heading>
 											</Tile>
 										</Tile>
-										<Tile kind="parent">
-											<Tile
-												kind="child"
-												renderAs={Notification}
-												color="gray"
-												style={{
-													border: '1px solid #dbdbdc',
-													boxShadow: '0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)',
-												}}
-											>
-												<Heading size={6} weight="bold" style={{ display: 'flex' }}>
-													<span>{walletData.balance ? `${(walletData.balance * 0.00000001).toFixed(8)} GAS` : '-'}</span>
-													<img
-														src="./img/sync.svg"
-														width={20}
-														height={20}
-														alt="logout"
-														style={isLoadingBalance ? {
-															marginLeft: 5,
-															cursor: 'pointer',
-															animation: 'spin 1.5s infinite linear',
-														} : {
-															marginLeft: 5,
-															cursor: 'pointer',
-														}}
-														onClick={onBalance}
-													/>
-												</Heading>
-												<Heading size={6}>CDN Balance</Heading>
-											</Tile>
-										</Tile>
 									</Tile>
 								</Tile>
 							</Tile>
@@ -394,7 +333,7 @@ const Profile = ({
 									renderAs={Notification}
 									color="grey"
 								>
-									<Heading size={5}>Deposit CDN</Heading>
+									<Heading size={5}>Deposit NeoFS</Heading>
 									<Form.Field>
 										<Form.Label size="small">Quantity (GAS)</Form.Label>
 										<Form.Control>
@@ -420,7 +359,7 @@ const Profile = ({
 									renderAs={Notification}
 									color="grey"
 								>
-									<Heading size={5}>Withdraw CDN</Heading>
+									<Heading size={5}>Withdraw NeoFS</Heading>
 									<Form.Field>
 										<Form.Label size="small">Quantity (GAS)</Form.Label>
 										<Form.Control>
@@ -450,7 +389,7 @@ const Profile = ({
 									src="./img/sync.svg"
 									width={20}
 									height={20}
-									alt="logout"
+									alt="sync"
 									style={isLoadingContainers ? {
 										marginLeft: 5,
 										cursor: 'pointer',
@@ -466,7 +405,7 @@ const Profile = ({
 								src="./img/settings.svg"
 								width={22}
 								height={22}
-								alt="sign_tokens"
+								alt="settings"
 								style={{ marginLeft: 5, cursor: 'pointer' }}
 								onClick={() => onPopup('signTokens', '')}
 							/>
@@ -513,10 +452,14 @@ const Profile = ({
 													width={30}
 													height={30}
 													fill="#f14668"
-													alt="sign_tokens"
+													alt="delete"
 													style={{ cursor: 'pointer' }}
 													onClick={(e) => {
-														onPopup('deleteContainer', containerItem.containerId);
+														if (walletData.tokens.container.DELETE) {
+															onPopup('deleteContainer', containerItem.containerId);
+														} else {
+															onPopup('signTokens', 'container.DELETE')
+														}
 														e.stopPropagation();
 													}}
 												/>
@@ -617,10 +560,14 @@ const Profile = ({
 																					width={22}
 																					height={22}
 																					fill="#f14668"
-																					alt="sign_tokens"
+																					alt="delete"
 																					style={{ marginLeft: 10, cursor: 'pointer' }}
 																					onClick={(e) => {
-																						onPopup('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.address.objectId });
+																						if (walletData.tokens.object.DELETE) {
+																							onPopup('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.address.objectId });
+																						} else {
+																							onPopup('signTokens', 'object.DELETE')
+																						}
 																						e.stopPropagation();
 																					}}
 																				/>
@@ -672,7 +619,14 @@ const Profile = ({
 																	id="upload"
 																	type="file"
 																	name="Upload"
-																	onChange={(e) => onCreateObject(e, containerItem.containerId, index)}
+																	onClick={(e) => {
+																		if (!walletData.tokens.object.PUT) {
+																			onPopup('signTokens', 'object.PUT');
+																			document.getElementById('upload').value = '';
+																			e.preventDefault();
+																		} 
+																	}}
+																	onChange={(e) => onCreateObject(e, containerItem.containerId)}
 																/>
 															</div>
 														</Box>
@@ -694,7 +648,7 @@ const Profile = ({
 						))}
 						<Button
 							color="primary"
-							onClick={(e) => onPopup('createContainer')}
+							onClick={() => walletData.tokens.container.PUT ? onPopup('createContainer') : onPopup('signTokens', 'container.PUT')}
 							style={{ display: 'flex', margin: 'auto' }}
 						>
 							New container
