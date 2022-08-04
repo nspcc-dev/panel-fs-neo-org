@@ -183,7 +183,7 @@ a.navbar-item:hover {
 
 .notification .title {
     margin-bottom: 0.5rem;
-    white-space: pre;
+    white-space: normal;
 }
 
 .notification .title:last-child {
@@ -191,7 +191,7 @@ a.navbar-item:hover {
 }
 
 .footer {
-    background-color: #23b87f;
+    background-color: #293639;
     padding: 40px 20px;
 }
 
