@@ -44,6 +44,12 @@ export const App = () => {
 	}, [walletConnectCtx.uri]);
 
 	useEffect(() => {
+		if (localStorage['wc@2:client//session:settled'] === '[]') {
+			onDisconnectWallet();
+		}
+	}, [walletConnectCtx]);
+
+	useEffect(() => {
 		if (walletConnectCtx.accounts.length !== 0) {
 			setWalletData({
 				type: walletConnectCtx.accounts[0].split(':')[0],
@@ -178,6 +184,17 @@ export const App = () => {
 		localStorage.removeItem('wc@2:client//keychain');
 		await walletConnectCtx.connect();
 	}
+
+  const onDisconnectWallet = () => {
+		walletConnectCtx.disconnect();
+		setWalletData(null);
+		localStorage.removeItem('wc@2:client//pairing:settled');
+		localStorage.removeItem('wc@2:client//session:pending');
+		localStorage.removeItem('wc@2:client//pairing:history');
+		localStorage.removeItem('wc@2:client//session:settled');
+		localStorage.removeItem('wc@2:client//pairing:pending');
+		localStorage.removeItem('wc@2:client//keychain');
+	};
 
   return (
 		<>
