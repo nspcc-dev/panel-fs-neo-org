@@ -266,7 +266,7 @@ const Profile = ({
 						</Heading>
 						{walletData.net !== 'testnet' && (
 							<Box style={{ fontSize: 14, wordBreak: 'break-all', background: '#f14668', color: '#fff' }}>
-								<div>1</div>
+								<div>{`You use ${walletData.net === 'private' ? 'private net' : walletData.net}. For a better experience, use testnet.`}</div>
 							</Box>
 						)}
 						<Tile kind="ancestor">
