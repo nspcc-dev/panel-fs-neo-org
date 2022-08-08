@@ -503,7 +503,7 @@ export const App = () => {
 							</Button>
 							<Button
 								color="danger"
-								onClick={() => onDeleteContainer(popup.text)}
+								onClick={() => onDeleteContainer(popup.text.containerId)}
 							>
 								Yes
 							</Button>
