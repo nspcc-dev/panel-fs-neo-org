@@ -139,43 +139,6 @@ const Profile = ({
 		}
 	};
 
-  const onCreateObject = (e, containerId) => {
-		if (walletData.tokens.object.PUT) {
-			onPopup('loading');
-			const file = e.target.files;
-			const reader = new FileReader();
-			reader.readAsDataURL(file[0]);
-			reader.onload = () => {
-				const base64file = reader.result;
-				api('PUT', '/objects?walletConnect=true', {
-					"containerId": containerId,
-					"fileName": file[0].name,
-					"payload": base64file.split('base64,')[1],
-					"attributes": [
-						{
-							"key": "User-Attribute",
-							"value": "some-value"
-						}
-					]
-				}, {
-					"Content-Type": "application/json",
-					"X-Bearer-Owner-Id": walletData.account,
-					'X-Bearer-Signature': walletData.tokens.object.PUT.signature,
-					'X-Bearer-Signature-Key': walletData.publicKey,
-					'Authorization': `Bearer ${walletData.tokens.object.PUT.token}`
-				}).then(() => {
-					onGetContainers();
-				});
-			};
-			reader.onerror = (error) => {
-				onPopup('failed', error);
-			};
-		} else {
-			onPopup('signTokens', 'object.PUT');
-			document.getElementById('upload').value = '';
-		}
-	};
-
   const onDeposit = async () => {
 		if (depositQuantity >= 0.00000001) {
 			onPopup('approveRequest');
@@ -603,22 +566,13 @@ const Profile = ({
 																	</div>
 																))}
 															</div>
-															<div className="input_block">
-																<label htmlFor="upload">Upload object</label>
-																<input
-																	id="upload"
-																	type="file"
-																	name="Upload"
-																	onClick={(e) => {
-																		if (!walletData.tokens.object.PUT) {
-																			onPopup('signTokens', 'object.PUT');
-																			document.getElementById('upload').value = '';
-																			e.preventDefault();
-																		} 
-																	}}
-																	onChange={(e) => onCreateObject(e, containerItem.containerId)}
-																/>
-															</div>
+															<Button
+																color="primary"
+																onClick={() => walletData.tokens.object.PUT ? onPopup('createObject', { containerId: containerItem.containerId }) : onPopup('signTokens', 'object.PUT')}
+																style={{ display: 'flex', margin: 'auto' }}
+															>
+																New object
+															</Button>
 														</Box>
 													</div>
 												) : (

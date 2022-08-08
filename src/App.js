@@ -158,6 +158,38 @@ export const App = () => {
 		}
 	};
 
+  const onCreateObject = (e, containerId) => {
+		if (walletData.tokens.object.PUT) {
+			onPopup('loading');
+			const file = e.target.files;
+			const reader = new FileReader();
+			reader.readAsDataURL(file[0]);
+			reader.onload = () => {
+				const base64file = reader.result;
+				api('PUT', '/objects?walletConnect=true', {
+					"containerId": containerId,
+					"fileName": file[0].name,
+					"payload": base64file.split('base64,')[1],
+					"attributes": attributes,
+				}, {
+					"Content-Type": "application/json",
+					"X-Bearer-Owner-Id": walletData.account,
+					'X-Bearer-Signature': walletData.tokens.object.PUT.signature,
+					'X-Bearer-Signature-Key': walletData.publicKey,
+					'Authorization': `Bearer ${walletData.tokens.object.PUT.token}`
+				}).then(() => {
+					setLoadContainers(true);
+				});
+			};
+			reader.onerror = (error) => {
+				onPopup('failed', error);
+			};
+		} else {
+			onPopup('signTokens', 'object.PUT');
+			document.getElementById('upload').value = '';
+		}
+	};
+
   const onDeleteObject = (containerId, objectId) => {
 		if (walletData.tokens.object.DELETE) {
 			onPopup('loading');
@@ -507,6 +539,44 @@ export const App = () => {
 							>
 								Yes
 							</Button>
+						</div>
+          </div>
+        </div>
+      )}
+			{popup.current === 'createObject' && (
+        <div className="popup">
+          <div
+            className="popup_close_panel"
+            onClick={onPopup}
+          />
+          <div className="popup_content">
+						<div
+							className="popup_close"
+							onClick={onPopup}
+						>
+							<img
+								src="./img/close.svg"
+								height={30}
+								width={30}
+								alt="loader"
+							/>
+						</div>
+						<Heading align="center" size={5}>New object</Heading>
+						<div className="input_block">
+							<label htmlFor="upload">Upload object</label>
+							<input
+								id="upload"
+								type="file"
+								name="Upload"
+								onClick={(e) => {
+									if (!walletData.tokens.object.PUT) {
+										onPopup('signTokens', 'object.PUT');
+										document.getElementById('upload').value = '';
+										e.preventDefault();
+									} 
+								}}
+								onChange={(e) => onCreateObject(e, popup.text.containerId)}
+							/>
 						</div>
           </div>
         </div>
