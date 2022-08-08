@@ -446,7 +446,7 @@ const Profile = ({
 													style={{ cursor: 'pointer' }}
 													onClick={(e) => {
 														if (walletData.tokens.container.DELETE) {
-															onPopup('deleteContainer', containerItem.containerId);
+															onPopup('deleteContainer', { containerId: containerItem.containerId });
 														} else {
 															onPopup('signTokens', 'container.DELETE')
 														}
