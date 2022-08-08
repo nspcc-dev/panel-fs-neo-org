@@ -97,20 +97,24 @@ export const App = () => {
 
 	const onSignMessage = async (msg = '', type, operation) => {
 		const response = await walletConnectCtx.signMessage(msg);
-		setWalletData({
-			...walletData,
-			publicKey: response.result.publicKey,
-			tokens: {
-				...walletData.tokens,
-				[type]: {
-					...walletData.tokens[type],
-					[operation]: {
-						token: msg,
-						signature: response.result.data + response.result.salt,
+		if (response.result.error) {
+			onPopup('failed', response.result.error.message)
+		} else {
+			setWalletData({
+				...walletData,
+				publicKey: response.result.publicKey,
+				tokens: {
+					...walletData.tokens,
+					[type]: {
+						...walletData.tokens[type],
+						[operation]: {
+							token: msg,
+							signature: response.result.data + response.result.salt,
+						}
 					}
 				}
-			}
-		});
+			});
+		}
 	};
 
   const onCreateContainer = () => {
