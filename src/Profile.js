@@ -109,7 +109,7 @@ const Profile = ({
 		});
 	};
 
-	const onSetEacl = (containerId, index) => {
+	const onSetEacl = (containerId) => {
 		if (walletData.tokens.container.SETEACL) {
 			api('PUT', `/containers/${containerId}/eacl?walletConnect=true`, {
 				"records": [
@@ -489,7 +489,7 @@ const Profile = ({
 														</Heading>
 														<Button
 															color="primary"
-															onClick={() => onSetEacl(containerItem.containerId, index)}
+															onClick={() => onSetEacl(containerItem.containerId)}
 															style={{ margin: '10px 0', display: 'block' }}
 														>Set eACL</Button>
 														<Box 
