@@ -14,6 +14,7 @@ import api from './api';
 
 const Profile = ({
 		walletData,
+		onDisconnectWallet,
 		setWalletData,
 		onPopup,
 		walletConnectCtx,
@@ -239,17 +240,6 @@ const Profile = ({
 		} else {
 			onPopup('failed', 'Incorrect quantity value');
 		}
-	};
-
-  const onDisconnectWallet = () => {
-		walletConnectCtx.disconnect();
-		setWalletData(null);
-		localStorage.removeItem('wc@2:client//pairing:settled');
-		localStorage.removeItem('wc@2:client//session:pending');
-		localStorage.removeItem('wc@2:client//pairing:history');
-		localStorage.removeItem('wc@2:client//session:settled');
-		localStorage.removeItem('wc@2:client//pairing:pending');
-		localStorage.removeItem('wc@2:client//keychain');
 	};
 
 	return (
