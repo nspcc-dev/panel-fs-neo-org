@@ -24,6 +24,10 @@ import './App.css';
 export const App = () => {
 	const location = useLocation();
 	const walletConnectCtx = useWalletConnect();
+	const [attributes, setAttributes] = useState([{
+		"key": "",
+		"value": ""
+	}]);
 	const [isLoadContainers, setLoadContainers] = useState(false);
 	const [containerNameCreate, setContainerNameCreate] = useState('');
 	const [walletData, setWalletData] = useState(null);
@@ -125,7 +129,7 @@ export const App = () => {
 					"containerName": containerNameCreate,
 					"placementPolicy": "REP 1",
 					"basicAcl": "public-read-write",
-					"attributes": [],
+					"attributes": attributes,
 				}, {
 					"Content-Type": "application/json",
 					"X-Bearer-Owner-Id": walletData.account,
@@ -135,6 +139,7 @@ export const App = () => {
 				}).then(() => {
 					setLoadContainers(true);
 					setContainerNameCreate('');
+					setAttributes([{ "key": "", "value": "" }]);
 				});
 			} else {
 				onPopup('failed', 'Incorrect container name');
@@ -182,6 +187,7 @@ export const App = () => {
 					'Authorization': `Bearer ${walletData.tokens.object.PUT.token}`
 				}).then(() => {
 					setLoadContainers(true);
+					setAttributes([{ "key": "", "value": "" }]);
 				});
 			};
 			reader.onerror = (error) => {
@@ -288,7 +294,6 @@ export const App = () => {
 						<Heading align="center" size={6} weight="normal">Please scan QR code to connect your wallet on a compatible device</Heading>
 						<Button
 							color="primary"
-							size="small"
 							onClick={() => window.open(`https://neon.coz.io/connect?uri=${popup.text}`, '_blank').focus()}
 							style={{ margin: 'auto', display: 'flex' }}
 						>
@@ -459,7 +464,6 @@ export const App = () => {
 							&& walletData.tokens.object.PUT && walletData.tokens.object.DELETE && walletData.tokens.object.GET && (
 							<Button
 								color="primary"
-								size="small"
 								onClick={onPopup}
 								style={{ margin: '20px auto 0', display: 'flex' }}
 							>
@@ -473,12 +477,18 @@ export const App = () => {
         <div className="popup">
           <div
             className="popup_close_panel"
-            onClick={onPopup}
+            onClick={() => {
+							onPopup();
+							setAttributes([{ "key": "", "value": "" }]);
+						}}
           />
           <div className="popup_content">
 						<div
 							className="popup_close"
-							onClick={onPopup}
+							onClick={() => {
+								onPopup();
+								setAttributes([{ "key": "", "value": "" }]);
+							}}
 						>
 							<img
 								src="./img/close.svg"
@@ -489,7 +499,7 @@ export const App = () => {
 						</div>
 						<Heading align="center" size={5}>New container</Heading>
 						<Form.Field>
-							<Form.Label size="small">Name</Form.Label>
+							<Form.Label>Name</Form.Label>
 							<Form.Control>
 								<Form.Input
 									type="text"
@@ -498,10 +508,70 @@ export const App = () => {
 								/>
 							</Form.Control>
 						</Form.Field>
+						<Form.Field>
+							<Form.Label>Attributes</Form.Label>
+							<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
+								{attributes.map((attribute, index) => (
+									<Form.Field kind="group">
+										<Form.Control>
+											<Form.Input
+												placeholder="Key"
+												value={attribute.key}
+												onChange={(e) => {
+													const attributesTemp = [...attributes];
+													attributesTemp[index].key = e.target.value;
+													setAttributes(attributesTemp);
+												}}
+											/>
+										</Form.Control>
+										<Form.Control>
+											<Form.Input
+												placeholder="Value"
+												value={attribute.value}
+												onChange={(e) => {
+													const attributesTemp = [...attributes];
+													attributesTemp[index].value = e.target.value;
+													setAttributes(attributesTemp);
+												}}
+											/>
+										</Form.Control>
+										<Form.Control>
+											<img
+												src="./img/trashbin.svg"
+												width={30}
+												height={30}
+												alt="delete"
+												style={{ cursor: 'pointer', margin: 4 }}
+												onClick={() => {
+													let attributesTemp = [...attributes];
+													attributesTemp.splice(index, 1);
+													setAttributes(attributesTemp);
+												}}
+											/>
+										</Form.Control>
+									</Form.Field>
+								))}
+							</div>
+							<Button
+								color="primary"
+								size="small"
+								onClick={() => {
+									let attributesTemp = [...attributes];
+									attributesTemp.push({
+										key: "",
+										value: "",
+									});
+									setAttributes(attributesTemp);
+								}}
+								style={{ display: 'flex', margin: '10px auto 0' }}
+							>
+								Add attribute
+							</Button>
+						</Form.Field>
 						<Button
 							color="primary"
 							onClick={onCreateContainer}
-							style={{ display: 'flex', margin: 'auto' }}
+							style={{ display: 'flex', margin: '30px auto 0' }}
 						>
 							Create
 						</Button>
@@ -550,12 +620,18 @@ export const App = () => {
         <div className="popup">
           <div
             className="popup_close_panel"
-            onClick={onPopup}
+            onClick={() => {
+							onPopup();
+							setAttributes([{ "key": "", "value": "" }]);
+						}}
           />
           <div className="popup_content">
 						<div
 							className="popup_close"
-							onClick={onPopup}
+							onClick={() => {
+								onPopup();
+								setAttributes([{ "key": "", "value": "" }]);
+							}}
 						>
 							<img
 								src="./img/close.svg"
@@ -565,7 +641,67 @@ export const App = () => {
 							/>
 						</div>
 						<Heading align="center" size={5}>New object</Heading>
-						<div className="input_block">
+						<Form.Field>
+							<Form.Label>Attributes</Form.Label>
+							<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
+								{attributes.map((attribute, index) => (
+									<Form.Field kind="group">
+										<Form.Control>
+											<Form.Input
+												placeholder="Key"
+												value={attribute.key}
+												onChange={(e) => {
+													const attributesTemp = [...attributes];
+													attributesTemp[index].key = e.target.value;
+													setAttributes(attributesTemp);
+												}}
+											/>
+										</Form.Control>
+										<Form.Control>
+											<Form.Input
+												placeholder="Value"
+												value={attribute.value}
+												onChange={(e) => {
+													const attributesTemp = [...attributes];
+													attributesTemp[index].value = e.target.value;
+													setAttributes(attributesTemp);
+												}}
+											/>
+										</Form.Control>
+										<Form.Control>
+											<img
+												src="./img/trashbin.svg"
+												width={30}
+												height={30}
+												alt="delete"
+												style={{ cursor: 'pointer', margin: 4 }}
+												onClick={() => {
+													let attributesTemp = [...attributes];
+													attributesTemp.splice(index, 1);
+													setAttributes(attributesTemp);
+												}}
+											/>
+										</Form.Control>
+									</Form.Field>
+								))}
+							</div>
+							<Button
+								color="primary"
+								size="small"
+								onClick={() => {
+									let attributesTemp = [...attributes];
+									attributesTemp.push({
+										key: "",
+										value: "",
+									});
+									setAttributes(attributesTemp);
+								}}
+								style={{ display: 'flex', margin: '10px auto 0' }}
+							>
+								Add attribute
+							</Button>
+						</Form.Field>
+						<div className="input_block" style={{ marginTop: 30 }}>
 							<label htmlFor="upload">Upload object</label>
 							<input
 								id="upload"
