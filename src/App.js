@@ -88,7 +88,6 @@ export const App = () => {
 		}
 		const headers = {
 			"Content-Type": "application/json",
-			"X-Bearer-Scope": type,
 			"X-Bearer-Owner-Id": walletData.account,
 		}
 		api('POST', '/auth', body, headers).then((e) => {
