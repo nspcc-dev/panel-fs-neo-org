@@ -568,13 +568,37 @@ export const App = () => {
 								Add attribute
 							</Button>
 						</Form.Field>
-						<Button
-							color="primary"
-							onClick={onCreateContainer}
-							style={{ display: 'flex', margin: '30px auto 0' }}
-						>
-							Create
-						</Button>
+						{attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0) ? (
+							<Button
+								color="primary"
+								onClick={onCreateContainer}
+								style={{ display: 'flex', margin: '30px auto 0' }}
+							>
+								Create
+							</Button>
+						) : (
+							<>
+								<Button
+									color="primary"
+									style={{
+										display: 'flex',
+										margin: '30px auto 0',
+										opacity: 0.6,
+										pointerEvents: 'none',
+									}}
+								>
+									Create
+								</Button>
+								<div
+									style={{
+										textAlign: 'center',
+										marginTop: 20,
+										fontSize: 14,
+										color: '#ff405b',
+									}}
+								>Attributes should not be empty</div>
+							</>
+						)}
           </div>
         </div>
       )}
@@ -701,22 +725,33 @@ export const App = () => {
 								Add attribute
 							</Button>
 						</Form.Field>
-						<div className="input_block" style={{ marginTop: 30 }}>
-							<label htmlFor="upload">Upload object</label>
-							<input
-								id="upload"
-								type="file"
-								name="Upload"
-								onClick={(e) => {
-									if (!walletData.tokens.object.PUT) {
-										onPopup('signTokens', 'object.PUT');
-										document.getElementById('upload').value = '';
-										e.preventDefault();
-									} 
+						{attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0) ? (
+							<div className="input_block" style={{ marginTop: 30 }}>
+								<label htmlFor="upload">Upload object</label>
+								<input
+									id="upload"
+									type="file"
+									name="Upload"
+									onClick={(e) => {
+										if (!walletData.tokens.object.PUT) {
+											onPopup('signTokens', 'object.PUT');
+											document.getElementById('upload').value = '';
+											e.preventDefault();
+										}
+									}}
+									onChange={(e) => onCreateObject(e, popup.text.containerId)}
+								/>
+							</div>
+						) : (
+							<div
+								style={{
+									textAlign: 'center',
+									marginTop: 30,
+									fontSize: 14,
+									color: '#ff405b',
 								}}
-								onChange={(e) => onCreateObject(e, popup.text.containerId)}
-							/>
-						</div>
+							>Attributes should not be empty</div>
+						)}
           </div>
         </div>
       )}
