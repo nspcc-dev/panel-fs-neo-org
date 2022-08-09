@@ -6,7 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 
 const wcOptions = {
   chains: ["neo3:testnet", "neo3:mainnet", "neo3:private"],
-  logger: "debug",
+  logger: "error",
   methods: ["invokeFunction", "testInvoke", "signMessage", "verifyMessage"],
   relayServer: "wss://relay.walletconnect.org",
   appMetadata: {
