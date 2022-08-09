@@ -21,6 +21,7 @@ const Profile = ({
 		isLoadContainers,
 		setLoadContainers,
 	}) => {
+	const [isLoading, setIsLoading] = useState(false);
 	const [NeoFSContract] = useState({
 		scriptHash: process.env.REACT_APP_NEOFS_SCRIPT_HASH,
 		account: process.env.REACT_APP_NEOFS_ACCOUNT,
@@ -46,9 +47,10 @@ const Profile = ({
 		if (!localStorage['wc@2:client//keychain']) {
 			document.location.href = "/";
 		}
-		if (walletData && !walletData.balance && walletData.account) {
+		if (walletData && walletData.account && !isLoading) {
 			onNeoFSBalance();
 			onGetContainers();
+			setIsLoading(true);
 		}
 	}, [walletData]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -111,6 +113,7 @@ const Profile = ({
 
 	const onSetEacl = (containerId) => {
 		if (walletData.tokens.container.SETEACL) {
+			onPopup('loading');
 			api('PUT', `/containers/${containerId}/eacl?walletConnect=true`, {
 				"records": [
 					{
@@ -133,6 +136,7 @@ const Profile = ({
 				'Authorization': `Bearer ${walletData.tokens.container.SETEACL.token}`
 			}).then(() => {
 				onGetContainers();
+				onPopup(false);
 			});
 		} else {
 			onPopup('signTokens', 'container.SETEACL');

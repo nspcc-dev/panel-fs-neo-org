@@ -512,7 +512,7 @@ export const App = () => {
 							<Form.Label>Attributes</Form.Label>
 							<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
 								{attributes.map((attribute, index) => (
-									<Form.Field kind="group">
+									<Form.Field kind="group" key={index}>
 										<Form.Control>
 											<Form.Input
 												placeholder="Key"
@@ -645,7 +645,7 @@ export const App = () => {
 							<Form.Label>Attributes</Form.Label>
 							<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
 								{attributes.map((attribute, index) => (
-									<Form.Field kind="group">
+									<Form.Field kind="group" key={index}>
 										<Form.Control>
 											<Form.Input
 												placeholder="Key"
