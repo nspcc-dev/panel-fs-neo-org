@@ -51,7 +51,7 @@ export const App = () => {
 		if (localStorage['wc@2:client//session:settled'] === '[]') {
 			onDisconnectWallet();
 		}
-	}, [walletConnectCtx]);
+	}, [walletConnectCtx]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
 		if (walletConnectCtx.accounts.length !== 0) {
