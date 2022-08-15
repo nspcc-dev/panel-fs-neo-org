@@ -102,6 +102,13 @@ ul {
 .objects_tree_file .file--label {
     display: flex;
     align-items: center;
+}
+
+.objects_tree_folder .folder--label {
+    margin: 5px 0 0;
+}
+
+.objects_tree_file .file--label {
     margin: 2px 0 0;
 }
 
