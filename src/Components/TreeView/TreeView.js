@@ -85,6 +85,7 @@ export default function TreeView({
 				>
 					{containerItem.objects[objectPath].files && containerItem.objects[objectPath].files.map((objectItem, objectIndex) => (
 						<Tree.File
+							key={`${objectItem.name}-${objectIndex}`}
 							name={objectItem.name}
 							onGetData={() => {
 								const containersTemp = [ ...containers ];
@@ -100,7 +101,23 @@ export default function TreeView({
 						>
 							<div className="objects_tree_file_content">
 								{objectItem.ownerId ? (
-									<div>
+									<>
+										<img
+											src="./img/trashbin.svg"
+											width={22}
+											height={22}
+											fill="#f14668"
+											alt="delete"
+											className="objects_tree_file_delete"
+											onClick={(e) => {
+												if (walletData.tokens.object.DELETE) {
+													onPopup('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.address.objectId });
+												} else {
+													onPopup('signTokens', 'object.DELETE')
+												}
+												e.stopPropagation();
+											}}
+										/>
 										<Heading size={6} weight="light">
 											<span>{`Object id: `}</span>
 											<a
@@ -122,23 +139,7 @@ export default function TreeView({
 											<span>{`Payload size: `}</span>
 											{objectItem.payloadSize}
 										</Heading>
-										<img
-											src="./img/trashbin.svg"
-											width={22}
-											height={22}
-											fill="#f14668"
-											alt="delete"
-											className="objects_tree_file_delete"
-											onClick={(e) => {
-												if (walletData.tokens.object.DELETE) {
-													onPopup('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.address.objectId });
-												} else {
-													onPopup('signTokens', 'object.DELETE')
-												}
-												e.stopPropagation();
-											}}
-										/>
-									</div>
+									</>
 								) : (
 									<img
 										className="popup_loader"
