@@ -13,6 +13,37 @@ import {
 import TreeView from './Components/TreeView/TreeView';
 import api from './api';
 
+function formatForTreeView(objects) {
+	const getTreeView = objectsList => (
+		objectsList.reduce((root, item) => {
+			const parts = item.filePath ? item.filePath.split('/') : ['root']; 
+			const lastPart = parts[parts.length - 1];
+			parts.filter(n => n !== '').reduce((acc, part) => {
+				let childrens = [];
+				if (part === lastPart) {
+					let childrensTemp = [];
+					if (acc[part]) {
+						childrensTemp = acc[part].childrens;
+					}
+					childrens = [...childrensTemp, item];
+				}
+				return (acc[part] && (acc[part] = { ...acc[part], childrens })) || (acc[part] = { childrens });
+			}, root);
+			return root;
+		}, Object.create(null))
+	);
+	objects.sort((a, b) => {
+		if (!a.filePath) {
+			a.filePath = '/root';
+		}
+		if (!b.filePath) {
+			b.filePath = '/root';
+		}
+		return b.filePath.length - a.filePath.length;
+	});
+	return getTreeView(objects);
+}
+
 const Profile = ({
 		walletData,
 		onDisconnectWallet,
