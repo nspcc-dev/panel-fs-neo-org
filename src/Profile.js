@@ -47,7 +47,6 @@ function formatForTreeView(objects) {
 const Profile = ({
 		walletData,
 		onDisconnectWallet,
-		setWalletData,
 		onPopup,
 		walletConnectCtx,
 		isLoadContainers,
@@ -120,35 +119,7 @@ const Profile = ({
 			'Authorization': `Bearer ${walletData.tokens.object.GET.token}`
 		}).then((e) => {
 			const containersTemp = [ ...containers ];
-			const objectsTemp = [];
-			for (let i = 0; i < e.objects.length; i++) {
-				const filePath = e.objects[i].filePath ? e.objects[i].filePath : '/root';
-				e.objects[i] = { ...e.objects[i], isActive: false };
-				if (objectsTemp[filePath]) {
-					objectsTemp[filePath].files.push(e.objects[i]);
-				} else {
-					objectsTemp[filePath] = { 'files' : [e.objects[i]] };
-				}
-			}
-			containersTemp[index] = { ...containersTemp[index], objects: objectsTemp, isActive: true };
-			setContainers(containersTemp);
-		});
-	};
-
-	const onGetObjectData = (containerId, objectId, objectPath, containerIndex, objectIndex) => {
-		api('GET', `/objects/${containerId}/${objectId}?walletConnect=true`, {}, {
-			"Content-Type": "application/json",
-			"X-Bearer-Owner-Id": walletData.account,
-			'X-Bearer-Signature': walletData.tokens.object.GET.signature,
-			'X-Bearer-Signature-Key': walletData.publicKey,
-			'Authorization': `Bearer ${walletData.tokens.object.GET.token}`
-		}).then((e) => {
-			const containersTemp = [ ...containers ];
-			containersTemp[containerIndex].objects[objectPath].files[objectIndex] = {
-				...e,
-				...containersTemp[containerIndex].objects[objectPath].files[objectIndex],
-				isActive: true,
-			};
+			containersTemp[index] = { ...containersTemp[index], objects: formatForTreeView(e.objects), isActive: true };
 			setContainers(containersTemp);
 		});
 	};
@@ -513,9 +484,6 @@ const Profile = ({
 																walletData={walletData}
 																onPopup={onPopup}
 																containerIndex={index}
-																containers={containers}
-																setContainers={setContainers}
-																onGetObjectData={onGetObjectData}
 																containerItem={containerItem}
 															/>
 															<Button

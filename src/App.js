@@ -879,7 +879,6 @@ export const App = () => {
 					path="/profile"
 					element={<Profile
 						walletData={walletData}
-						setWalletData={setWalletData}
 						walletConnectCtx={walletConnectCtx}
 						isLoadContainers={isLoadContainers}
 						setLoadContainers={setLoadContainers}
