@@ -16,9 +16,16 @@ import api from './api';
 function formatForTreeView(objects) {
 	const getTreeView = objectsList => (
 		objectsList.reduce((root, item) => {
-			const parts = item.filePath ? item.filePath.split('/') : ['root']; 
+			const parts = item.filePath ? item.filePath.split('/').filter((n) => n.indexOf('.') === -1) : [''];
 			const lastPart = parts[parts.length - 1];
-			parts.filter(n => n !== '').reduce((acc, part) => {
+			if (parts.length === 1 && lastPart === '') {
+				let childrensTemp = [];
+				if (root.childrens) {
+					childrensTemp = root.childrens;
+				}
+				root = { ...root, childrens: [...childrensTemp, item] };
+			}
+			parts.filter((n) => n !== '').reduce((acc, part) => {
 				let childrens = [];
 				if (part === lastPart) {
 					let childrensTemp = [];
@@ -34,12 +41,12 @@ function formatForTreeView(objects) {
 	);
 	objects.sort((a, b) => {
 		if (!a.filePath) {
-			a.filePath = '/root';
+			a.filePath = '';
 		}
 		if (!b.filePath) {
-			b.filePath = '/root';
+			b.filePath = '';
 		}
-		return b.filePath.length - a.filePath.length;
+		return b.filePath.split('/').length - a.filePath.split('/').length;
 	});
 	return getTreeView(objects);
 }
@@ -119,7 +126,7 @@ const Profile = ({
 			'Authorization': `Bearer ${walletData.tokens.object.GET.token}`
 		}).then((e) => {
 			const containersTemp = [ ...containers ];
-			containersTemp[index] = { ...containersTemp[index], objects: formatForTreeView(e.objects), isActive: true };
+			containersTemp[index] = { ...containersTemp[index], objects: e.objects ? formatForTreeView(e.objects) : [], isActive: true };
 			setContainers(containersTemp);
 		});
 	};
