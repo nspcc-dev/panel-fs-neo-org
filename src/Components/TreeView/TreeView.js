@@ -183,7 +183,7 @@ export default function TreeView({
 							onGetObjectData={onGetObjectData}
 						/>
 					)}
-					{index === 0 && containerItem.objects.childrens && containerItem.objects.childrens.map((objectItem, objectIndex) => (
+					{Object.keys(containerItem.objects).length === (index + 1) && containerItem.objects.childrens && containerItem.objects.childrens.map((objectItem, objectIndex) => (
 						<Tree.File
 							key={`${objectItem.name}-${objectIndex}`}
 							name={objectItem.name}

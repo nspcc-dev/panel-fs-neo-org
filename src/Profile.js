@@ -33,6 +33,10 @@ function formatForTreeView(objects) {
 						childrensTemp = acc[part].childrens;
 					}
 					childrens = [...childrensTemp, item];
+				} else if (acc[part]) {
+					let childrensTemp = [];
+					childrensTemp = acc[part].childrens;
+					childrens = [...childrensTemp];
 				}
 				return (acc[part] && (acc[part] = { ...acc[part], childrens })) || (acc[part] = { childrens });
 			}, root);
@@ -46,7 +50,16 @@ function formatForTreeView(objects) {
 		if (!b.filePath) {
 			b.filePath = '';
 		}
-		return b.filePath.split('/').length - a.filePath.split('/').length;
+		a.fullName = `${a.filePath}/${a.name}`;
+		b.fullName = `${b.filePath}/${b.name}`;
+
+    if (a.fullName < b.fullName) {
+			return -1;
+		}
+    if (a.fullName > b.fullName) {
+			return 1;
+		}
+    return 0;
 	});
 	return getTreeView(objects);
 }
