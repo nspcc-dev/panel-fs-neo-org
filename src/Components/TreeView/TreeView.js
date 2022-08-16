@@ -8,11 +8,11 @@ const Tree = ({ children }) => {
   return <div className="objects_tree">{children}</div>;
 };
 
-const TreeBranch = ({ objectPath, containerItem, containerChildrens, walletData, onGetObjectData, containerIndex, onPopup }) => {
+const Branch = ({ objectPath, containerItem, containerChildrens, walletData, onGetObjectData, containerIndex, onPopup }) => {
   return (
 		<Tree.Folder name={objectPath}>
 			{Object.keys(containerChildrens[objectPath]).length > 1 && Object.keys(containerChildrens[objectPath]).map((objectPathNew) => ( objectPathNew !== 'childrens' && (
-				<TreeBranch
+				<Tree.Branch
 					key={objectPathNew}
 					objectPath={objectPathNew}
 					walletData={walletData}
@@ -159,6 +159,7 @@ const File = ({ name, containerItem, objectItem, walletData, onPopup }) => {
 
 Tree.File = File;
 Tree.Folder = Folder;
+Tree.Branch = Branch;
 
 export default function TreeView({
 	containerItem,
@@ -169,17 +170,30 @@ export default function TreeView({
 }) {
   return (
 		<Tree>
-			{containerItem.objects && Object.keys(containerItem.objects).map((objectPath) => (
-				<TreeBranch
-					key={objectPath}
-					objectPath={objectPath}
-					walletData={walletData}
-					onPopup={onPopup}
-					containerItem={containerItem}
-					containerChildrens={containerItem.objects}
-					containerIndex={containerIndex}
-					onGetObjectData={onGetObjectData}
-				/>
+			{containerItem.objects && Object.keys(containerItem.objects).map((objectPath, index) => (
+				<div key={objectPath}>
+					{objectPath !== 'childrens' && (
+						<Tree.Branch
+							objectPath={objectPath}
+							walletData={walletData}
+							onPopup={onPopup}
+							containerItem={containerItem}
+							containerChildrens={containerItem.objects}
+							containerIndex={containerIndex}
+							onGetObjectData={onGetObjectData}
+						/>
+					)}
+					{index === 0 && containerItem.objects.childrens && containerItem.objects.childrens.map((objectItem, objectIndex) => (
+						<Tree.File
+							key={`${objectItem.name}-${objectIndex}`}
+							name={objectItem.name}
+							containerItem={containerItem}
+							objectItem={objectItem}
+							walletData={walletData}
+							onPopup={onPopup}
+						/>
+					))}
+				</div>
 			))}
 		</Tree>
   );
