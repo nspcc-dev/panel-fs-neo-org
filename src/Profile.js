@@ -50,6 +50,20 @@ function formatForTreeView(objects) {
 		if (!b.filePath) {
 			b.filePath = '';
 		}
+		if (a.filePath.indexOf('.') !== -1) {
+			const path = a.filePath.split('/');
+			a.name = path[path.length - 1];
+		}
+		if (b.filePath.indexOf('.') !== -1) {
+			const path = b.filePath.split('/');
+			b.name = path[path.length - 1];
+		}
+		if (!a.name) {
+			a.name = a.address.objectId;
+		}
+		if (!b.name) {
+			b.name = b.address.objectId;
+		}
 		a.fullName = `${a.filePath}/${a.name}`;
 		b.fullName = `${b.filePath}/${b.name}`;
 
