@@ -88,6 +88,7 @@ ul {
 
 .objects_tree {
     line-height: 1.5;
+    overflow-y: scroll;
 }
 
 .objects_tree_file {
