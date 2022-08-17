@@ -882,6 +882,7 @@ export const App = () => {
 						walletConnectCtx={walletConnectCtx}
 						isLoadContainers={isLoadContainers}
 						setLoadContainers={setLoadContainers}
+						onDisconnectWallet={onDisconnectWallet}
 						onPopup={onPopup}
 					/>}
 				/>
