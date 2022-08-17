@@ -254,6 +254,7 @@ ul {
     padding: 30px 20px 20px 20px;
     min-width: 200px;
     max-width: 650px;
+    margin: 10px;
 }
 
 .popup_close {
