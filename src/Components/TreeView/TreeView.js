@@ -137,10 +137,6 @@ const File = ({ name, containerItem, objectItem, walletData, onPopup }) => {
 								<span>{`Object size: `}</span>
 								{objectDate.objectSize}
 							</Heading>
-							<Heading size={6} weight="light">
-								<span>{`Payload size: `}</span>
-								{objectDate.payloadSize}
-							</Heading>
 						</>
 					) : (
 						<img
