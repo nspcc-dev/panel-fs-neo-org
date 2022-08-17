@@ -878,6 +878,7 @@ export const App = () => {
 				<Route
 					path="/profile"
 					element={<Profile
+						onAuth={onAuth}
 						walletData={walletData}
 						walletConnectCtx={walletConnectCtx}
 						isLoadContainers={isLoadContainers}
