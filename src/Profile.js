@@ -16,29 +16,29 @@ import api from './api';
 function formatForTreeView(objects) {
 	const getTreeView = objectsList => (
 		objectsList.reduce((root, item) => {
-			const parts = item.filePath ? item.filePath.split('/').filter((n) => n.indexOf('.') === -1) : [''];
+			const parts = item.filePath ? item.filePath.split('/') : [''];
 			const lastPart = parts[parts.length - 1];
 			if (parts.length === 1 && lastPart === '') {
-				let childrensTemp = [];
-				if (root.childrens) {
-					childrensTemp = root.childrens;
+				let childrenTemp = [];
+				if (root.children) {
+					childrenTemp = root.children;
 				}
-				root = { ...root, childrens: [...childrensTemp, item] };
+				root = { ...root, children: [...childrenTemp, item] };
 			}
 			parts.filter((n) => n !== '').reduce((acc, part) => {
-				let childrens = [];
+				let children = [];
 				if (part === lastPart) {
-					let childrensTemp = [];
+					let childrenTemp = [];
 					if (acc[part]) {
-						childrensTemp = acc[part].childrens;
+						childrenTemp = acc[part].children;
 					}
-					childrens = [...childrensTemp, item];
+					children = [...childrenTemp, item];
 				} else if (acc[part]) {
-					let childrensTemp = [];
-					childrensTemp = acc[part].childrens;
-					childrens = [...childrensTemp];
+					let childrenTemp = [];
+					childrenTemp = acc[part].children;
+					children = [...childrenTemp];
 				}
-				return (acc[part] && (acc[part] = { ...acc[part], childrens })) || (acc[part] = { childrens });
+				return (acc[part] && (acc[part] = { ...acc[part], children })) || (acc[part] = { children });
 			}, root);
 			return root;
 		}, Object.create(null))
@@ -65,15 +65,15 @@ function formatForTreeView(objects) {
 	}
 
 	objects.sort((a, b) => {
-    if (a.fullName < b.fullName) {
+		if (a.fullName < b.fullName) {
 			return -1;
 		}
 
-    if (a.fullName > b.fullName) {
+		if (a.fullName > b.fullName) {
 			return 1;
 		}
 
-    return 0;
+		return 0;
 	});
 	return getTreeView(objects);
 }
