@@ -85,6 +85,7 @@ const Profile = ({
 		walletConnectCtx,
 		isLoadContainers,
 		setLoadContainers,
+		onAuth,
 	}) => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [NeoFSContract] = useState({
@@ -142,7 +143,7 @@ const Profile = ({
 		});
 	};
 
-	const onGetContainerData = (containerId, index) => {
+	const onGetObjectData = (containerId, index) => {
 		api('POST', `/objects/${containerId}/search?walletConnect=true`, {
 			"filters": [],
 		}, {
@@ -153,7 +154,7 @@ const Profile = ({
 			'Authorization': `Bearer ${walletData.tokens.object.GET.token}`
 		}).then((e) => {
 			const containersTemp = [ ...containers ];
-			containersTemp[index] = { ...containersTemp[index], objects: e.objects ? formatForTreeView(e.objects) : [], isActive: true };
+			containersTemp[index] = { ...containersTemp[index], objects: e.objects ? formatForTreeView(e.objects) : [] };
 			setContainers(containersTemp);
 		});
 	};
@@ -437,15 +438,10 @@ const Profile = ({
 											className={containerItem.isActive ? 'active' : ''}
 											onClick={() => {
 												const containersTemp = [ ...containers ];
-												if (containerItem.isActive) {
-													containersTemp[index].isActive = false;
-													setContainers(containersTemp);
-												} else if (walletData.tokens.object.GET) {
-													containersTemp[index].isActive = true;
-													setContainers(containersTemp);
-													onGetContainerData(containerItem.containerId, index);
-												} else {
-													onPopup('signTokens', 'object.GET');
+												containersTemp[index].isActive = !containerItem.isActive;
+												setContainers(containersTemp);
+												if (walletData.tokens.object.GET && containersTemp[index].isActive) {
+													onGetObjectData(containerItem.containerId, index);
 												}
 											}}
 										>
@@ -514,19 +510,34 @@ const Profile = ({
 															}}
 														>
 															<Heading size={6} weight="semibold">Objects</Heading>
-															<TreeView
-																walletData={walletData}
-																onPopup={onPopup}
-																containerIndex={index}
-																containerItem={containerItem}
-															/>
-															<Button
-																color="primary"
-																onClick={() => walletData.tokens.object.PUT ? onPopup('createObject', { containerId: containerItem.containerId }) : onPopup('signTokens', 'object.PUT')}
-																style={{ display: 'flex', margin: '20px auto 0' }}
-															>
-																New object
-															</Button>
+															{walletData.tokens.object.GET ? (
+																<>
+																	<TreeView
+																		walletData={walletData}
+																		onPopup={onPopup}
+																		containerIndex={index}
+																		containerItem={containerItem}
+																	/>
+																	<Button
+																		color="primary"
+																		onClick={() => walletData.tokens.object.PUT ? onPopup('createObject', { containerId: containerItem.containerId }) : onPopup('signTokens', 'object.PUT')}
+																		style={{ display: 'flex', margin: '20px auto 0' }}
+																	>
+																		New object
+																	</Button>
+																</>
+															) : (
+																<div className="token_status_panel">
+																	<div>For getting operations</div>
+																	<Button
+																		color="primary"
+																		size="small"
+																		onClick={() => onAuth('object', 'GET')}
+																	>
+																		Sign
+																	</Button>
+																</div>
+															)}
 														</Box>
 													</div>
 												) : (
