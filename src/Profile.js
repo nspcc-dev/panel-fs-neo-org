@@ -43,39 +43,62 @@ function formatForTreeView(objects) {
 			return root;
 		}, Object.create(null))
 	);
+
+	if (objects.length === 1) {
+		objects.push({ address: { objectId: '' }, name: '' });
+	}
+
 	objects.sort((a, b) => {
 		if (!a.filePath) {
 			a.filePath = '';
 		}
+
 		if (!b.filePath) {
 			b.filePath = '';
 		}
-		if (a.filePath.indexOf('.') !== -1) {
-			const path = a.filePath.split('/');
-			a.name = path[path.length - 1];
+
+		if (!a.fullName) {
+			const pathA = a.filePath.split('/');
+			if (pathA[pathA.length - 1] === '') {
+				a.filePath = '';
+			} else {
+				a.name = pathA[pathA.length - 1];
+				a.filePath = pathA.slice(0, pathA.length - 1).join('/');
+			}
 		}
-		if (b.filePath.indexOf('.') !== -1) {
-			const path = b.filePath.split('/');
-			b.name = path[path.length - 1];
+
+		if (!b.fullName) {
+			const pathB = b.filePath.split('/');
+			if (pathB[pathB.length - 1] === '') {
+				b.filePath = '';
+			} else {
+				b.name = pathB[pathB.length - 1];
+				b.filePath = pathB.slice(0, pathB.length - 1).join('/');
+			}
 		}
+
 		if (!a.name) {
 			a.name = a.address.objectId;
 		}
+
 		if (!b.name) {
 			b.name = b.address.objectId;
 		}
-		a.fullName = `${a.filePath}/${a.name}`;
-		b.fullName = `${b.filePath}/${b.name}`;
+
+		a.fullName = `${a.filePath ? `${a.filePath.trim()}/` : ''}${a.name.trim()}`;
+		b.fullName = `${b.filePath ? `${b.filePath.trim()}/` : ''}${b.name.trim()}`;
 
     if (a.fullName < b.fullName) {
 			return -1;
 		}
+
     if (a.fullName > b.fullName) {
 			return 1;
 		}
+
     return 0;
 	});
-	return getTreeView(objects);
+	return getTreeView(objects.filter((n) => n.name !== ''));
 }
 
 const Profile = ({
