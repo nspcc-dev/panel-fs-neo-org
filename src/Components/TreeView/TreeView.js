@@ -6,11 +6,11 @@ import {
 import api from '../../api';
 
 const Tree = ({ children }) => {
-  return <div className="objects_tree">{children}</div>;
+	return <div className="objects_tree">{children}</div>;
 };
 
 const Branch = ({ objectPath, containerItem, containerChildren, walletData, onGetObjectData, containerIndex, onPopup }) => {
-  return (
+	return (
 		<Tree.Folder name={objectPath}>
 			{Object.keys(containerChildren[objectPath]).length > 1 && Object.keys(containerChildren[objectPath]).map((objectPathNew) => ( objectPathNew !== 'children' && (
 				<Tree.Branch
@@ -39,37 +39,37 @@ const Branch = ({ objectPath, containerItem, containerChildren, walletData, onGe
 };
 
 const Folder = ({ name, children }) => {
-  const [isOpen, setIsOpen] = useState(true);
+	const [isOpen, setIsOpen] = useState(true);
 
-  const handleToggle = e => {
-    e.preventDefault();
-    setIsOpen(!isOpen);
-  };
+	const handleToggle = e => {
+		e.preventDefault();
+		setIsOpen(!isOpen);
+	};
 
-  return (
-    <div className="objects_tree_folder">
-      <div className="folder--label" onClick={handleToggle}>
+	return (
+		<div className="objects_tree_folder">
+			<div className="folder--label" onClick={handleToggle}>
 				<img
 					src="./img/folder.svg"
 					width={15}
 					alt="folder"
 				/>
-        <span>{name}</span>
-      </div>
-      <div
+				<span>{name}</span>
+			</div>
+			<div
 				className="folder_collapsible"
 				style={isOpen ? { height: "auto" } : { height: 0 }}
 			>{children}</div>
-    </div>
-  );
+		</div>
+	);
 };
 
 const File = ({ name, containerItem, objectItem, walletData, onPopup }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [objectDate, setObjectDate] = useState(null);
+	const [isOpen, setIsOpen] = useState(false);
+	const [objectDate, setObjectDate] = useState(null);
 
 	const handleToggle = e => {
-    setIsOpen(!isOpen);
+		setIsOpen(!isOpen);
 		if (!isOpen) {
 			api('GET', `/objects/${containerItem.containerId}/${objectItem.address.objectId}?walletConnect=true`, {}, {
 				"Content-Type": "application/json",
@@ -81,10 +81,10 @@ const File = ({ name, containerItem, objectItem, walletData, onPopup }) => {
 				setObjectDate(e);
 			});
 		}
-    e.preventDefault();
-  };
+		e.preventDefault();
+	};
 
-  return (
+	return (
 		<div className="objects_tree_file">
 			<div
 				className="file--label"
@@ -163,7 +163,7 @@ const File = ({ name, containerItem, objectItem, walletData, onPopup }) => {
 				</div>
 			</div>
 		</div>
-  );
+	);
 };
 
 Tree.File = File;
@@ -177,7 +177,7 @@ export default function TreeView({
 	containerIndex,
 	onGetObjectData,
 }) {
-  return (
+	return (
 		<Tree>
 			{containerItem.objects && Object.keys(containerItem.objects).map((objectPath, index) => (
 				<div key={objectPath}>
@@ -205,5 +205,5 @@ export default function TreeView({
 				</div>
 			))}
 		</Tree>
-  );
+	);
 }
