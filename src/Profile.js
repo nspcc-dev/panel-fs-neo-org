@@ -9,6 +9,7 @@ import {
 	Button,
 	Box,
 	Tag,
+	Tabs,
 } from 'react-bulma-components';
 import TreeView from './Components/TreeView/TreeView';
 import api from './api';
@@ -78,6 +79,14 @@ function formatForTreeView(objects) {
 	return getTreeView(objects);
 }
 
+function formatForContainerName(attributes, containerId) {
+	if (attributes.length > 0) {
+		const pos = attributes.map((item) => item.key).indexOf('Name');
+		return attributes[pos].value;
+	}
+	return containerId;
+}
+
 const Profile = ({
 		walletData,
 		onDisconnectWallet,
@@ -101,6 +110,8 @@ const Profile = ({
 
 	const [depositQuantity, setDepositQuantity] = useState(0);
 	const [withdrawQuantity, setWithdrawQuantity] = useState(0);
+
+	const [activeAttributes, setActiveAttributes] = useState('main');
 
 	useEffect(() => {
 		if (isLoadContainers) {
@@ -445,7 +456,7 @@ const Profile = ({
 												}
 											}}
 										>
-											{containerItem.attributes.filter((attribute) => attribute.key === 'Name')[0].value}
+											{formatForContainerName(containerItem.attributes, containerItem.containerId)}
 											{containerItem.isActive && (
 												<img
 													src="./img/trashbin.svg"
@@ -469,76 +480,106 @@ const Profile = ({
 											<div className="container_panel">
 												{containerItem.ownerId ? (
 													<div>
-														<Heading size={6} weight="light">
-															<span>{`Container id: `}</span>
-															{containerItem.containerId}
-														</Heading>
-														<Heading size={6} weight="light">
-															<span>{`Owner id: `}</span>
-															{containerItem.ownerId}
-														</Heading>
-														<Heading size={6} weight="light">
-															<span>{`Creation: `}</span>
-															{new Date(containerItem.attributes[0].value * 1000).toLocaleDateString()}
-														</Heading>
-														<Heading size={6} weight="light">
-															<span>{`Zone: `}</span>
-															{containerItem.attributes[2].value}
-														</Heading>
-														<Heading size={6} weight="light">
-															<span>{`Basic acl: `}</span>
-															{`0x${containerItem.basicAcl}`}
-														</Heading>
-														<Heading size={6} weight="light">
-															<span>{`Placement policy: `}</span>
-															{containerItem.placementPolicy}
-														</Heading>
-														<Heading size={6} weight="light">
-															<span>{`Version: `}</span>
-															{containerItem.version}
-														</Heading>
-														<Button
-															color="primary"
-															onClick={() => onSetEacl(containerItem.containerId)}
-															style={{ margin: '10px 0', display: 'block' }}
-														>Set eACL</Button>
-														<Box 
-															style={{
-																marginTop: 20,
-																border: '1px solid #dbdbdc',
-																boxShadow: '0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)',
-															}}
-														>
-															<Heading size={6} weight="semibold">Objects</Heading>
-															{walletData.tokens.object.GET ? (
-																<>
-																	<TreeView
-																		walletData={walletData}
-																		onPopup={onPopup}
-																		containerIndex={index}
-																		containerItem={containerItem}
-																	/>
-																	<Button
-																		color="primary"
-																		onClick={() => walletData.tokens.object.PUT ? onPopup('createObject', { containerId: containerItem.containerId }) : onPopup('signTokens', 'object.PUT')}
-																		style={{ display: 'flex', margin: '20px auto 0' }}
-																	>
-																		New object
-																	</Button>
-																</>
-															) : (
-																<div className="token_status_panel">
-																	<div>For getting operations</div>
-																	<Button
-																		color="primary"
-																		size="small"
-																		onClick={() => onAuth('object', 'GET')}
-																	>
-																		Sign
-																	</Button>
-																</div>
-															)}
-														</Box>
+														<Section>
+															<Heading size={5} weight="bolder">Information</Heading>
+															<Heading size={6} weight="light">
+																<span>{`Container id: `}</span>
+																{containerItem.containerId}
+															</Heading>
+															<Heading size={6} weight="light">
+																<span>{`Owner id: `}</span>
+																{containerItem.ownerId}
+															</Heading>
+															<Heading size={6} weight="light">
+																<span>{`Placement policy: `}</span>
+																{containerItem.placementPolicy}
+															</Heading>
+															<Heading size={6} weight="light">
+																<span>{`Version: `}</span>
+																{containerItem.version}
+															</Heading>
+															<Heading size={6} weight="light">
+																<span>{`Basic acl: `}</span>
+																{`0x${containerItem.basicAcl}`}
+															</Heading>
+															<Button
+																color="primary"
+																onClick={() => onSetEacl(containerItem.containerId)}
+																style={{ margin: '10px 0', display: 'block' }}
+															>Set eACL</Button>
+														</Section>
+														<Section>
+															<Heading size={5} weight="bolder">Attributes</Heading>
+															<Tabs>
+																<Tabs.Tab
+																	onClick={() => {
+																		setActiveAttributes('main');
+																	}}
+																	active={activeAttributes === 'main'}
+																>
+																	Main
+																</Tabs.Tab>
+																<Tabs.Tab
+																	onClick={() => {
+																		setActiveAttributes('system');
+																	}}
+																	active={activeAttributes === 'system'}
+																>
+																	System
+																</Tabs.Tab>
+															</Tabs>
+															{activeAttributes === 'main' && containerItem.attributes.map((attribute) => ( attribute.key.indexOf('__NEOFS__') === -1 && (
+																<Heading size={6} weight="light" style={{ marginLeft: 10 }}>
+																	<span>{`${attribute.key === 'Timestamp' ? 'Creation' : attribute.key}: `}</span>
+																	{attribute.key === 'Timestamp' ? new Date(attribute.value * 1000).toLocaleDateString() : attribute.value}
+																</Heading>
+															)))}
+															{activeAttributes === 'system' && containerItem.attributes.map((attribute) => ( attribute.key.indexOf('__NEOFS__') !== -1 && (
+																<Heading size={6} weight="light" style={{ marginLeft: 10 }}>
+																	<span>{`${attribute.key === 'Timestamp' ? 'Creation' : attribute.key}: `}</span>
+																	{attribute.key === 'Timestamp' ? new Date(attribute.value * 1000).toLocaleDateString() : attribute.value}
+																</Heading>
+															)))}
+														</Section>
+														<Section>
+															<Heading size={5} weight="bolder">Objects</Heading>
+															<Box
+																style={{
+																	marginTop: 15,
+																	border: '1px solid #dbdbdc',
+																	boxShadow: '0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)',
+																}}
+															>
+																{walletData.tokens.object.GET ? (
+																	<>
+																		<TreeView
+																			walletData={walletData}
+																			onPopup={onPopup}
+																			containerIndex={index}
+																			containerItem={containerItem}
+																		/>
+																		<Button
+																			color="primary"
+																			onClick={() => walletData.tokens.object.PUT ? onPopup('createObject', { containerId: containerItem.containerId }) : onPopup('signTokens', 'object.PUT')}
+																			style={{ display: 'flex', margin: '20px auto 0' }}
+																		>
+																			New object
+																		</Button>
+																	</>
+																) : (
+																	<div className="token_status_panel">
+																		<div>For getting operations</div>
+																		<Button
+																			color="primary"
+																			size="small"
+																			onClick={() => onAuth('object', 'GET')}
+																		>
+																			Sign
+																		</Button>
+																	</div>
+																)}
+															</Box>
+														</Section>
 													</div>
 												) : (
 													<img

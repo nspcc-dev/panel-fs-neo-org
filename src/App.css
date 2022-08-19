@@ -73,6 +73,14 @@ ul {
     font-weight: 600;
 }
 
+.container_panel .section {
+    padding: 1rem 0rem;
+}
+
+.notification a:not(.button):not(.dropdown-item) {
+    text-decoration: none;
+}
+
 .navbar-menu {
     background: #29363b;
 }

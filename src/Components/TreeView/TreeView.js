@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
 	Heading,
+	Section,
 } from 'react-bulma-components';
 import api from '../../api';
 
@@ -120,23 +121,35 @@ const File = ({ name, containerItem, objectItem, walletData, onPopup }) => {
 									e.stopPropagation();
 								}}
 							/>
-							<Heading size={6} weight="light">
-								<span>{`Object id: `}</span>
-								<a
-									href={`${process.env.REACT_APP_NGINX}/get/${containerItem.containerId}/${objectItem.address.objectId}`}
-									target="_blank"
-									rel="noopener noreferrer"
-									style={{ textDecoration: 'underline' }}
-								>{objectItem.address.objectId}</a>
-							</Heading>
-							<Heading size={6} weight="light">
-								<span>{`Owner id: `}</span>
-								{objectDate.ownerId}
-							</Heading>
-							<Heading size={6} weight="light">
-								<span>{`Object size: `}</span>
-								{objectDate.objectSize}
-							</Heading>
+							<Section style={{ paddingTop: 0 }}>
+								<Heading size={7} weight="bolder" style={{ color: '#828282' }}>Information</Heading>
+								<Heading size={6} weight="light">
+									<span>{`Object id: `}</span>
+									<a
+										href={`${process.env.REACT_APP_NGINX}/get/${containerItem.containerId}/${objectItem.address.objectId}`}
+										target="_blank"
+										rel="noopener noreferrer"
+										style={{ textDecoration: 'underline' }}
+									>{objectItem.address.objectId}</a>
+								</Heading>
+								<Heading size={6} weight="light">
+									<span>{`Owner id: `}</span>
+									{objectDate.ownerId}
+								</Heading>
+								<Heading size={6} weight="light">
+									<span>{`Object size: `}</span>
+									{objectDate.objectSize}
+								</Heading>
+							</Section>
+							<Section style={{ paddingBottom: 0 }}>
+								<Heading size={7} weight="bolder" style={{ color: '#828282' }}>Attributes</Heading>
+								{objectDate.attributes.map((attribute) => (
+									<Heading size={6} weight="light">
+										<span>{`${attribute.key === 'Timestamp' ? 'Creation' : attribute.key}: `}</span>
+										{attribute.key === 'Timestamp' ? new Date(attribute.value * 1000).toLocaleDateString() : attribute.value}
+									</Heading>
+								))}
+							</Section>
 						</>
 					) : (
 						<img
