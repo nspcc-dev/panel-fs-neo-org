@@ -529,13 +529,13 @@ const Profile = ({
 																</Tabs.Tab>
 															</Tabs>
 															{activeAttributes === 'main' && containerItem.attributes.map((attribute) => ( attribute.key.indexOf('__NEOFS__') === -1 && (
-																<Heading size={6} weight="light" style={{ marginLeft: 10 }}>
+																<Heading size={6} weight="light" style={{ marginLeft: 10 }} key={attribute.key}>
 																	<span>{`${attribute.key === 'Timestamp' ? 'Creation' : attribute.key}: `}</span>
 																	{attribute.key === 'Timestamp' ? new Date(attribute.value * 1000).toLocaleDateString() : attribute.value}
 																</Heading>
 															)))}
 															{activeAttributes === 'system' && containerItem.attributes.map((attribute) => ( attribute.key.indexOf('__NEOFS__') !== -1 && (
-																<Heading size={6} weight="light" style={{ marginLeft: 10 }}>
+																<Heading size={6} weight="light" style={{ marginLeft: 10 }} key={attribute.key}>
 																	<span>{`${attribute.key === 'Timestamp' ? 'Creation' : attribute.key}: `}</span>
 																	{attribute.key === 'Timestamp' ? new Date(attribute.value * 1000).toLocaleDateString() : attribute.value}
 																</Heading>
