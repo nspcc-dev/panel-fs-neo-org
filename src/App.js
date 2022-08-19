@@ -12,6 +12,7 @@ import {
 	Footer,
 	Columns,
 	Form,
+	Tag,
 } from 'react-bulma-components';
 import Home from './Home';
 import Profile from './Profile';
@@ -26,7 +27,11 @@ export const App = () => {
 	const walletConnectCtx = useWalletConnect();
 	const [attributes, setAttributes] = useState([]);
 	const [isLoadContainers, setLoadContainers] = useState(false);
-	const [containerNameCreate, setContainerNameCreate] = useState('');
+	const [containerForm, setContainerForm] = useState({
+		containerName: '',
+		placementPolicy: '',
+		basicAcl: '',
+	});
 	const [walletData, setWalletData] = useState(null);
 
 	const [popup, setPopup] = useState({
@@ -120,12 +125,12 @@ export const App = () => {
 
 	const onCreateContainer = () => {
 		if (walletData.tokens.container.PUT) {
-			if (containerNameCreate.length > 0) {
+			if (containerForm.containerName.length > 0 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0) {
 				onPopup('loading');
 				api('PUT', '/containers?walletConnect=true&name-scope-global=true', {
-					"containerName": containerNameCreate,
-					"placementPolicy": "REP 1",
-					"basicAcl": "public-read-write",
+					"containerName": containerForm.containerName,
+					"placementPolicy": containerForm.placementPolicy,
+					"basicAcl": containerForm.basicAcl,
 					"attributes": attributes,
 				}, {
 					"Content-Type": "application/json",
@@ -135,11 +140,15 @@ export const App = () => {
 					'Authorization': `Bearer ${walletData.tokens.container.PUT.token}`
 				}).then(() => {
 					setLoadContainers(true);
-					setContainerNameCreate('');
+					setContainerForm({
+						containerName: '',
+						placementPolicy: '',
+						basicAcl: '',
+					});
 					setAttributes([]);
 				});
 			} else {
-				onPopup('failed', 'Incorrect container name');
+				onPopup('failed', 'Specify the name, placement policy and basic acl of the container');
 			}
 		} else {
 			onPopup('signTokens', 'container.PUT');
@@ -500,9 +509,55 @@ export const App = () => {
 							<Form.Control>
 								<Form.Input
 									type="text"
-									value={containerNameCreate}
-									onChange={(e) => setContainerNameCreate(e.target.value)}
+									value={containerForm.containerName}
+									onChange={(e) => setContainerForm({ ...containerForm , containerName: e.target.value })}
 								/>
+							</Form.Control>
+						</Form.Field>
+						<Form.Field>
+							<Form.Label>Placement policy</Form.Label>
+							<Form.Control>
+								<Form.Input
+									type="text"
+									value={containerForm.placementPolicy}
+									onChange={(e) => setContainerForm({ ...containerForm , placementPolicy: e.target.value })}
+								/>
+								{[
+									'REP 2 IN X CBF 3 SELECT 2 FROM * AS X',
+									'REP 3',
+								].map((placementPolicyExample) => (
+									<Tag
+										key={placementPolicyExample}
+										onClick={() => setContainerForm({ ...containerForm , placementPolicy: placementPolicyExample })}
+										style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
+									>{placementPolicyExample}</Tag>
+								))}
+							</Form.Control>
+						</Form.Field>
+						<Form.Field>
+							<Form.Label>Basic acl</Form.Label>
+							<Form.Control>
+								<Form.Input
+									type="text"
+									value={containerForm.basicAcl}
+									onChange={(e) => setContainerForm({ ...containerForm , basicAcl: e.target.value })}
+								/>
+								{[
+									'private',
+									'eacl-private',
+									'public-read',
+									'eacl-public-read',
+									'public-read-write',
+									'eacl-public-read-write',
+									'public-append',
+									'eacl-public-append',
+								].map((basicAclExample) => (
+									<Tag
+										key={basicAclExample}
+										onClick={() => setContainerForm({ ...containerForm , basicAcl: basicAclExample })}
+										style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
+									>{basicAclExample}</Tag>
+								))}
 							</Form.Control>
 						</Form.Field>
 						<Form.Field>
