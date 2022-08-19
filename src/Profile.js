@@ -202,7 +202,7 @@ const Profile = ({
 		}
 	};
 
-  const onDeposit = async () => {
+	const onDeposit = async () => {
 		if (depositQuantity >= 0.00000001) {
 			onPopup('approveRequest');
 			const senderAddress = walletConnectCtx.getAccountAddress(0);
@@ -236,7 +236,7 @@ const Profile = ({
 		}
 	};
 
-  const onWithdraw = async () => {
+	const onWithdraw = async () => {
 		if (withdrawQuantity >= 0.00000001) {
 			onPopup('approveRequest');
 			const senderAddress = walletConnectCtx.getAccountAddress(0);

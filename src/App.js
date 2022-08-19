@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Routes,
-  Route,
-  Link,
-  useLocation,
+	Routes,
+	Route,
+	Link,
+	useLocation,
 } from "react-router-dom";
 import {
 	Navbar,
@@ -29,13 +29,13 @@ export const App = () => {
 	const [containerNameCreate, setContainerNameCreate] = useState('');
 	const [walletData, setWalletData] = useState(null);
 
-  const [popup, setPopup] = useState({
+	const [popup, setPopup] = useState({
 		current: null,
 		text: '',
 	});
 
-  const onPopup = (current = null, text = null) => {
-    setPopup({ current, text });
+	const onPopup = (current = null, text = null) => {
+		setPopup({ current, text });
 	};
 
 	useEffect(() => {
@@ -118,7 +118,7 @@ export const App = () => {
 		}
 	};
 
-  const onCreateContainer = () => {
+	const onCreateContainer = () => {
 		if (walletData.tokens.container.PUT) {
 			if (containerNameCreate.length > 0) {
 				onPopup('loading');
@@ -146,7 +146,7 @@ export const App = () => {
 		}
 	};
 
-  const onDeleteContainer = (containerName) => {
+	const onDeleteContainer = (containerName) => {
 		if (walletData.tokens.container.DELETE) {
 			onPopup('loading');
 			api('DELETE', `/containers/${containerName}?walletConnect=true`, {}, {
@@ -163,7 +163,7 @@ export const App = () => {
 		}
 	};
 
-  const onCreateObject = (e, containerId) => {
+	const onCreateObject = (e, containerId) => {
 		if (walletData.tokens.object.PUT) {
 			onPopup('loading');
 			const file = e.target.files;
@@ -196,7 +196,7 @@ export const App = () => {
 		}
 	};
 
-  const onDeleteObject = (containerId, objectId) => {
+	const onDeleteObject = (containerId, objectId) => {
 		if (walletData.tokens.object.DELETE) {
 			onPopup('loading');
 			api('DELETE', `/objects/${containerId}/${objectId}?walletConnect=true`, {}, {
@@ -223,7 +223,7 @@ export const App = () => {
 		await walletConnectCtx.connect();
 	}
 
-  const onDisconnectWallet = () => {
+	const onDisconnectWallet = () => {
 		walletConnectCtx.disconnect();
 		setWalletData(null);
 		localStorage.removeItem('wc@2:client//pairing:settled');
@@ -234,7 +234,7 @@ export const App = () => {
 		localStorage.removeItem('wc@2:client//keychain');
 	};
 
-  return (
+	return (
 		<>
 			{(popup.current === 'success' || popup.current === 'failed') && (
 				<div className="popup">
@@ -260,12 +260,12 @@ export const App = () => {
 				</div>
 			)}
 			{popup.current === 'connectWallet' && (
-        <div className="popup">
-          <div
-            className="popup_close_panel"
-            onClick={onPopup}
-          />
-          <div className="popup_content" style={{ maxWidth: 400 }}>
+				<div className="popup">
+					<div
+						className="popup_close_panel"
+						onClick={onPopup}
+					/>
+					<div className="popup_content" style={{ maxWidth: 400 }}>
 						<div
 							className="popup_close"
 							onClick={onPopup}
@@ -296,16 +296,16 @@ export const App = () => {
 						>
 							Scan
 						</Button>
-          </div>
-        </div>
-      )}
+					</div>
+				</div>
+			)}
 			{popup.current === 'signTokens' && (
-        <div className="popup">
-          <div
-            className="popup_close_panel"
-            onClick={onPopup}
-          />
-          <div className="popup_content">
+				<div className="popup">
+					<div
+						className="popup_close_panel"
+						onClick={onPopup}
+					/>
+					<div className="popup_content">
 						<div
 							className="popup_close"
 							onClick={onPopup}
@@ -467,19 +467,19 @@ export const App = () => {
 								Start
 							</Button>
 						)}
-          </div>
-        </div>
-      )}
+					</div>
+				</div>
+			)}
 			{popup.current === 'createContainer' && (
-        <div className="popup">
-          <div
-            className="popup_close_panel"
-            onClick={() => {
+				<div className="popup">
+					<div
+						className="popup_close_panel"
+						onClick={() => {
 							onPopup();
 							setAttributes([]);
 						}}
-          />
-          <div className="popup_content">
+					/>
+					<div className="popup_content">
 						<div
 							className="popup_close"
 							onClick={() => {
@@ -596,16 +596,16 @@ export const App = () => {
 								>Attributes should not be empty</div>
 							</>
 						)}
-          </div>
-        </div>
-      )}
+					</div>
+				</div>
+			)}
 			{popup.current === 'deleteContainer' && (
-        <div className="popup">
-          <div
-            className="popup_close_panel"
-            onClick={onPopup}
-          />
-          <div className="popup_content">
+				<div className="popup">
+					<div
+						className="popup_close_panel"
+						onClick={onPopup}
+					/>
+					<div className="popup_content">
 						<div
 							className="popup_close"
 							onClick={onPopup}
@@ -634,19 +634,19 @@ export const App = () => {
 								Yes
 							</Button>
 						</div>
-          </div>
-        </div>
-      )}
+					</div>
+				</div>
+			)}
 			{popup.current === 'createObject' && (
-        <div className="popup">
-          <div
-            className="popup_close_panel"
-            onClick={() => {
+				<div className="popup">
+					<div
+						className="popup_close_panel"
+						onClick={() => {
 							onPopup();
 							setAttributes([]);
 						}}
-          />
-          <div className="popup_content">
+					/>
+					<div className="popup_content">
 						<div
 							className="popup_close"
 							onClick={() => {
@@ -749,16 +749,16 @@ export const App = () => {
 								}}
 							>Attributes should not be empty</div>
 						)}
-          </div>
-        </div>
-      )}
+					</div>
+				</div>
+			)}
 			{popup.current === 'deleteObject' && (
-        <div className="popup">
-          <div
-            className="popup_close_panel"
-            onClick={onPopup}
-          />
-          <div className="popup_content">
+				<div className="popup">
+					<div
+						className="popup_close_panel"
+						onClick={onPopup}
+					/>
+					<div className="popup_content">
 						<div
 							className="popup_close"
 							onClick={onPopup}
@@ -787,16 +787,16 @@ export const App = () => {
 								Yes
 							</Button>
 						</div>
-          </div>
-        </div>
-      )}
+					</div>
+				</div>
+			)}
 			{popup.current === 'loading' && (
-        <div className="popup">
-          <div
-            className="popup_close_panel"
-            onClick={onPopup}
-          />
-          <div className="popup_content">
+				<div className="popup">
+					<div
+						className="popup_close_panel"
+						onClick={onPopup}
+					/>
+					<div className="popup_content">
 						<div
 							className="popup_close"
 							onClick={onPopup}
@@ -816,16 +816,16 @@ export const App = () => {
 							width={30}
 							alt="loader"
 						/>
-          </div>
-        </div>
-      )}
+					</div>
+				</div>
+			)}
 			{popup.current === 'approveRequest' && (
-        <div className="popup">
-          <div
-            className="popup_close_panel"
-            onClick={onPopup}
-          />
-          <div className="popup_content">
+				<div className="popup">
+					<div
+						className="popup_close_panel"
+						onClick={onPopup}
+					/>
+					<div className="popup_content">
 						<div
 							className="popup_close"
 							onClick={onPopup}
@@ -846,9 +846,9 @@ export const App = () => {
 							alt="loader"
 						/>
 						<Heading align="center" size={6} weight="normal">Approve or reject request using your wallet</Heading>
-          </div>
-        </div>
-      )}
+					</div>
+				</div>
+			)}
 			<Navbar style={{ background: "#29363a" }}>
 				<Navbar.Brand>
 					<Navbar.Item renderAs="div">
@@ -942,6 +942,6 @@ export const App = () => {
 					NeoFS Panel
 				</Heading>
 			</Footer>
-    </>
-  );
+		</>
+	);
 }
