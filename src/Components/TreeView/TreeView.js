@@ -113,11 +113,7 @@ const File = ({ name, containerItem, objectItem, walletData, onPopup }) => {
 								alt="delete"
 								className="objects_tree_file_delete"
 								onClick={(e) => {
-									if (walletData.tokens.object.DELETE) {
-										onPopup('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.address.objectId });
-									} else {
-										onPopup('signTokens', 'object.DELETE')
-									}
+									onPopup('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.address.objectId });
 									e.stopPropagation();
 								}}
 							/>
