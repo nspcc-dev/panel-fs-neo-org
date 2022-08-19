@@ -144,7 +144,7 @@ const File = ({ name, containerItem, objectItem, walletData, onPopup }) => {
 							<Section style={{ paddingBottom: 0 }}>
 								<Heading size={7} weight="bolder" style={{ color: '#828282' }}>Attributes</Heading>
 								{objectDate.attributes.map((attribute) => (
-									<Heading size={6} weight="light">
+									<Heading size={6} weight="light" key={attribute.key}>
 										<span>{`${attribute.key === 'Timestamp' ? 'Creation' : attribute.key}: `}</span>
 										{attribute.key === 'Timestamp' ? new Date(attribute.value * 1000).toLocaleDateString() : attribute.value}
 									</Heading>
