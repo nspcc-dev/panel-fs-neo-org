@@ -24,10 +24,7 @@ import './App.css';
 export const App = () => {
 	const location = useLocation();
 	const walletConnectCtx = useWalletConnect();
-	const [attributes, setAttributes] = useState([{
-		"key": "",
-		"value": ""
-	}]);
+	const [attributes, setAttributes] = useState([]);
 	const [isLoadContainers, setLoadContainers] = useState(false);
 	const [containerNameCreate, setContainerNameCreate] = useState('');
 	const [walletData, setWalletData] = useState(null);
@@ -139,7 +136,7 @@ export const App = () => {
 				}).then(() => {
 					setLoadContainers(true);
 					setContainerNameCreate('');
-					setAttributes([{ "key": "", "value": "" }]);
+					setAttributes([]);
 				});
 			} else {
 				onPopup('failed', 'Incorrect container name');
@@ -187,7 +184,7 @@ export const App = () => {
 					'Authorization': `Bearer ${walletData.tokens.object.PUT.token}`
 				}).then(() => {
 					setLoadContainers(true);
-					setAttributes([{ "key": "", "value": "" }]);
+					setAttributes([]);
 				});
 			};
 			reader.onerror = (error) => {
@@ -479,7 +476,7 @@ export const App = () => {
             className="popup_close_panel"
             onClick={() => {
 							onPopup();
-							setAttributes([{ "key": "", "value": "" }]);
+							setAttributes([]);
 						}}
           />
           <div className="popup_content">
@@ -487,7 +484,7 @@ export const App = () => {
 							className="popup_close"
 							onClick={() => {
 								onPopup();
-								setAttributes([{ "key": "", "value": "" }]);
+								setAttributes([]);
 							}}
 						>
 							<img
@@ -646,7 +643,7 @@ export const App = () => {
             className="popup_close_panel"
             onClick={() => {
 							onPopup();
-							setAttributes([{ "key": "", "value": "" }]);
+							setAttributes([]);
 						}}
           />
           <div className="popup_content">
@@ -654,7 +651,7 @@ export const App = () => {
 							className="popup_close"
 							onClick={() => {
 								onPopup();
-								setAttributes([{ "key": "", "value": "" }]);
+								setAttributes([]);
 							}}
 						>
 							<img
