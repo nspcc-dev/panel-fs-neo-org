@@ -314,7 +314,7 @@ export const App = () => {
 						className="popup_close_panel"
 						onClick={onPopup}
 					/>
-					<div className="popup_content">
+					<div className="popup_content" style={{ maxWidth: 650 }}>
 						<div
 							className="popup_close"
 							onClick={onPopup}
