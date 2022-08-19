@@ -504,151 +504,169 @@ export const App = () => {
 							/>
 						</div>
 						<Heading align="center" size={5}>New container</Heading>
-						<Form.Field>
-							<Form.Label>Name</Form.Label>
-							<Form.Control>
-								<Form.Input
-									type="text"
-									value={containerForm.containerName}
-									onChange={(e) => setContainerForm({ ...containerForm , containerName: e.target.value })}
-								/>
-							</Form.Control>
-						</Form.Field>
-						<Form.Field>
-							<Form.Label>Placement policy</Form.Label>
-							<Form.Control>
-								<Form.Input
-									type="text"
-									value={containerForm.placementPolicy}
-									onChange={(e) => setContainerForm({ ...containerForm , placementPolicy: e.target.value })}
-								/>
-								{[
-									'REP 2 IN X CBF 3 SELECT 2 FROM * AS X',
-									'REP 3',
-								].map((placementPolicyExample) => (
-									<Tag
-										key={placementPolicyExample}
-										onClick={() => setContainerForm({ ...containerForm , placementPolicy: placementPolicyExample })}
-										style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
-									>{placementPolicyExample}</Tag>
-								))}
-							</Form.Control>
-						</Form.Field>
-						<Form.Field>
-							<Form.Label>Basic acl</Form.Label>
-							<Form.Control>
-								<Form.Input
-									type="text"
-									value={containerForm.basicAcl}
-									onChange={(e) => setContainerForm({ ...containerForm , basicAcl: e.target.value })}
-								/>
-								{[
-									'private',
-									'eacl-private',
-									'public-read',
-									'eacl-public-read',
-									'public-read-write',
-									'eacl-public-read-write',
-									'public-append',
-									'eacl-public-append',
-								].map((basicAclExample) => (
-									<Tag
-										key={basicAclExample}
-										onClick={() => setContainerForm({ ...containerForm , basicAcl: basicAclExample })}
-										style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
-									>{basicAclExample}</Tag>
-								))}
-							</Form.Control>
-						</Form.Field>
-						<Form.Field>
-							<Form.Label>Attributes</Form.Label>
-							<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
-								{attributes.map((attribute, index) => (
-									<Form.Field kind="group" key={index}>
-										<Form.Control>
-											<Form.Input
-												placeholder="Key"
-												value={attribute.key}
-												onChange={(e) => {
-													const attributesTemp = [...attributes];
-													attributesTemp[index].key = e.target.value;
-													setAttributes(attributesTemp);
-												}}
-											/>
-										</Form.Control>
-										<Form.Control>
-											<Form.Input
-												placeholder="Value"
-												value={attribute.value}
-												onChange={(e) => {
-													const attributesTemp = [...attributes];
-													attributesTemp[index].value = e.target.value;
-													setAttributes(attributesTemp);
-												}}
-											/>
-										</Form.Control>
-										<Form.Control>
-											<img
-												src="./img/trashbin.svg"
-												width={30}
-												height={30}
-												alt="delete"
-												style={{ cursor: 'pointer', margin: 4 }}
-												onClick={() => {
-													let attributesTemp = [...attributes];
-													attributesTemp.splice(index, 1);
-													setAttributes(attributesTemp);
-												}}
-											/>
-										</Form.Control>
-									</Form.Field>
-								))}
-							</div>
-							<Button
-								color="primary"
-								size="small"
-								onClick={() => {
-									let attributesTemp = [...attributes];
-									attributesTemp.push({
-										key: "",
-										value: "",
-									});
-									setAttributes(attributesTemp);
-								}}
-								style={{ display: 'flex', margin: '10px auto 0' }}
-							>
-								Add attribute
-							</Button>
-						</Form.Field>
-						{attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0) ? (
-							<Button
-								color="primary"
-								onClick={onCreateContainer}
-								style={{ display: 'flex', margin: '30px auto 0' }}
-							>
-								Create
-							</Button>
+						{!walletData.tokens.container.PUT ? (
+							<>
+								<Heading align="center" size={6} weight="normal">To use creation function, you must use signed user token</Heading>
+								<div className="token_status_panel">
+									<div>For creation operations</div>
+									<Button
+										color="primary"
+										size="small"
+										onClick={() => onAuth('container', 'PUT')}
+									>
+										Sign
+									</Button>
+								</div>
+							</>
 						) : (
 							<>
-								<Button
-									color="primary"
-									style={{
-										display: 'flex',
-										margin: '30px auto 0',
-										opacity: 0.6,
-										pointerEvents: 'none',
-									}}
-								>
-									Create
-								</Button>
-								<div
-									style={{
-										textAlign: 'center',
-										marginTop: 20,
-										fontSize: 14,
-										color: '#ff405b',
-									}}
-								>Attributes should not be empty</div>
+								<Form.Field>
+									<Form.Label>Name</Form.Label>
+									<Form.Control>
+										<Form.Input
+											type="text"
+											value={containerForm.containerName}
+											onChange={(e) => setContainerForm({ ...containerForm , containerName: e.target.value })}
+										/>
+									</Form.Control>
+								</Form.Field>
+								<Form.Field>
+									<Form.Label>Placement policy</Form.Label>
+									<Form.Control>
+										<Form.Input
+											type="text"
+											value={containerForm.placementPolicy}
+											onChange={(e) => setContainerForm({ ...containerForm , placementPolicy: e.target.value })}
+										/>
+										{[
+											'REP 2 IN X CBF 3 SELECT 2 FROM * AS X',
+											'REP 3',
+										].map((placementPolicyExample) => (
+											<Tag
+												key={placementPolicyExample}
+												onClick={() => setContainerForm({ ...containerForm , placementPolicy: placementPolicyExample })}
+												style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
+											>{placementPolicyExample}</Tag>
+										))}
+									</Form.Control>
+								</Form.Field>
+								<Form.Field>
+									<Form.Label>Basic acl</Form.Label>
+									<Form.Control>
+										<Form.Input
+											type="text"
+											value={containerForm.basicAcl}
+											onChange={(e) => setContainerForm({ ...containerForm , basicAcl: e.target.value })}
+										/>
+										{[
+											'private',
+											'eacl-private',
+											'public-read',
+											'eacl-public-read',
+											'public-read-write',
+											'eacl-public-read-write',
+											'public-append',
+											'eacl-public-append',
+										].map((basicAclExample) => (
+											<Tag
+												key={basicAclExample}
+												onClick={() => setContainerForm({ ...containerForm , basicAcl: basicAclExample })}
+												style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
+											>{basicAclExample}</Tag>
+										))}
+									</Form.Control>
+								</Form.Field>
+								<Form.Field>
+									<Form.Label>Attributes</Form.Label>
+									<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
+										{attributes.map((attribute, index) => (
+											<Form.Field kind="group" key={index}>
+												<Form.Control>
+													<Form.Input
+														placeholder="Key"
+														value={attribute.key}
+														onChange={(e) => {
+															const attributesTemp = [...attributes];
+															attributesTemp[index].key = e.target.value;
+															setAttributes(attributesTemp);
+														}}
+													/>
+												</Form.Control>
+												<Form.Control>
+													<Form.Input
+														placeholder="Value"
+														value={attribute.value}
+														onChange={(e) => {
+															const attributesTemp = [...attributes];
+															attributesTemp[index].value = e.target.value;
+															setAttributes(attributesTemp);
+														}}
+													/>
+												</Form.Control>
+												<Form.Control>
+													<img
+														src="./img/trashbin.svg"
+														width={30}
+														height={30}
+														alt="delete"
+														style={{ cursor: 'pointer', margin: 4 }}
+														onClick={() => {
+															let attributesTemp = [...attributes];
+															attributesTemp.splice(index, 1);
+															setAttributes(attributesTemp);
+														}}
+													/>
+												</Form.Control>
+											</Form.Field>
+										))}
+									</div>
+									<Button
+										color="primary"
+										size="small"
+										onClick={() => {
+											let attributesTemp = [...attributes];
+											attributesTemp.push({
+												key: "",
+												value: "",
+											});
+											setAttributes(attributesTemp);
+										}}
+										style={{ display: 'flex', margin: '10px auto 0' }}
+									>
+										Add attribute
+									</Button>
+								</Form.Field>
+								{attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0) ? (
+									<Button
+										color="primary"
+										onClick={onCreateContainer}
+										style={{ display: 'flex', margin: '30px auto 0' }}
+									>
+										Create
+									</Button>
+								) : (
+									<>
+										<Button
+											color="primary"
+											style={{
+												display: 'flex',
+												margin: '30px auto 0',
+												opacity: 0.6,
+												pointerEvents: 'none',
+											}}
+										>
+											Create
+										</Button>
+										<div
+											style={{
+												textAlign: 'center',
+												marginTop: 20,
+												fontSize: 14,
+												color: '#ff405b',
+											}}
+										>Attributes should not be empty</div>
+									</>
+								)}
 							</>
 						)}
 					</div>
@@ -673,22 +691,40 @@ export const App = () => {
 							/>
 						</div>
 						<Heading align="center" size={5}>Container Deletion</Heading>
-						<Heading align="center" size={6}>Are you sure you want to delete container?</Heading>
-						<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
-							<Button
-								color="gray"
-								onClick={onPopup}
-								style={{ marginRight: 10 }}
-							>
-								No
-							</Button>
-							<Button
-								color="danger"
-								onClick={() => onDeleteContainer(popup.text.containerId)}
-							>
-								Yes
-							</Button>
-						</div>
+						{!walletData.tokens.container.DELETE ? (
+							<>
+								<Heading align="center" size={6} weight="normal">To use deletion function, you must use signed user token</Heading>
+								<div className="token_status_panel">
+									<div>For deletion operations</div>
+									<Button
+										color="primary"
+										size="small"
+										onClick={() => onAuth('container', 'DELETE')}
+									>
+										Sign
+									</Button>
+								</div>
+							</>
+						) : (
+							<>
+								<Heading align="center" size={6}>Are you sure you want to delete container?</Heading>
+								<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
+									<Button
+										color="gray"
+										onClick={onPopup}
+										style={{ marginRight: 10 }}
+									>
+										No
+									</Button>
+									<Button
+										color="danger"
+										onClick={() => onDeleteContainer(popup.text.containerId)}
+									>
+										Yes
+									</Button>
+								</div>
+							</>
+						)}
 					</div>
 				</div>
 			)}
@@ -717,92 +753,110 @@ export const App = () => {
 							/>
 						</div>
 						<Heading align="center" size={5}>New object</Heading>
-						<Form.Field>
-							<Form.Label>Attributes</Form.Label>
-							<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
-								{attributes.map((attribute, index) => (
-									<Form.Field kind="group" key={index}>
-										<Form.Control>
-											<Form.Input
-												placeholder="Key"
-												value={attribute.key}
-												onChange={(e) => {
-													const attributesTemp = [...attributes];
-													attributesTemp[index].key = e.target.value;
-													setAttributes(attributesTemp);
-												}}
-											/>
-										</Form.Control>
-										<Form.Control>
-											<Form.Input
-												placeholder="Value"
-												value={attribute.value}
-												onChange={(e) => {
-													const attributesTemp = [...attributes];
-													attributesTemp[index].value = e.target.value;
-													setAttributes(attributesTemp);
-												}}
-											/>
-										</Form.Control>
-										<Form.Control>
-											<img
-												src="./img/trashbin.svg"
-												width={30}
-												height={30}
-												alt="delete"
-												style={{ cursor: 'pointer', margin: 4 }}
-												onClick={() => {
-													let attributesTemp = [...attributes];
-													attributesTemp.splice(index, 1);
-													setAttributes(attributesTemp);
-												}}
-											/>
-										</Form.Control>
-									</Form.Field>
-								))}
-							</div>
-							<Button
-								color="primary"
-								size="small"
-								onClick={() => {
-									let attributesTemp = [...attributes];
-									attributesTemp.push({
-										key: "",
-										value: "",
-									});
-									setAttributes(attributesTemp);
-								}}
-								style={{ display: 'flex', margin: '10px auto 0' }}
-							>
-								Add attribute
-							</Button>
-						</Form.Field>
-						{attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0) ? (
-							<div className="input_block" style={{ marginTop: 30 }}>
-								<label htmlFor="upload">Upload object</label>
-								<input
-									id="upload"
-									type="file"
-									name="Upload"
-									onClick={(e) => {
-										if (!walletData.tokens.object.PUT) {
-											onPopup('signTokens', 'object.PUT');
-											document.getElementById('upload').value = '';
-											e.preventDefault();
-										}
-									}}
-									onChange={(e) => onCreateObject(e, popup.text.containerId)}
-								/>
-							</div>
+						{!walletData.tokens.object.PUT ? (
+							<>
+								<Heading align="center" size={6} weight="normal">To use creation function, you must use signed user token</Heading>
+								<div className="token_status_panel">
+									<div>For creation operations</div>
+									<Button
+										color="primary"
+										size="small"
+										onClick={() => onAuth('object', 'PUT')}
+									>
+										Sign
+									</Button>
+								</div>
+							</>
 						) : (
-							<div
-								style={{
-									textAlign: 'center',
-									marginTop: 30,
-									fontSize: 14,
-									color: '#ff405b',
-								}}
-							>Attributes should not be empty</div>
+							<>
+								<Form.Field>
+									<Form.Label>Attributes</Form.Label>
+									<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
+										{attributes.map((attribute, index) => (
+											<Form.Field kind="group" key={index}>
+												<Form.Control>
+													<Form.Input
+														placeholder="Key"
+														value={attribute.key}
+														onChange={(e) => {
+															const attributesTemp = [...attributes];
+															attributesTemp[index].key = e.target.value;
+															setAttributes(attributesTemp);
+														}}
+													/>
+												</Form.Control>
+												<Form.Control>
+													<Form.Input
+														placeholder="Value"
+														value={attribute.value}
+														onChange={(e) => {
+															const attributesTemp = [...attributes];
+															attributesTemp[index].value = e.target.value;
+															setAttributes(attributesTemp);
+														}}
+													/>
+												</Form.Control>
+												<Form.Control>
+													<img
+														src="./img/trashbin.svg"
+														width={30}
+														height={30}
+														alt="delete"
+														style={{ cursor: 'pointer', margin: 4 }}
+														onClick={() => {
+															let attributesTemp = [...attributes];
+															attributesTemp.splice(index, 1);
+															setAttributes(attributesTemp);
+														}}
+													/>
+												</Form.Control>
+											</Form.Field>
+										))}
+									</div>
+									<Button
+										color="primary"
+										size="small"
+										onClick={() => {
+											let attributesTemp = [...attributes];
+											attributesTemp.push({
+												key: "",
+												value: "",
+											});
+											setAttributes(attributesTemp);
+										}}
+										style={{ display: 'flex', margin: '10px auto 0' }}
+									>
+										Add attribute
+									</Button>
+								</Form.Field>
+								{attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0) ? (
+									<div className="input_block" style={{ marginTop: 30 }}>
+										<label htmlFor="upload">Upload object</label>
+										<input
+											id="upload"
+											type="file"
+											name="Upload"
+											onClick={(e) => {
+												if (!walletData.tokens.object.PUT) {
+													onPopup('signTokens', 'object.PUT');
+													document.getElementById('upload').value = '';
+													e.preventDefault();
+												}
+											}}
+											onChange={(e) => onCreateObject(e, popup.text.containerId)}
+										/>
+									</div>
+								) : (
+									<div
+										style={{
+											textAlign: 'center',
+											marginTop: 30,
+											fontSize: 14,
+											color: '#ff405b',
+										}}
+									>Attributes should not be empty</div>
+								)}
+							</>
 						)}
 					</div>
 				</div>
@@ -826,22 +880,40 @@ export const App = () => {
 							/>
 						</div>
 						<Heading align="center" size={5}>Object Deletion</Heading>
-						<Heading align="center" size={6}>Are you sure you want to delete object?</Heading>
-						<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
-							<Button
-								color="gray"
-								onClick={onPopup}
-								style={{ marginRight: 10 }}
-							>
-								No
-							</Button>
-							<Button
-								color="danger"
-								onClick={() => onDeleteObject(popup.text.containerId, popup.text.objectId)}
-							>
-								Yes
-							</Button>
-						</div>
+						{!walletData.tokens.object.DELETE ? (
+							<>
+								<Heading align="center" size={6} weight="normal">To use deletion function, you must use signed user token</Heading>
+								<div className="token_status_panel">
+									<div>For deletion operations</div>
+									<Button
+										color="primary"
+										size="small"
+										onClick={() => onAuth('object', 'DELETE')}
+									>
+										Sign
+									</Button>
+								</div>
+							</>
+						) : (
+							<>
+								<Heading align="center" size={6}>Are you sure you want to delete object?</Heading>
+								<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
+									<Button
+										color="gray"
+										onClick={onPopup}
+										style={{ marginRight: 10 }}
+									>
+										No
+									</Button>
+									<Button
+										color="danger"
+										onClick={() => onDeleteObject(popup.text.containerId, popup.text.objectId)}
+									>
+										Yes
+									</Button>
+								</div>
+							</>
+						)}
 					</div>
 				</div>
 			)}

@@ -466,11 +466,7 @@ const Profile = ({
 													alt="delete"
 													style={{ cursor: 'pointer' }}
 													onClick={(e) => {
-														if (walletData.tokens.container.DELETE) {
-															onPopup('deleteContainer', { containerId: containerItem.containerId });
-														} else {
-															onPopup('signTokens', 'container.DELETE')
-														}
+														onPopup('deleteContainer', { containerId: containerItem.containerId });
 														e.stopPropagation();
 													}}
 												/>
@@ -560,7 +556,7 @@ const Profile = ({
 																		/>
 																		<Button
 																			color="primary"
-																			onClick={() => walletData.tokens.object.PUT ? onPopup('createObject', { containerId: containerItem.containerId }) : onPopup('signTokens', 'object.PUT')}
+																			onClick={() => onPopup('createObject', { containerId: containerItem.containerId })}
 																			style={{ display: 'flex', margin: '20px auto 0' }}
 																		>
 																			New object
@@ -598,7 +594,7 @@ const Profile = ({
 						))}
 						<Button
 							color="primary"
-							onClick={() => walletData.tokens.container.PUT ? onPopup('createContainer') : onPopup('signTokens', 'container.PUT')}
+							onClick={() => onPopup('createContainer')}
 							style={{ display: 'flex', margin: 'auto' }}
 						>
 							New container
