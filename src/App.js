@@ -567,6 +567,7 @@ export const App = () => {
 											'eacl-public-read-write',
 											'public-append',
 											'eacl-public-append',
+											'0x1C8C8CCC',
 										].map((basicAclExample) => (
 											<Tag
 												key={basicAclExample}
