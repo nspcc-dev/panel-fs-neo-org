@@ -126,27 +126,31 @@ export const App = () => {
 	const onCreateContainer = () => {
 		if (walletData.tokens.container.PUT) {
 			if (containerForm.containerName.length > 0 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0) {
-				onPopup('loading');
-				api('PUT', '/containers?walletConnect=true&name-scope-global=true', {
-					"containerName": containerForm.containerName,
-					"placementPolicy": containerForm.placementPolicy,
-					"basicAcl": containerForm.basicAcl,
-					"attributes": attributes,
-				}, {
-					"Content-Type": "application/json",
-					"X-Bearer-Owner-Id": walletData.account,
-					'X-Bearer-Signature': walletData.tokens.container.PUT.signature,
-					'X-Bearer-Signature-Key': walletData.publicKey,
-					'Authorization': `Bearer ${walletData.tokens.container.PUT.token}`
-				}).then(() => {
-					setLoadContainers(true);
-					setContainerForm({
-						containerName: '',
-						placementPolicy: '',
-						basicAcl: '',
+				if (containerForm.containerName.length >= 3) {
+					onPopup('loading');
+					api('PUT', '/containers?walletConnect=true&name-scope-global=true', {
+						"containerName": containerForm.containerName,
+						"placementPolicy": containerForm.placementPolicy,
+						"basicAcl": containerForm.basicAcl,
+						"attributes": attributes,
+					}, {
+						"Content-Type": "application/json",
+						"X-Bearer-Owner-Id": walletData.account,
+						'X-Bearer-Signature': walletData.tokens.container.PUT.signature,
+						'X-Bearer-Signature-Key': walletData.publicKey,
+						'Authorization': `Bearer ${walletData.tokens.container.PUT.token}`
+					}).then(() => {
+						setLoadContainers(true);
+						setContainerForm({
+							containerName: '',
+							placementPolicy: '',
+							basicAcl: '',
+						});
+						setAttributes([]);
 					});
-					setAttributes([]);
-				});
+				} else {
+					onPopup('failed', 'The name of the container must be more than 2 characters');
+				}
 			} else {
 				onPopup('failed', 'Specify the name, placement policy and basic acl of the container');
 			}
