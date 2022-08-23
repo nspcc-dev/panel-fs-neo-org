@@ -9,7 +9,7 @@ const Tree = ({ children }) => {
 	return <div className="objects_tree">{children}</div>;
 };
 
-const Branch = ({ objectPath, containerItem, containerChildren, walletData, onGetObjectData, containerIndex, onPopup }) => {
+const Branch = ({ objectPath, containerItem, containerChildren, walletData, onGetObjects, containerIndex, onPopup }) => {
 	return (
 		<Tree.Folder name={objectPath}>
 			{Object.keys(containerChildren[objectPath]).length > 1 && Object.keys(containerChildren[objectPath]).map((objectPathNew) => ( objectPathNew !== 'children' && (
@@ -21,7 +21,7 @@ const Branch = ({ objectPath, containerItem, containerChildren, walletData, onGe
 					containerItem={containerItem}
 					containerChildren={containerChildren[objectPath]}
 					containerIndex={containerIndex}
-					onGetObjectData={onGetObjectData}
+					onGetObjects={onGetObjects}
 				/>
 			)))}
 			{containerChildren[objectPath].children && containerChildren[objectPath].children.map((objectItem, objectIndex) => (
@@ -171,11 +171,12 @@ export default function TreeView({
 	walletData,
 	onPopup,
 	containerIndex,
-	onGetObjectData,
+	onGetObjects,
+	objects,
 }) {
 	return (
 		<Tree>
-			{containerItem.objects && Object.keys(containerItem.objects).map((objectPath, index) => (
+			{objects && Object.keys(objects).map((objectPath, index) => (
 				<div key={objectPath}>
 					{objectPath !== 'children' && (
 						<Tree.Branch
@@ -183,12 +184,12 @@ export default function TreeView({
 							walletData={walletData}
 							onPopup={onPopup}
 							containerItem={containerItem}
-							containerChildren={containerItem.objects}
+							containerChildren={objects}
 							containerIndex={containerIndex}
-							onGetObjectData={onGetObjectData}
+							onGetObjects={onGetObjects}
 						/>
 					)}
-					{Object.keys(containerItem.objects).length === (index + 1) && containerItem.objects.children && containerItem.objects.children.map((objectItem, objectIndex) => (
+					{Object.keys(objects).length === (index + 1) && objects.children && objects.children.map((objectItem, objectIndex) => (
 						<Tree.File
 							key={`${objectItem.name}-${objectIndex}`}
 							name={objectItem.name}

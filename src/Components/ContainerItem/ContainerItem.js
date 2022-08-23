@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	Heading,
 	Section,
@@ -9,19 +9,116 @@ import {
 	Notification,
 } from 'react-bulma-components';
 import TreeView from '../TreeView/TreeView';
+import api from '../../api';
+
+function formatForTreeView(objects) {
+	const getTreeView = objectsList => (
+		objectsList.reduce((root, item) => {
+			const parts = item.filePath ? item.filePath.split('/') : [''];
+			const lastPart = parts[parts.length - 1];
+			if (parts.length === 1 && lastPart === '') {
+				let childrenTemp = [];
+				if (root.children) {
+					childrenTemp = root.children;
+				}
+				root = { ...root, children: [...childrenTemp, item] };
+			}
+			parts.filter((n) => n !== '').reduce((acc, part) => {
+				let children = [];
+				if (part === lastPart) {
+					let childrenTemp = [];
+					if (acc[part]) {
+						childrenTemp = acc[part].children;
+					}
+					children = [...childrenTemp, item];
+				} else if (acc[part]) {
+					let childrenTemp = [];
+					childrenTemp = acc[part].children;
+					children = [...childrenTemp];
+				}
+				return (acc[part] && (acc[part] = { ...acc[part], children })) || (acc[part] = { children });
+			}, root);
+			return root;
+		}, Object.create(null))
+	);
+
+	for (let i = 0; i < objects.length; i++) {
+		if (!objects[i].filePath) {
+			objects[i].filePath = '';
+		}
+
+		const path = objects[i].filePath.split('/');
+		if (path[path.length - 1] === '') {
+			objects[i].filePath = '';
+		} else {
+			objects[i].name = path[path.length - 1];
+			objects[i].filePath = path.slice(0, path.length - 1).join('/');
+		}
+
+		if (!objects[i].name) {
+			objects[i].name = objects[i].address.objectId;
+		}
+
+		objects[i].fullName = `${objects[i].filePath ? `${objects[i].filePath.trim()}/` : ''}${objects[i].name.trim()}`;
+	}
+
+	objects.sort((a, b) => {
+		if (a.fullName < b.fullName) {
+			return -1;
+		}
+
+		if (a.fullName > b.fullName) {
+			return 1;
+		}
+
+		return 0;
+	});
+	return getTreeView(objects);
+}
+
+function formatForContainerName(attributes, containerId) {
+	if (attributes.length > 0) {
+		const pos = attributes.map((item) => item.key).indexOf('Name');
+		return attributes[pos].value;
+	}
+	return containerId;
+}
 
 export default function ContainerItem({
 	containerItem,
 	walletData,
 	onPopup,
 	index,
-	onGetObjectData,
 	onAuth,
-	formatForContainerName,
 	onSetEacl,
+	isLoadContainers,
+	setLoadContainers,
 }) {
 	const [activeAttributes, setActiveAttributes] = useState('main');
 	const [isOpen, setIsOpen] = useState(false);
+	const [objects, setObjects] = useState(null);
+
+	useEffect(() => {
+		if (isLoadContainers === containerItem.containerId) {
+			onGetObjects(isLoadContainers);
+			setLoadContainers(false);
+			onPopup();
+		}
+	}, [isLoadContainers]); // eslint-disable-line react-hooks/exhaustive-deps
+
+	const onGetObjects = (containerId) => {
+		api('POST', `/objects/${containerId}/search?walletConnect=true`, {
+			"filters": [],
+		}, {
+			"Content-Type": "application/json",
+			"X-Bearer-Owner-Id": walletData.account,
+			'X-Bearer-Signature': walletData.tokens.object.GET.signature,
+			'X-Bearer-Signature-Key': walletData.publicKey,
+			'Authorization': `Bearer ${walletData.tokens.object.GET.token}`
+		}).then((e) => {
+			setObjects(e.objects ? formatForTreeView(e.objects) : []);
+		});
+	};
 
 	return (
 		<Tile
@@ -46,8 +143,8 @@ export default function ContainerItem({
 						className={isOpen ? 'active' : ''}
 						onClick={() => {
 							setIsOpen(!isOpen);
-							if (walletData.tokens.object.GET && isOpen) {
-								onGetObjectData(containerItem.containerId, index);
+							if (walletData.tokens.object.GET && !isOpen) {
+								onGetObjects(containerItem.containerId);
 							}
 						}}
 					>
@@ -148,6 +245,7 @@ export default function ContainerItem({
 														onPopup={onPopup}
 														containerIndex={index}
 														containerItem={containerItem}
+														objects={objects}
 													/>
 													<Button
 														color="primary"
