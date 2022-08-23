@@ -192,7 +192,7 @@ export const App = () => {
 					'X-Bearer-Signature-Key': walletData.publicKey,
 					'Authorization': `Bearer ${walletData.tokens.object.PUT.token}`
 				}).then(() => {
-					setLoadContainers(true);
+					setLoadContainers(containerId);
 					setAttributes([]);
 				});
 			};
@@ -215,7 +215,7 @@ export const App = () => {
 				'X-Bearer-Signature-Key': walletData.publicKey,
 				'Authorization': `Bearer ${walletData.tokens.object.DELETE.token}`
 			}).then(() => {
-				setLoadContainers(true);
+				setLoadContainers(containerId);
 			});
 		} else {
 			onPopup('signTokens', 'object.DELETE');
