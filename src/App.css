@@ -61,8 +61,38 @@ ul {
     cursor: pointer;
 }
 
+.field.is-grouped>.control {
+    flex-shrink: unset;
+}
+
 .is-primary {
     background-color: #23b87f !important;
+}
+
+.panel-heading {
+    font-weight: 600;
+    font-size: 1em;
+}
+
+.panel-block {
+    text-decoration: none !important;
+    flex-direction: column;
+}
+
+.panel-block-header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    position: relative;
+}
+
+.panel-block-content {
+    margin: 10px 0;
+    cursor: default;
+}
+
+.panel-block-content .field.is-grouped>.control {
+    flex-basis: 33%;
 }
 
 .container_panel {
