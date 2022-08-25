@@ -7,6 +7,9 @@ import {
 	Tile,
 	Box,
 	Notification,
+	Panel,
+	Form,
+	Tag,
 } from 'react-bulma-components';
 import TreeView from '../TreeView/TreeView';
 import api from '../../api';
@@ -90,13 +93,14 @@ export default function ContainerItem({
 	onPopup,
 	index,
 	onAuth,
-	onSetEacl,
 	isLoadContainers,
 	setLoadContainers,
 }) {
 	const [activeAttributes, setActiveAttributes] = useState('main');
 	const [isOpen, setIsOpen] = useState(false);
 	const [objects, setObjects] = useState(null);
+	const [eACLParams, setEACLParams] = useState([]);
+	const [activePanel, setActivePanel] = useState('');
 
 	useEffect(() => {
 		if (isLoadContainers === containerItem.containerId) {
@@ -118,6 +122,25 @@ export default function ContainerItem({
 		}).then((e) => {
 			setObjects(e.objects ? formatForTreeView(e.objects) : []);
 		});
+	};
+
+	const onSetEACL = (containerId) => {
+		if (walletData.tokens.container.SETEACL) {
+			onPopup('loading');
+			api('PUT', `/containers/${containerId}/eacl?walletConnect=true`, {
+				"records": eACLParams.filter((item) => delete item.isOpen),
+			}, {
+				"Content-Type": "application/json",
+				"X-Bearer-Owner-Id": walletData.account,
+				'X-Bearer-Signature': walletData.tokens.container.SETEACL.signature,
+				'X-Bearer-Signature-Key': walletData.publicKey,
+				'Authorization': `Bearer ${walletData.tokens.container.SETEACL.token}`
+			}).then(() => {
+				setLoadContainers(true);
+			});
+		} else {
+			onPopup('signTokens', 'container.SETEACL');
+		}
 	};
 
 	return (
@@ -190,11 +213,277 @@ export default function ContainerItem({
 											<span>{`Basic acl: `}</span>
 											{`0x${containerItem.basicAcl}`}
 										</Heading>
-										<Button
-											color="primary"
-											onClick={() => onSetEacl(containerItem.containerId)}
-											style={{ margin: '10px 0', display: 'block' }}
-										>Set eACL</Button>
+									</Section>
+									<Section>
+										<Heading
+											size={6}
+											weight="bolder"
+											onClick={() => {
+												if (!walletData.tokens.container.SETEACL) {
+													onPopup('signTokens', 'container.SETEACL');
+												} else if (activePanel === 'eACL') {
+													setActivePanel('');
+												} else {
+													setActivePanel('eACL');
+												}
+											}}
+											style={{ cursor: 'pointer' }}
+										>
+											<img
+												src={activePanel === 'eACL' ? './img/chevron_down.svg' : './img/chevron_right.svg'}
+												style={{ marginRight: 10 }}
+												width={12}
+												height={12}
+												alt="chevron"
+											/>
+											eACL
+										</Heading>
+										{activePanel === 'eACL' && (
+											<Box
+												style={{
+													marginTop: 15,
+													padding: '0 0 1.25rem 0',
+													border: '1px solid #dbdbdc',
+													boxShadow: '0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)',
+												}}
+											>
+												{eACLParams.map((eACLItem, index) => (
+													<Panel.Block
+														active
+														renderAs="a"
+														key={index}
+													>
+														<div
+															className="panel-block-header"
+															onClick={() => {
+																const aECLParamsTemp = [...eACLParams];
+																aECLParamsTemp[index].isOpen = !aECLParamsTemp[index].isOpen;
+																setEACLParams(aECLParamsTemp);
+															}}
+														>
+															<Panel.Icon>
+																<img
+																	src={eACLItem.isOpen ? './img/chevron_down.svg' : './img/chevron_right.svg'}
+																	style={{ marginRight: 10 }}
+																	width={12}
+																	height={12}
+																	alt="chevron"
+																/>
+															</Panel.Icon>
+															{`Rule #${index + 1}`}
+															{eACLItem.isOpen && (
+																<Panel.Icon>
+																	<img
+																		src="./img/trashbin.svg"
+																		width={25}
+																		height={25}
+																		alt="delete"
+																		style={{ cursor: 'pointer', position: 'absolute', right: 0, top: 0 }}
+																		onClick={(e) => {
+																			const aECLParamsTemp = [...eACLParams];
+																			aECLParamsTemp.splice(index, 1);
+																			setEACLParams(aECLParamsTemp);
+																			e.stopPropagation();
+																		}}
+																	/>
+																</Panel.Icon>
+															)}
+														</div>
+														{eACLItem.isOpen && (
+															<div className="panel-block-content">
+																<Form.Field kind="group">
+																	<Form.Control>
+																		<Form.Select
+																			value={eACLItem.operation}
+																			onChange={(e) => {
+																				const aECLParamsTemp = [...eACLParams];
+																				aECLParamsTemp[index].operation = e.target.value;
+																				setEACLParams(aECLParamsTemp);
+																			}}
+																		>
+																			<option value="" disabled>Operation</option>
+																			{['PUT', 'GET', 'HEAD', 'DELETE', 'SEARCH', 'GETRANGE', 'GETRANGEHASH'].map((item) => (
+																				<option value={item} key={item}>{item}</option>
+																			))}
+																		</Form.Select>
+																	</Form.Control>
+																	<Form.Control>
+																		<Form.Select
+																			value={eACLItem.action}
+																			onChange={(e) => {
+																				const aECLParamsTemp = [...eACLParams];
+																				aECLParamsTemp[index].action = e.target.value;
+																				setEACLParams(aECLParamsTemp);
+																			}}
+																		>
+																			<option value="" disabled>Action</option>
+																			{['ALLOW', 'DENY'].map((item) => (
+																				<option value={item} key={item}>{item}</option>
+																			))}
+																		</Form.Select>
+																	</Form.Control>
+																	<Form.Control>
+																		<Form.Input
+																			placeholder="Role"
+																			value={eACLItem.targets[0].role}
+																			onChange={(e) => {
+																				const aECLParamsTemp = [...eACLParams];
+																				aECLParamsTemp[index].targets[0].role = e.target.value;
+																				setEACLParams(aECLParamsTemp);
+																			}}
+																		/>
+																		{[
+																			'OTHERS',
+																			'USER',
+																			'KEYS',
+																		].map((eACLTargetExample) => (
+																			<Tag
+																				key={eACLTargetExample}
+																				onClick={() => {
+																					const aECLParamsTemp = [...eACLParams];
+																					console.log(aECLParamsTemp)
+																					aECLParamsTemp[index].targets[0].role = eACLTargetExample;
+																					setEACLParams(aECLParamsTemp);
+																				}}
+																				style={{ margin: '5px 2px 0 0', cursor: 'pointer', border: '1px solid #fff' }}
+																			>{eACLTargetExample}</Tag>
+																		))}
+																	</Form.Control>
+																	<Form.Control>
+																		<Form.Input
+																			placeholder="Keys (key1, key2)"
+																			value={eACLItem.targets[0].keys.toString()}
+																			style={eACLItem.targets[0].role === 'KEYS' ? {} : { pointerEvents: 'none', background: '#f5f5f5' }}
+																			onChange={(e) => {
+																				const aECLParamsTemp = [...eACLParams];
+																				aECLParamsTemp[index].targets[0].keys = e.target.value.split(',');
+																				setEACLParams(aECLParamsTemp);
+																			}}
+																		/>
+																	</Form.Control>
+																</Form.Field>
+																<Heading align="center" weight="normal" size={6} style={{ marginBottom: 10 }}>Filters</Heading>
+																{eACLItem.filters.map((filterItem, filterIndex) => (
+																	<Form.Field className="panel-block-content" kind="group" key={filterIndex}>
+																		<Form.Control>
+																			<Form.Select
+																				value={filterItem.headerType}
+																				onChange={(e) => {
+																					const aECLParamsTemp = [...eACLParams];
+																					aECLParamsTemp[index].filters[filterIndex].headerType = e.target.value;
+																					setEACLParams(aECLParamsTemp);
+																				}}
+																			>
+																				<option value="" disabled>headerType</option>
+																				{['REQUEST', 'OBJECT', 'SERVICE'].map((item) => (
+																					<option value={item} key={item}>{item}</option>
+																				))}
+																			</Form.Select>
+																		</Form.Control>
+																		<Form.Control>
+																			<Form.Select
+																				value={filterItem.matchType}
+																				onChange={(e) => {
+																					const aECLParamsTemp = [...eACLParams];
+																					aECLParamsTemp[index].filters[filterIndex].matchType = e.target.value;
+																					setEACLParams(aECLParamsTemp);
+																				}}
+																			>
+																				<option value="" disabled>matchType</option>
+																				{['STRING_EQUAL', 'STRING_NOT_EQUAL'].map((item) => (
+																					<option value={item} key={item}>{item}</option>
+																				))}
+																			</Form.Select>
+																		</Form.Control>
+																		<Form.Control>
+																			<Form.Input
+																				placeholder="Key"
+																				value={filterItem.key}
+																				onChange={(e) => {
+																					const aECLParamsTemp = [...eACLParams];
+																					aECLParamsTemp[index].filters[filterIndex].key = e.target.value;
+																					setEACLParams(aECLParamsTemp);
+																				}}
+																			/>
+																		</Form.Control>
+																		<Form.Control>
+																			<Form.Input
+																				placeholder="Value"
+																				value={filterItem.value}
+																				onChange={(e) => {
+																					const aECLParamsTemp = [...eACLParams];
+																					aECLParamsTemp[index].filters[filterIndex].value = e.target.value;
+																					setEACLParams(aECLParamsTemp);
+																				}}
+																			/>
+																		</Form.Control>
+																		<img
+																			src="./img/trashbin.svg"
+																			width={25}
+																			height={25}
+																			alt="delete"
+																			style={{ cursor: 'pointer', right: 0, top: 0 }}
+																			onClick={() => {
+																				const aECLParamsTemp = [...eACLParams];
+																				aECLParamsTemp[index].filters.splice(filterIndex, 1);
+																				setEACLParams(aECLParamsTemp);
+																			}}
+																		/>
+																	</Form.Field>
+																))}
+																<Button
+																	outlined
+																	onClick={() => {
+																		let aECLParamsTemp = [...eACLParams];
+																		aECLParamsTemp[index].filters.push({
+																			headerType: "",
+																			matchType: "",
+																			key: "",
+																			value: ""
+																		});
+																		setEACLParams(aECLParamsTemp);
+																	}}
+																	style={{ display: 'flex', margin: 'auto' }}
+																>
+																	Add filter
+																</Button>
+															</div>
+														)}
+													</Panel.Block>
+												))}
+												<Panel.Block>
+													<Button
+														fullwidth
+														outlined
+														onClick={() => {
+															let aECLParamsTemp = [...eACLParams];
+															aECLParamsTemp.push({
+																operation: "",
+																action: "",
+																filters: [],
+																targets: [{
+																	keys: [],
+																	role: '',
+																}],
+															});
+															setEACLParams(aECLParamsTemp);
+														}}
+													>
+														Add rule
+													</Button>
+												</Panel.Block>
+												<Button
+													color="primary"
+													onClick={() => onSetEACL(containerItem.containerId)}
+													style={{
+														display: 'flex',
+														margin: '20px auto 0',
+													}}
+												>
+													Update
+												</Button>
+											</Box>
+										)}
 									</Section>
 									<Section>
 										<Heading size={5} weight="bolder">Attributes</Heading>

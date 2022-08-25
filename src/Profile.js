@@ -76,38 +76,6 @@ const Profile = ({
 		});
 	};
 
-	const onSetEacl = (containerId) => {
-		if (walletData.tokens.container.SETEACL) {
-			onPopup('loading');
-			api('PUT', `/containers/${containerId}/eacl?walletConnect=true`, {
-				"records": [
-					{
-						"operation": "GET",
-						"action": "ALLOW",
-						"filters": [],
-						"targets": [
-							{
-								"role": "OTHERS",
-								"keys": []
-							}
-						]
-					}
-				]
-			}, {
-				"Content-Type": "application/json",
-				"X-Bearer-Owner-Id": walletData.account,
-				'X-Bearer-Signature': walletData.tokens.container.SETEACL.signature,
-				'X-Bearer-Signature-Key': walletData.publicKey,
-				'Authorization': `Bearer ${walletData.tokens.container.SETEACL.token}`
-			}).then(() => {
-				onGetContainers();
-				onPopup(false);
-			});
-		} else {
-			onPopup('signTokens', 'container.SETEACL');
-		}
-	};
-
 	const onDeposit = async () => {
 		if (depositQuantity >= 0.00000001) {
 			onPopup('approveRequest');
@@ -340,7 +308,6 @@ const Profile = ({
 								index={index}
 								containerItem={containerItem}
 								onAuth={onAuth}
-								onSetEacl={onSetEacl}
 								isLoadContainers={isLoadContainers}
 								setLoadContainers={setLoadContainers}
 							/>
