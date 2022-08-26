@@ -344,43 +344,19 @@ export default function ContainerItem({
 																		</Form.Select>
 																	</Form.Control>
 																	<Form.Control>
-																		<Form.Input
-																			placeholder="Role"
+																		<Form.Select
 																			value={eACLItem.targets[0].role}
 																			onChange={(e) => {
 																				const aECLParamsTemp = [...eACLParams];
 																				aECLParamsTemp[index].targets[0].role = e.target.value;
 																				setEACLParams(aECLParamsTemp);
 																			}}
-																		/>
-																		{[
-																			'OTHERS',
-																			'USER',
-																			'KEYS',
-																		].map((eACLTargetExample) => (
-																			<Tag
-																				key={eACLTargetExample}
-																				onClick={() => {
-																					const aECLParamsTemp = [...eACLParams];
-																					console.log(aECLParamsTemp)
-																					aECLParamsTemp[index].targets[0].role = eACLTargetExample;
-																					setEACLParams(aECLParamsTemp);
-																				}}
-																				style={{ margin: '5px 2px 0 0', cursor: 'pointer', border: '1px solid #fff' }}
-																			>{eACLTargetExample}</Tag>
-																		))}
-																	</Form.Control>
-																	<Form.Control>
-																		<Form.Input
-																			placeholder="Keys (key1, key2)"
-																			value={eACLItem.targets[0].keys.toString()}
-																			style={eACLItem.targets[0].role === 'KEYS' ? {} : { pointerEvents: 'none', background: '#f5f5f5' }}
-																			onChange={(e) => {
-																				const aECLParamsTemp = [...eACLParams];
-																				aECLParamsTemp[index].targets[0].keys = e.target.value.split(',');
-																				setEACLParams(aECLParamsTemp);
-																			}}
-																		/>
+																		>
+																			<option value="" disabled>Action</option>
+																			{['USER', 'SYSTEM', 'OTHERS'].map((item) => (
+																				<option value={item} key={item}>{item}</option>
+																			))}
+																		</Form.Select>
 																	</Form.Control>
 																</Form.Field>
 																<Heading align="center" weight="normal" size={6} style={{ marginBottom: 10 }}>Filters</Heading>
