@@ -352,7 +352,7 @@ export default function ContainerItem({
 																				setEACLParams(aECLParamsTemp);
 																			}}
 																		>
-																			<option value="" disabled>Action</option>
+																			<option value="" disabled>Role</option>
 																			{['USER', 'SYSTEM', 'OTHERS'].map((item) => (
 																				<option value={item} key={item}>{item}</option>
 																			))}
