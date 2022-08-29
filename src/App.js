@@ -564,11 +564,8 @@ export const App = () => {
 										<Form.Input
 											type="text"
 											value={containerForm.containerName}
+											className={isSending && containerForm.containerName.length < 3 ? 'is-error' : ""}
 											onChange={(e) => setContainerForm({ ...containerForm , containerName: e.target.value })}
-											style={isSending === true && containerForm.containerName.length < 3 ? {
-												borderColor: '#ff405b',
-												color: '#ff405b',
-											} : {}}
 										/>
 									</Form.Control>
 								</Form.Field>
@@ -578,11 +575,8 @@ export const App = () => {
 										<Form.Input
 											type="text"
 											value={containerForm.placementPolicy}
+											className={isSending && containerForm.placementPolicy === '' ? 'is-error' : ""}
 											onChange={(e) => setContainerForm({ ...containerForm , placementPolicy: e.target.value })}
-											style={isSending === true && containerForm.placementPolicy === '' ? {
-												borderColor: '#ff405b',
-												color: '#ff405b',
-											} : {}}
 										/>
 										{[
 											'REP 2 IN X CBF 3 SELECT 2 FROM * AS X',
@@ -602,11 +596,8 @@ export const App = () => {
 										<Form.Input
 											type="text"
 											value={containerForm.basicAcl}
+											className={isSending && containerForm.basicAcl === '' ? 'is-error' : ""}
 											onChange={(e) => setContainerForm({ ...containerForm , basicAcl: e.target.value })}
-											style={isSending === true && containerForm.basicAcl === '' ? {
-												borderColor: '#ff405b',
-												color: '#ff405b',
-											} : {}}
 										/>
 										{[
 											'private',
@@ -827,10 +818,7 @@ export const App = () => {
 										) : (
 											<label
 												htmlFor="upload"
-												style={isSending === true && objectForm.name === '' ? {
-													borderColor: '#ff405b',
-													color: '#ff405b',
-												} : {}}
+												className={isSending && objectForm.name === '' ? 'is-error' : ""}
 											>{objectForm.name ? objectForm.name : 'Upload object'}</label>
 										)}
 										<input
