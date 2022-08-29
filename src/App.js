@@ -27,6 +27,11 @@ export const App = () => {
 	const walletConnectCtx = useWalletConnect();
 	const [attributes, setAttributes] = useState([]);
 	const [isLoadContainers, setLoadContainers] = useState(false);
+	const [objectForm, setObjectForm] = useState({
+		name: '',
+		base64file: '',
+		loading: false,
+	});
 	const [containerForm, setContainerForm] = useState({
 		containerName: '',
 		placementPolicy: '',
@@ -176,33 +181,56 @@ export const App = () => {
 		}
 	};
 
-	const onCreateObject = (e, containerId) => {
-		if (walletData.tokens.object.PUT) {
-			onPopup('loading');
-			const file = e.target.files;
+	const onHandleObject = (e) => {
+		setObjectForm({
+			name: '',
+			base64file: '',
+			loading: true,
+		});
+		const file = e.target.files;
+			if (file.length > 0) {
 			const reader = new FileReader();
 			reader.readAsDataURL(file[0]);
 			reader.onload = () => {
 				const base64file = reader.result;
-				api('PUT', '/objects?walletConnect=true', {
-					"containerId": containerId,
-					"fileName": file[0].name,
-					"payload": base64file.split('base64,')[1],
-					"attributes": attributes,
-				}, {
-					"Content-Type": "application/json",
-					"X-Bearer-Owner-Id": walletData.account,
-					'X-Bearer-Signature': walletData.tokens.object.PUT.signature,
-					'X-Bearer-Signature-Key': walletData.publicKey,
-					'Authorization': `Bearer ${walletData.tokens.object.PUT.token}`
-				}).then(() => {
-					setLoadContainers(containerId);
-					setAttributes([]);
+				setObjectForm({
+					name: file[0].name,
+					base64file,
+					loading: false,
 				});
 			};
 			reader.onerror = (error) => {
 				onPopup('failed', error);
+				document.getElementById('upload').value = '';
 			};
+		} else {
+			setObjectForm({
+				name: '',
+				base64file: '',
+				loading: false,
+			});
+		}
+	};
+
+	const onCreateObject = (containerId) => {
+		if (walletData.tokens.object.PUT) {
+			onPopup('loading');
+			api('PUT', '/objects?walletConnect=true', {
+				"containerId": containerId,
+				"fileName": objectForm.name,
+				"payload": objectForm.base64file.split('base64,')[1],
+				"attributes": attributes,
+			}, {
+				"Content-Type": "application/json",
+				"X-Bearer-Owner-Id": walletData.account,
+				'X-Bearer-Signature': walletData.tokens.object.PUT.signature,
+				'X-Bearer-Signature-Key': walletData.publicKey,
+				'Authorization': `Bearer ${walletData.tokens.object.PUT.token}`
+			}).then(() => {
+				setLoadContainers(containerId);
+				setAttributes([]);
+				setObjectForm({ name: '', base64file: '' });
+			});
 		} else {
 			onPopup('signTokens', 'object.PUT');
 			document.getElementById('upload').value = '';
@@ -775,6 +803,19 @@ export const App = () => {
 						) : (
 							<>
 								<Form.Field>
+									<div className="input_block" style={{ marginTop: 30 }}>
+										{objectForm.loading ? (
+											<label htmlFor="upload">Loading...</label>
+										) : (
+											<label htmlFor="upload">{objectForm.name ? objectForm.name : 'Upload object'}</label>
+										)}
+										<input
+											id="upload"
+											type="file"
+											name="Upload"
+											onChange={onHandleObject}
+										/>
+									</div>
 									<Form.Label>Attributes</Form.Label>
 									<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
 										{attributes.map((attribute, index) => (
@@ -835,22 +876,13 @@ export const App = () => {
 									</Button>
 								</Form.Field>
 								{attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0) ? (
-									<div className="input_block" style={{ marginTop: 30 }}>
-										<label htmlFor="upload">Upload object</label>
-										<input
-											id="upload"
-											type="file"
-											name="Upload"
-											onClick={(e) => {
-												if (!walletData.tokens.object.PUT) {
-													onPopup('signTokens', 'object.PUT');
-													document.getElementById('upload').value = '';
-													e.preventDefault();
-												}
-											}}
-											onChange={(e) => onCreateObject(e, popup.text.containerId)}
-										/>
-									</div>
+									<Button
+										color="primary"
+										onClick={() => onCreateObject(popup.text.containerId)}
+										style={{ display: 'flex', margin: '30px auto 0' }}
+									>
+										Create
+									</Button>
 								) : (
 									<div
 										style={{
