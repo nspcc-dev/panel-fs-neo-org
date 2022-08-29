@@ -242,6 +242,7 @@ ul {
     border: 1px dashed #363636;
     color: #363636;
     cursor: pointer;
+    min-width: 300px;
 }
 
 .input_block:hover label {
