@@ -27,6 +27,7 @@ export const App = () => {
 	const walletConnectCtx = useWalletConnect();
 	const [attributes, setAttributes] = useState([]);
 	const [isLoadContainers, setLoadContainers] = useState(false);
+	const [isSending, setSending] = useState(false);
 	const [objectForm, setObjectForm] = useState({
 		name: '',
 		base64file: '',
@@ -129,38 +130,37 @@ export const App = () => {
 	};
 
 	const onCreateContainer = () => {
-		if (walletData.tokens.container.PUT) {
-			if (containerForm.containerName.length > 0 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0) {
-				if (containerForm.containerName.length >= 3) {
-					onPopup('loading');
-					api('PUT', '/containers?walletConnect=true&name-scope-global=true', {
-						"containerName": containerForm.containerName,
-						"placementPolicy": containerForm.placementPolicy,
-						"basicAcl": containerForm.basicAcl,
-						"attributes": attributes,
-					}, {
-						"Content-Type": "application/json",
-						"X-Bearer-Owner-Id": walletData.account,
-						'X-Bearer-Signature': walletData.tokens.container.PUT.signature,
-						'X-Bearer-Signature-Key': walletData.publicKey,
-						'Authorization': `Bearer ${walletData.tokens.container.PUT.token}`
-					}).then(() => {
-						setLoadContainers(true);
-						setContainerForm({
-							containerName: '',
-							placementPolicy: '',
-							basicAcl: '',
-						});
-						setAttributes([]);
-					});
+		if (containerForm.containerName.length >= 3 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0) {
+			onPopup('loading');
+			api('PUT', '/containers?walletConnect=true&name-scope-global=true', {
+				"containerName": containerForm.containerName,
+				"placementPolicy": containerForm.placementPolicy,
+				"basicAcl": containerForm.basicAcl,
+				"attributes": attributes,
+			}, {
+				"Content-Type": "application/json",
+				"X-Bearer-Owner-Id": walletData.account,
+				'X-Bearer-Signature': walletData.tokens.container.PUT.signature,
+				'X-Bearer-Signature-Key': walletData.publicKey,
+				'Authorization': `Bearer ${walletData.tokens.container.PUT.token}`
+			}).then((e) => {
+				if (e.message) {
+					onPopup('failed', e.message);
 				} else {
-					onPopup('failed', 'The name of the container must be more than 2 characters');
+					setLoadContainers(true);
+					setContainerForm({
+						containerName: '',
+						placementPolicy: '',
+						basicAcl: '',
+					});
+					setAttributes([]);
 				}
-			} else {
-				onPopup('failed', 'Specify the name, placement policy and basic acl of the container');
-			}
+			});
 		} else {
-			onPopup('signTokens', 'container.PUT');
+			setSending(true);
+			setTimeout(() => {
+				setSending(false);
+			}, 700);
 		}
 	};
 
@@ -213,7 +213,7 @@ export const App = () => {
 	};
 
 	const onCreateObject = (containerId) => {
-		if (walletData.tokens.object.PUT) {
+		if (objectForm.name !== '') {
 			onPopup('loading');
 			api('PUT', '/objects?walletConnect=true', {
 				"containerId": containerId,
@@ -226,14 +226,20 @@ export const App = () => {
 				'X-Bearer-Signature': walletData.tokens.object.PUT.signature,
 				'X-Bearer-Signature-Key': walletData.publicKey,
 				'Authorization': `Bearer ${walletData.tokens.object.PUT.token}`
-			}).then(() => {
-				setLoadContainers(containerId);
-				setAttributes([]);
-				setObjectForm({ name: '', base64file: '' });
+			}).then((e) => {
+				if (e.message) {
+					onPopup('failed', e.message);
+				} else {
+					setLoadContainers(containerId);
+					setAttributes([]);
+					setObjectForm({ name: '', base64file: '' });
+				}
 			});
 		} else {
-			onPopup('signTokens', 'object.PUT');
-			document.getElementById('upload').value = '';
+			setSending(true);
+			setTimeout(() => {
+				setSending(false);
+			}, 700);
 		}
 	};
 
@@ -559,6 +565,10 @@ export const App = () => {
 											type="text"
 											value={containerForm.containerName}
 											onChange={(e) => setContainerForm({ ...containerForm , containerName: e.target.value })}
+											style={isSending === true && containerForm.containerName.length < 3 ? {
+												borderColor: '#ff405b',
+												color: '#ff405b',
+											} : {}}
 										/>
 									</Form.Control>
 								</Form.Field>
@@ -569,6 +579,10 @@ export const App = () => {
 											type="text"
 											value={containerForm.placementPolicy}
 											onChange={(e) => setContainerForm({ ...containerForm , placementPolicy: e.target.value })}
+											style={isSending === true && containerForm.placementPolicy === '' ? {
+												borderColor: '#ff405b',
+												color: '#ff405b',
+											} : {}}
 										/>
 										{[
 											'REP 2 IN X CBF 3 SELECT 2 FROM * AS X',
@@ -589,6 +603,10 @@ export const App = () => {
 											type="text"
 											value={containerForm.basicAcl}
 											onChange={(e) => setContainerForm({ ...containerForm , basicAcl: e.target.value })}
+											style={isSending === true && containerForm.basicAcl === '' ? {
+												borderColor: '#ff405b',
+												color: '#ff405b',
+											} : {}}
 										/>
 										{[
 											'private',
@@ -807,7 +825,13 @@ export const App = () => {
 										{objectForm.loading ? (
 											<label htmlFor="upload">Loading...</label>
 										) : (
-											<label htmlFor="upload">{objectForm.name ? objectForm.name : 'Upload object'}</label>
+											<label
+												htmlFor="upload"
+												style={isSending === true && objectForm.name === '' ? {
+													borderColor: '#ff405b',
+													color: '#ff405b',
+												} : {}}
+											>{objectForm.name ? objectForm.name : 'Upload object'}</label>
 										)}
 										<input
 											id="upload"
@@ -816,6 +840,8 @@ export const App = () => {
 											onChange={onHandleObject}
 										/>
 									</div>
+								</Form.Field>
+								<Form.Field>
 									<Form.Label>Attributes</Form.Label>
 									<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
 										{attributes.map((attribute, index) => (
@@ -884,14 +910,27 @@ export const App = () => {
 										Create
 									</Button>
 								) : (
-									<div
-										style={{
-											textAlign: 'center',
-											marginTop: 30,
-											fontSize: 14,
-											color: '#ff405b',
-										}}
-									>Attributes should not be empty</div>
+									<>
+										<Button
+											color="primary"
+											style={{
+												display: 'flex',
+												margin: '30px auto 0',
+												opacity: 0.6,
+												pointerEvents: 'none',
+											}}
+										>
+											Create
+										</Button>
+										<div
+											style={{
+												textAlign: 'center',
+												marginTop: 20,
+												fontSize: 14,
+												color: '#ff405b',
+											}}
+										>Attributes should not be empty</div>
+									</>
 								)}
 							</>
 						)}
