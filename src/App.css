@@ -28,6 +28,13 @@ select,
     width: 100%;
 }
 
+.is-error select,
+input.is-error,
+label.is-error {
+    border-color: #ff405b !important;
+    color: #ff405b !important;
+}
+
 .title.is-6 {
     line-height: 1.3rem;
 }

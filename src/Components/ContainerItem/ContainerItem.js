@@ -98,6 +98,7 @@ export default function ContainerItem({
 	const [objects, setObjects] = useState(null);
 	const [eACLParams, setEACLParams] = useState([]);
 	const [activePanel, setActivePanel] = useState('');
+	const [isSending, setSending] = useState(false);
 
 	useEffect(() => {
 		if (isLoadContainers === containerItem.containerId) {
@@ -142,7 +143,7 @@ export default function ContainerItem({
 	};
 
 	const onSetEACL = (containerId) => {
-		if (walletData.tokens.container.SETEACL) {
+		if (eACLParams.every((eACLItem) => eACLItem.operation !== '' && eACLItem.action !== '' && eACLItem.targets[0].role !== '' && eACLItem.filters.every((filterItem) => filterItem.headerType !== '' && filterItem.matchType !== '' && filterItem.key !== '' && filterItem.value !== ''))) {
 			onPopup('loading');
 			api('PUT', `/containers/${containerId}/eacl?walletConnect=true`, {
 				"records": eACLParams.filter((item) => delete item.isOpen),
@@ -156,7 +157,10 @@ export default function ContainerItem({
 				setLoadContainers(true);
 			});
 		} else {
-			onPopup('signTokens', 'container.SETEACL');
+			setSending(true);
+			setTimeout(() => {
+				setSending(false);
+			}, 700);
 		}
 	};
 
@@ -316,6 +320,7 @@ export default function ContainerItem({
 																	<Form.Control>
 																		<Form.Select
 																			value={eACLItem.operation}
+																			className={isSending && eACLItem.operation === '' ? 'is-error' : ""}
 																			onChange={(e) => {
 																				const aECLParamsTemp = [...eACLParams];
 																				aECLParamsTemp[index].operation = e.target.value;
@@ -331,6 +336,7 @@ export default function ContainerItem({
 																	<Form.Control>
 																		<Form.Select
 																			value={eACLItem.action}
+																			className={isSending && eACLItem.action === '' ? 'is-error' : ""}
 																			onChange={(e) => {
 																				const aECLParamsTemp = [...eACLParams];
 																				aECLParamsTemp[index].action = e.target.value;
@@ -346,6 +352,7 @@ export default function ContainerItem({
 																	<Form.Control>
 																		<Form.Select
 																			value={eACLItem.targets[0].role}
+																			className={isSending && eACLItem.targets[0].role === '' ? 'is-error' : ""}
 																			onChange={(e) => {
 																				const aECLParamsTemp = [...eACLParams];
 																				aECLParamsTemp[index].targets[0].role = e.target.value;
@@ -365,6 +372,7 @@ export default function ContainerItem({
 																		<Form.Control>
 																			<Form.Select
 																				value={filterItem.headerType}
+																				className={isSending && filterItem.headerType === '' ? 'is-error' : ""}
 																				onChange={(e) => {
 																					const aECLParamsTemp = [...eACLParams];
 																					aECLParamsTemp[index].filters[filterIndex].headerType = e.target.value;
@@ -380,6 +388,7 @@ export default function ContainerItem({
 																		<Form.Control>
 																			<Form.Select
 																				value={filterItem.matchType}
+																				className={isSending && filterItem.matchType === '' ? 'is-error' : ""}
 																				onChange={(e) => {
 																					const aECLParamsTemp = [...eACLParams];
 																					aECLParamsTemp[index].filters[filterIndex].matchType = e.target.value;
@@ -396,6 +405,7 @@ export default function ContainerItem({
 																			<Form.Input
 																				placeholder="Key"
 																				value={filterItem.key}
+																				className={isSending && filterItem.key === '' ? 'is-error' : ""}
 																				onChange={(e) => {
 																					const aECLParamsTemp = [...eACLParams];
 																					aECLParamsTemp[index].filters[filterIndex].key = e.target.value;
@@ -407,6 +417,7 @@ export default function ContainerItem({
 																			<Form.Input
 																				placeholder="Value"
 																				value={filterItem.value}
+																				className={isSending && filterItem.value === '' ? 'is-error' : ""}
 																				onChange={(e) => {
 																					const aECLParamsTemp = [...eACLParams];
 																					aECLParamsTemp[index].filters[filterIndex].value = e.target.value;
