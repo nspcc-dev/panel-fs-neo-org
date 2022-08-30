@@ -64,7 +64,16 @@ const Folder = ({ name, children }) => {
 	);
 };
 
-const File = ({ name, containerItem, objectItem, walletData, onPopup }) => {
+const File = ({
+		name,
+		containerItem,
+		objectItem,
+		walletData,
+		onPopup,
+		BearerOwnerIdHeader,
+		BearerSignatureHeader,
+		BearerSignatureKeyHeader,
+	}) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [objectDate, setObjectDate] = useState(null);
 
@@ -73,10 +82,10 @@ const File = ({ name, containerItem, objectItem, walletData, onPopup }) => {
 		if (!isOpen) {
 			api('GET', `/objects/${containerItem.containerId}/${objectItem.address.objectId}?walletConnect=true`, {}, {
 				"Content-Type": "application/json",
-				"X-Bearer-Owner-Id": walletData.account,
-				'X-Bearer-Signature': walletData.tokens.object.GET.signature,
-				'X-Bearer-Signature-Key': walletData.publicKey,
-				'Authorization': `Bearer ${walletData.tokens.object.GET.token}`
+				"Authorization": `Bearer ${walletData.tokens.object.GET.token}`,
+				[BearerOwnerIdHeader]: walletData.account,
+				[BearerSignatureHeader]: walletData.tokens.object.GET.signature,
+				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then((e) => {
 				setObjectDate(e);
 			});
@@ -173,6 +182,9 @@ export default function TreeView({
 	containerIndex,
 	onGetObjects,
 	objects,
+	BearerOwnerIdHeader,
+	BearerSignatureHeader,
+	BearerSignatureKeyHeader,
 }) {
 	return (
 		<Tree>
@@ -197,6 +209,9 @@ export default function TreeView({
 							objectItem={objectItem}
 							walletData={walletData}
 							onPopup={onPopup}
+							BearerOwnerIdHeader={BearerOwnerIdHeader}
+							BearerSignatureHeader={BearerSignatureHeader}
+							BearerSignatureKeyHeader={BearerSignatureKeyHeader}
 						/>
 					))}
 				</div>

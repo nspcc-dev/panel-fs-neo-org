@@ -20,6 +20,9 @@ const Profile = ({
 		walletConnectCtx,
 		isLoadContainers,
 		setLoadContainers,
+		BearerOwnerIdHeader,
+		BearerSignatureHeader,
+		BearerSignatureKeyHeader,
 		onAuth,
 	}) => {
 	const [isLoading, setIsLoading] = useState(false);
@@ -310,6 +313,9 @@ const Profile = ({
 								onAuth={onAuth}
 								isLoadContainers={isLoadContainers}
 								setLoadContainers={setLoadContainers}
+								BearerOwnerIdHeader={BearerOwnerIdHeader}
+								BearerSignatureHeader={BearerSignatureHeader}
+								BearerSignatureKeyHeader={BearerSignatureKeyHeader}
 							/>
 						))}
 						<Button

@@ -25,6 +25,11 @@ import './App.css';
 export const App = () => {
 	const location = useLocation();
 	const walletConnectCtx = useWalletConnect();
+
+	const [BearerOwnerIdHeader] = useState("X-Bearer-Owner-Id");
+	const [BearerSignatureHeader] = useState("X-Bearer-Signature");
+	const [BearerSignatureKeyHeader] = useState("X-Bearer-Signature");
+
 	const [attributes, setAttributes] = useState([]);
 	const [isLoadContainers, setLoadContainers] = useState(false);
 	const [isSending, setSending] = useState(false);
@@ -100,7 +105,7 @@ export const App = () => {
 		}
 		const headers = {
 			"Content-Type": "application/json",
-			"X-Bearer-Owner-Id": walletData.account,
+			[BearerOwnerIdHeader]: walletData.account,
 		}
 		api('POST', '/auth', body, headers).then((e) => {
 			onSignMessage(e[0].token, type, operation);
@@ -139,10 +144,10 @@ export const App = () => {
 				"attributes": attributes,
 			}, {
 				"Content-Type": "application/json",
-				"X-Bearer-Owner-Id": walletData.account,
-				'X-Bearer-Signature': walletData.tokens.container.PUT.signature,
-				'X-Bearer-Signature-Key': walletData.publicKey,
-				'Authorization': `Bearer ${walletData.tokens.container.PUT.token}`
+				"Authorization": `Bearer ${walletData.tokens.container.PUT.token}`,
+				[BearerOwnerIdHeader]: walletData.account,
+				[BearerSignatureHeader]: walletData.tokens.container.PUT.signature,
+				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then((e) => {
 				if (e.message) {
 					onPopup('failed', e.message);
@@ -169,10 +174,10 @@ export const App = () => {
 			onPopup('loading');
 			api('DELETE', `/containers/${containerName}?walletConnect=true`, {}, {
 				"Content-Type": "application/json",
-				"X-Bearer-Owner-Id": walletData.account,
-				'X-Bearer-Signature': walletData.tokens.container.DELETE.signature,
-				'X-Bearer-Signature-Key': walletData.publicKey,
-				'Authorization': `Bearer ${walletData.tokens.container.DELETE.token}`
+				"Authorization": `Bearer ${walletData.tokens.container.DELETE.token}`,
+				[BearerOwnerIdHeader]: walletData.account,
+				[BearerSignatureHeader]: walletData.tokens.container.DELETE.signature,
+				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then(() => {
 				setLoadContainers(true);
 			});
@@ -222,10 +227,10 @@ export const App = () => {
 				"attributes": attributes,
 			}, {
 				"Content-Type": "application/json",
-				"X-Bearer-Owner-Id": walletData.account,
-				'X-Bearer-Signature': walletData.tokens.object.PUT.signature,
-				'X-Bearer-Signature-Key': walletData.publicKey,
-				'Authorization': `Bearer ${walletData.tokens.object.PUT.token}`
+				"Authorization": `Bearer ${walletData.tokens.object.PUT.token}`,
+				[BearerOwnerIdHeader]: walletData.account,
+				[BearerSignatureHeader]: walletData.tokens.object.PUT.signature,
+				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then((e) => {
 				if (e.message) {
 					onPopup('failed', e.message);
@@ -248,10 +253,10 @@ export const App = () => {
 			onPopup('loading');
 			api('DELETE', `/objects/${containerId}/${objectId}?walletConnect=true`, {}, {
 				"Content-Type": "application/json",
-				"X-Bearer-Owner-Id": walletData.account,
-				'X-Bearer-Signature': walletData.tokens.object.DELETE.signature,
-				'X-Bearer-Signature-Key': walletData.publicKey,
-				'Authorization': `Bearer ${walletData.tokens.object.DELETE.token}`
+				"Authorization": `Bearer ${walletData.tokens.object.DELETE.token}`,
+				[BearerOwnerIdHeader]: walletData.account,
+				[BearerSignatureHeader]: walletData.tokens.object.DELETE.signature,
+				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then(() => {
 				setLoadContainers(containerId);
 			});
@@ -1072,6 +1077,9 @@ export const App = () => {
 						isLoadContainers={isLoadContainers}
 						setLoadContainers={setLoadContainers}
 						onDisconnectWallet={onDisconnectWallet}
+						BearerOwnerIdHeader={BearerOwnerIdHeader}
+						BearerSignatureHeader={BearerSignatureHeader}
+						BearerSignatureKeyHeader={BearerSignatureKeyHeader}
 						onPopup={onPopup}
 					/>}
 				/>
