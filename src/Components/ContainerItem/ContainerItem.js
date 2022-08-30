@@ -234,7 +234,7 @@ export default function ContainerItem({
 										{containerItem.attributes.map((attribute) => ( attribute.key === 'Timestamp' && (
 											<Heading size={6} weight="light" key={attribute.key}>
 												<span>{`${attribute.key === 'Timestamp' ? 'Creation' : attribute.key}: `}</span>
-												{attribute.key === 'Timestamp' ? `${new Date(attribute.value * 1000).toLocaleTimeString()} ${new Date(attribute.value * 1000).toLocaleDateString()}` : attribute.value}
+												{attribute.key === 'Timestamp' ? `${new Date(attribute.value * 1000).toISOString()}` : attribute.value}
 											</Heading>
 										)))}
 									</Section>
