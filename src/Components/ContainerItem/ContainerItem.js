@@ -93,6 +93,9 @@ export default function ContainerItem({
 	index,
 	isLoadContainers,
 	setLoadContainers,
+	BearerOwnerIdHeader,
+	BearerSignatureHeader,
+	BearerSignatureKeyHeader,
 }) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [objects, setObjects] = useState(null);
@@ -113,10 +116,10 @@ export default function ContainerItem({
 			"filters": [],
 		}, {
 			"Content-Type": "application/json",
-			"X-Bearer-Owner-Id": walletData.account,
-			'X-Bearer-Signature': walletData.tokens.object.GET.signature,
-			'X-Bearer-Signature-Key': walletData.publicKey,
-			'Authorization': `Bearer ${walletData.tokens.object.GET.token}`
+			"Authorization": `Bearer ${walletData.tokens.object.GET.token}`,
+			[BearerOwnerIdHeader]: walletData.account,
+			[BearerSignatureHeader]: walletData.tokens.object.GET.signature,
+			[BearerSignatureKeyHeader]: walletData.publicKey,
 		}).then((e) => {
 			setObjects(e.objects ? formatForTreeView(e.objects) : []);
 		});
@@ -127,10 +130,10 @@ export default function ContainerItem({
 			onPopup('loading');
 			api('GET', `/containers/${containerId}/eacl?walletConnect=true`, {}, {
 				"Content-Type": "application/json",
-				"X-Bearer-Owner-Id": walletData.account,
-				'X-Bearer-Signature': walletData.tokens.container.SETEACL.signature,
-				'X-Bearer-Signature-Key': walletData.publicKey,
-				'Authorization': `Bearer ${walletData.tokens.container.SETEACL.token}`
+				"Authorization": `Bearer ${walletData.tokens.container.SETEACL.token}`,
+				[BearerOwnerIdHeader]: walletData.account,
+				[BearerSignatureHeader]: walletData.tokens.container.SETEACL.signature,
+				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then((e) => {
 				onPopup();
 				if (e.records) {
@@ -149,10 +152,10 @@ export default function ContainerItem({
 				"records": eACLParams.filter((item) => delete item.isOpen),
 			}, {
 				"Content-Type": "application/json",
-				"X-Bearer-Owner-Id": walletData.account,
-				'X-Bearer-Signature': walletData.tokens.container.SETEACL.signature,
-				'X-Bearer-Signature-Key': walletData.publicKey,
-				'Authorization': `Bearer ${walletData.tokens.container.SETEACL.token}`
+				"Authorization": `Bearer ${walletData.tokens.container.SETEACL.token}`,
+				[BearerOwnerIdHeader]: walletData.account,
+				[BearerSignatureHeader]: walletData.tokens.container.SETEACL.signature,
+				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then(() => {
 				setLoadContainers(true);
 			});
@@ -556,6 +559,9 @@ export default function ContainerItem({
 													containerIndex={index}
 													containerItem={containerItem}
 													objects={objects}
+													BearerOwnerIdHeader={BearerOwnerIdHeader}
+													BearerSignatureHeader={BearerSignatureHeader}
+													BearerSignatureKeyHeader={BearerSignatureKeyHeader}
 												/>
 												<Button
 													color="primary"
