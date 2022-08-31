@@ -149,6 +149,7 @@ export default function ContainerItem({
 
 	const onSetEACL = (containerId) => {
 		if (eACLParams.every((eACLItem) => eACLItem.operation !== '' && eACLItem.action !== '' && eACLItem.targets[0].role !== '' && eACLItem.filters.every((filterItem) => filterItem.headerType !== '' && filterItem.matchType !== '' && filterItem.key !== '' && filterItem.value !== ''))) {
+			setSending(false);
 			onPopup('loading');
 			api('PUT', `/containers/${containerId}/eacl?walletConnect=true`, {
 				"records": eACLParams.filter((item) => delete item.isOpen),
@@ -163,9 +164,6 @@ export default function ContainerItem({
 			});
 		} else {
 			setSending(true);
-			setTimeout(() => {
-				setSending(false);
-			}, 700);
 		}
 	};
 
@@ -252,6 +250,7 @@ export default function ContainerItem({
 													onPopup('signTokens', 'container.SETEACL');
 												} else if (activePanel === 'eACL') {
 													setActivePanel('');
+													setSending(false);
 												} else {
 													onGetEACL(containerItem.containerId);
 													setActivePanel('eACL');
@@ -486,6 +485,11 @@ export default function ContainerItem({
 														Add rule
 													</Button>
 												</Panel.Block>
+												{isSending && !(eACLParams.every((eACLItem) => eACLItem.operation !== '' && eACLItem.action !== '' && eACLItem.targets[0].role !== '' && eACLItem.filters.every((filterItem) => filterItem.headerType !== '' && filterItem.matchType !== '' && filterItem.key !== '' && filterItem.value !== ''))) && (
+													<Notification className="error_message">
+														Please fill in all required fields
+													</Notification>
+												)}
 												<Button
 													color="primary"
 													onClick={() => onSetEACL(containerItem.containerId)}
