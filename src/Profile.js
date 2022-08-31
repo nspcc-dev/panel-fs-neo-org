@@ -20,6 +20,8 @@ const Profile = ({
 		walletConnectCtx,
 		isLoadContainers,
 		setLoadContainers,
+		ContentTypeHeader,
+		AuthorizationHeader,
 		BearerOwnerIdHeader,
 		BearerSignatureHeader,
 		BearerSignatureKeyHeader,
@@ -313,6 +315,8 @@ const Profile = ({
 								onAuth={onAuth}
 								isLoadContainers={isLoadContainers}
 								setLoadContainers={setLoadContainers}
+								ContentTypeHeader={ContentTypeHeader}
+								AuthorizationHeader={AuthorizationHeader}
 								BearerOwnerIdHeader={BearerOwnerIdHeader}
 								BearerSignatureHeader={BearerSignatureHeader}
 								BearerSignatureKeyHeader={BearerSignatureKeyHeader}
