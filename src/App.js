@@ -26,9 +26,11 @@ export const App = () => {
 	const location = useLocation();
 	const walletConnectCtx = useWalletConnect();
 
+	const [ContentTypeHeader] = useState("application/json");
+	const [AuthorizationHeader] = useState("Authorization");
 	const [BearerOwnerIdHeader] = useState("X-Bearer-Owner-Id");
 	const [BearerSignatureHeader] = useState("X-Bearer-Signature");
-	const [BearerSignatureKeyHeader] = useState("X-Bearer-Signature");
+	const [BearerSignatureKeyHeader] = useState("X-Bearer-Signature-Key");
 
 	const [attributes, setAttributes] = useState([]);
 	const [isLoadContainers, setLoadContainers] = useState(false);
@@ -104,7 +106,7 @@ export const App = () => {
 			}]
 		}
 		const headers = {
-			"Content-Type": "application/json",
+			[ContentTypeHeader]: "application/json",
 			[BearerOwnerIdHeader]: walletData.account,
 		}
 		api('POST', '/auth', body, headers).then((e) => {
@@ -143,8 +145,8 @@ export const App = () => {
 				"basicAcl": containerForm.basicAcl,
 				"attributes": attributes,
 			}, {
-				"Content-Type": "application/json",
-				"Authorization": `Bearer ${walletData.tokens.container.PUT.token}`,
+				[ContentTypeHeader]: "application/json",
+				[AuthorizationHeader]: `Bearer ${walletData.tokens.container.PUT.token}`,
 				[BearerOwnerIdHeader]: walletData.account,
 				[BearerSignatureHeader]: walletData.tokens.container.PUT.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
@@ -173,8 +175,8 @@ export const App = () => {
 		if (walletData.tokens.container.DELETE) {
 			onPopup('loading');
 			api('DELETE', `/containers/${containerName}?walletConnect=true`, {}, {
-				"Content-Type": "application/json",
-				"Authorization": `Bearer ${walletData.tokens.container.DELETE.token}`,
+				[ContentTypeHeader]: "application/json",
+				[AuthorizationHeader]: `Bearer ${walletData.tokens.container.DELETE.token}`,
 				[BearerOwnerIdHeader]: walletData.account,
 				[BearerSignatureHeader]: walletData.tokens.container.DELETE.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
@@ -226,8 +228,8 @@ export const App = () => {
 				"payload": objectForm.base64file.split('base64,')[1],
 				"attributes": attributes,
 			}, {
-				"Content-Type": "application/json",
-				"Authorization": `Bearer ${walletData.tokens.object.PUT.token}`,
+				[ContentTypeHeader]: "application/json",
+				[AuthorizationHeader]: `Bearer ${walletData.tokens.object.PUT.token}`,
 				[BearerOwnerIdHeader]: walletData.account,
 				[BearerSignatureHeader]: walletData.tokens.object.PUT.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
@@ -252,8 +254,8 @@ export const App = () => {
 		if (walletData.tokens.object.DELETE) {
 			onPopup('loading');
 			api('DELETE', `/objects/${containerId}/${objectId}?walletConnect=true`, {}, {
-				"Content-Type": "application/json",
-				"Authorization": `Bearer ${walletData.tokens.object.DELETE.token}`,
+				[ContentTypeHeader]: "application/json",
+				[AuthorizationHeader]: `Bearer ${walletData.tokens.object.DELETE.token}`,
 				[BearerOwnerIdHeader]: walletData.account,
 				[BearerSignatureHeader]: walletData.tokens.object.DELETE.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
@@ -1077,6 +1079,8 @@ export const App = () => {
 						isLoadContainers={isLoadContainers}
 						setLoadContainers={setLoadContainers}
 						onDisconnectWallet={onDisconnectWallet}
+						ContentTypeHeader={ContentTypeHeader}
+						AuthorizationHeader={AuthorizationHeader}
 						BearerOwnerIdHeader={BearerOwnerIdHeader}
 						BearerSignatureHeader={BearerSignatureHeader}
 						BearerSignatureKeyHeader={BearerSignatureKeyHeader}

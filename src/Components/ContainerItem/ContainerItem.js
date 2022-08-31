@@ -93,6 +93,8 @@ export default function ContainerItem({
 	index,
 	isLoadContainers,
 	setLoadContainers,
+	ContentTypeHeader,
+	AuthorizationHeader,
 	BearerOwnerIdHeader,
 	BearerSignatureHeader,
 	BearerSignatureKeyHeader,
@@ -115,8 +117,8 @@ export default function ContainerItem({
 		api('POST', `/objects/${containerId}/search?walletConnect=true`, {
 			"filters": [],
 		}, {
-			"Content-Type": "application/json",
-			"Authorization": `Bearer ${walletData.tokens.object.GET.token}`,
+			[ContentTypeHeader]: "application/json",
+			[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.token}`,
 			[BearerOwnerIdHeader]: walletData.account,
 			[BearerSignatureHeader]: walletData.tokens.object.GET.signature,
 			[BearerSignatureKeyHeader]: walletData.publicKey,
@@ -129,8 +131,8 @@ export default function ContainerItem({
 		if (walletData.tokens.container.SETEACL) {
 			onPopup('loading');
 			api('GET', `/containers/${containerId}/eacl?walletConnect=true`, {}, {
-				"Content-Type": "application/json",
-				"Authorization": `Bearer ${walletData.tokens.container.SETEACL.token}`,
+				[ContentTypeHeader]: "application/json",
+				[AuthorizationHeader]: `Bearer ${walletData.tokens.container.SETEACL.token}`,
 				[BearerOwnerIdHeader]: walletData.account,
 				[BearerSignatureHeader]: walletData.tokens.container.SETEACL.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
@@ -151,8 +153,8 @@ export default function ContainerItem({
 			api('PUT', `/containers/${containerId}/eacl?walletConnect=true`, {
 				"records": eACLParams.filter((item) => delete item.isOpen),
 			}, {
-				"Content-Type": "application/json",
-				"Authorization": `Bearer ${walletData.tokens.container.SETEACL.token}`,
+				[ContentTypeHeader]: "application/json",
+				[AuthorizationHeader]: `Bearer ${walletData.tokens.container.SETEACL.token}`,
 				[BearerOwnerIdHeader]: walletData.account,
 				[BearerSignatureHeader]: walletData.tokens.container.SETEACL.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
@@ -559,6 +561,8 @@ export default function ContainerItem({
 													containerIndex={index}
 													containerItem={containerItem}
 													objects={objects}
+													ContentTypeHeader={ContentTypeHeader}
+													AuthorizationHeader={AuthorizationHeader}
 													BearerOwnerIdHeader={BearerOwnerIdHeader}
 													BearerSignatureHeader={BearerSignatureHeader}
 													BearerSignatureKeyHeader={BearerSignatureKeyHeader}

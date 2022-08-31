@@ -70,6 +70,8 @@ const File = ({
 		objectItem,
 		walletData,
 		onPopup,
+		ContentTypeHeader,
+		AuthorizationHeader,
 		BearerOwnerIdHeader,
 		BearerSignatureHeader,
 		BearerSignatureKeyHeader,
@@ -81,8 +83,8 @@ const File = ({
 		setIsOpen(!isOpen);
 		if (!isOpen) {
 			api('GET', `/objects/${containerItem.containerId}/${objectItem.address.objectId}?walletConnect=true`, {}, {
-				"Content-Type": "application/json",
-				"Authorization": `Bearer ${walletData.tokens.object.GET.token}`,
+				[ContentTypeHeader]: "application/json",
+				[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.token}`,
 				[BearerOwnerIdHeader]: walletData.account,
 				[BearerSignatureHeader]: walletData.tokens.object.GET.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
@@ -182,6 +184,8 @@ export default function TreeView({
 	containerIndex,
 	onGetObjects,
 	objects,
+	ContentTypeHeader,
+	AuthorizationHeader,
 	BearerOwnerIdHeader,
 	BearerSignatureHeader,
 	BearerSignatureKeyHeader,
@@ -209,6 +213,8 @@ export default function TreeView({
 							objectItem={objectItem}
 							walletData={walletData}
 							onPopup={onPopup}
+							ContentTypeHeader={ContentTypeHeader}
+							AuthorizationHeader={AuthorizationHeader}
 							BearerOwnerIdHeader={BearerOwnerIdHeader}
 							BearerSignatureHeader={BearerSignatureHeader}
 							BearerSignatureKeyHeader={BearerSignatureKeyHeader}
