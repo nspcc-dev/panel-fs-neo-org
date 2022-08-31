@@ -26,7 +26,7 @@ export const App = () => {
 	const location = useLocation();
 	const walletConnectCtx = useWalletConnect();
 
-	const [ContentTypeHeader] = useState("application/json");
+	const [ContentTypeHeader] = useState("Content-Type");
 	const [AuthorizationHeader] = useState("Authorization");
 	const [BearerOwnerIdHeader] = useState("X-Bearer-Owner-Id");
 	const [BearerSignatureHeader] = useState("X-Bearer-Signature");
