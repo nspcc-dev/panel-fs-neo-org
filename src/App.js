@@ -138,7 +138,7 @@ export const App = () => {
 	};
 
 	const onCreateContainer = () => {
-		if (containerForm.containerName.length >= 3 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0) {
+		if (containerForm.containerName.length >= 3 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0 && attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0)) {
 			setSending(false);
 			onPopup('loading');
 			api('PUT', '/containers?walletConnect=true&name-scope-global=true', {
@@ -219,7 +219,7 @@ export const App = () => {
 	};
 
 	const onCreateObject = (containerId) => {
-		if (objectForm.name !== '') {
+		if (objectForm.name !== '' && attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0)) {
 			setSending(false);
 			onPopup('loading');
 			api('PUT', '/objects?walletConnect=true', {
@@ -684,37 +684,22 @@ export const App = () => {
 										Add attribute
 									</Button>
 								</Form.Field>
-								{isSending && !(containerForm.containerName.length >= 3 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0) && (
+								{isSending && (!(containerForm.containerName.length >= 3 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0) || attributes.some((attribute) => attribute.key.length <= 0 || attribute.value.length <= 0))&& (
 									<Notification className="error_message" style={{ margin: '20px 0' }}>
-										{containerForm.containerName.length > 0 && containerForm.containerName.length < 3 ? 'Container name must contain at least 3 characters.' : 'Please fill in all required fields.'}
+										{attributes.some((attribute) => attribute.key.length <= 0 || attribute.value.length <= 0) ? (
+											'Attributes should not be empty.'
+										) : (
+											<span>{containerForm.containerName.length > 0 && containerForm.containerName.length < 3 ? 'Container name must contain at least 3 characters.' : 'Please fill in all required fields.'}</span>
+										)}
 									</Notification>
 								)}
-								{attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0) ? (
-									<Button
-										color="primary"
-										onClick={onCreateContainer}
-										style={{ display: 'flex', margin: '30px auto 0' }}
-									>
-										Create
-									</Button>
-								) : (
-									<>
-										<Notification className="error_message" style={{ margin: '20px 0' }}>
-											Attributes should not be empty.
-										</Notification>
-										<Button
-											color="primary"
-											style={{
-												display: 'flex',
-												margin: '30px auto 0',
-												opacity: 0.6,
-												pointerEvents: 'none',
-											}}
-										>
-											Create
-										</Button>
-									</>
-								)}
+								<Button
+									color="primary"
+									onClick={onCreateContainer}
+									style={{ display: 'flex', margin: '30px auto 0' }}
+								>
+									Create
+								</Button>
 							</>
 						)}
 					</div>
@@ -897,32 +882,18 @@ export const App = () => {
 										Add attribute
 									</Button>
 								</Form.Field>
-								{attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0) ? (
-									<Button
-										color="primary"
-										onClick={() => onCreateObject(popup.text.containerId)}
-										style={{ display: 'flex', margin: '30px auto 0' }}
-									>
-										Create
-									</Button>
-								) : (
-									<>
-										<Notification className="error_message" style={{ margin: '20px 0' }}>
-											Attributes should not be empty.
-										</Notification>
-										<Button
-											color="primary"
-											style={{
-												display: 'flex',
-												margin: '30px auto 0',
-												opacity: 0.6,
-												pointerEvents: 'none',
-											}}
-										>
-											Create
-										</Button>
-									</>
+								{isSending && (objectForm.name === '' || attributes.some((attribute) => attribute.key.length <= 0 || attribute.value.length <= 0)) && (
+									<Notification className="error_message" style={{ margin: '20px 0' }}>
+										{objectForm.name === '' ? 'Object should not be empty.' : 'Attributes should not be empty.'}
+									</Notification>
 								)}
+								<Button
+									color="primary"
+									onClick={() => onCreateObject(popup.text.containerId)}
+									style={{ display: 'flex', margin: '30px auto 0' }}
+								>
+									Create
+								</Button>
 							</>
 						)}
 					</div>
