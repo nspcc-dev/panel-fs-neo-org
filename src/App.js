@@ -13,6 +13,7 @@ import {
 	Columns,
 	Form,
 	Tag,
+	Notification,
 } from 'react-bulma-components';
 import Home from './Home';
 import Profile from './Profile';
@@ -138,6 +139,7 @@ export const App = () => {
 
 	const onCreateContainer = () => {
 		if (containerForm.containerName.length >= 3 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0) {
+			setSending(false);
 			onPopup('loading');
 			api('PUT', '/containers?walletConnect=true&name-scope-global=true', {
 				"containerName": containerForm.containerName,
@@ -165,9 +167,6 @@ export const App = () => {
 			});
 		} else {
 			setSending(true);
-			setTimeout(() => {
-				setSending(false);
-			}, 700);
 		}
 	};
 
@@ -221,6 +220,7 @@ export const App = () => {
 
 	const onCreateObject = (containerId) => {
 		if (objectForm.name !== '') {
+			setSending(false);
 			onPopup('loading');
 			api('PUT', '/objects?walletConnect=true', {
 				"containerId": containerId,
@@ -244,9 +244,6 @@ export const App = () => {
 			});
 		} else {
 			setSending(true);
-			setTimeout(() => {
-				setSending(false);
-			}, 700);
 		}
 	};
 
@@ -531,6 +528,7 @@ export const App = () => {
 						onClick={() => {
 							onPopup();
 							setAttributes([]);
+							setSending(false);
 						}}
 					/>
 					<div className="popup_content">
@@ -539,6 +537,7 @@ export const App = () => {
 							onClick={() => {
 								onPopup();
 								setAttributes([]);
+								setSending(false);
 							}}
 						>
 							<img
@@ -685,6 +684,11 @@ export const App = () => {
 										Add attribute
 									</Button>
 								</Form.Field>
+								{isSending && !(containerForm.containerName.length >= 3 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0) && (
+									<Notification className="error_message" style={{ margin: '20px 0' }}>
+										{containerForm.containerName.length > 0 && containerForm.containerName.length < 3 ? 'Container name must contain at least 3 characters.' : 'Please fill in all required fields.'}
+									</Notification>
+								)}
 								{attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0) ? (
 									<Button
 										color="primary"
@@ -695,6 +699,9 @@ export const App = () => {
 									</Button>
 								) : (
 									<>
+										<Notification className="error_message" style={{ margin: '20px 0' }}>
+											Attributes should not be empty.
+										</Notification>
 										<Button
 											color="primary"
 											style={{
@@ -706,14 +713,6 @@ export const App = () => {
 										>
 											Create
 										</Button>
-										<div
-											style={{
-												textAlign: 'center',
-												marginTop: 20,
-												fontSize: 14,
-												color: '#ff405b',
-											}}
-										>Attributes should not be empty</div>
 									</>
 								)}
 							</>
@@ -784,6 +783,7 @@ export const App = () => {
 						onClick={() => {
 							onPopup();
 							setAttributes([]);
+							setSending(false);
 						}}
 					/>
 					<div className="popup_content">
@@ -792,6 +792,7 @@ export const App = () => {
 							onClick={() => {
 								onPopup();
 								setAttributes([]);
+								setSending(false);
 							}}
 						>
 							<img
@@ -906,6 +907,9 @@ export const App = () => {
 									</Button>
 								) : (
 									<>
+										<Notification className="error_message" style={{ margin: '20px 0' }}>
+											Attributes should not be empty.
+										</Notification>
 										<Button
 											color="primary"
 											style={{
@@ -917,14 +921,6 @@ export const App = () => {
 										>
 											Create
 										</Button>
-										<div
-											style={{
-												textAlign: 'center',
-												marginTop: 20,
-												fontSize: 14,
-												color: '#ff405b',
-											}}
-										>Attributes should not be empty</div>
 									</>
 								)}
 							</>
