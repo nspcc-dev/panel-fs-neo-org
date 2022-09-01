@@ -12,7 +12,7 @@ const Tree = ({ children }) => {
 const Branch = ({ objectPath, containerItem, containerChildren, walletData, onGetObjects, containerIndex, onPopup }) => {
 	return (
 		<Tree.Folder name={objectPath}>
-			{Object.keys(containerChildren[objectPath]).length > 1 && Object.keys(containerChildren[objectPath]).map((objectPathNew) => ( objectPathNew !== 'children' && (
+			{Object.keys(containerChildren[objectPath]).length > 1 && Object.keys(containerChildren[objectPath]).map((objectPathNew) => ( objectPathNew !== '/' && (
 				<Tree.Branch
 					key={objectPathNew}
 					objectPath={objectPathNew}
@@ -24,7 +24,7 @@ const Branch = ({ objectPath, containerItem, containerChildren, walletData, onGe
 					onGetObjects={onGetObjects}
 				/>
 			)))}
-			{containerChildren[objectPath].children && containerChildren[objectPath].children.map((objectItem, objectIndex) => (
+			{containerChildren[objectPath]['/'] && containerChildren[objectPath]['/'].map((objectItem, objectIndex) => (
 				<Tree.File
 					key={`${objectItem.name}-${objectIndex}`}
 					name={objectItem.name}
@@ -194,7 +194,7 @@ export default function TreeView({
 		<Tree>
 			{objects && Object.keys(objects).map((objectPath, index) => (
 				<div key={objectPath}>
-					{objectPath !== 'children' && (
+					{objectPath !== '/' && (
 						<Tree.Branch
 							objectPath={objectPath}
 							walletData={walletData}
@@ -205,7 +205,7 @@ export default function TreeView({
 							onGetObjects={onGetObjects}
 						/>
 					)}
-					{Object.keys(objects).length === (index + 1) && objects.children && objects.children.map((objectItem, objectIndex) => (
+					{Object.keys(objects).length === (index + 1) && objects['/'] && objects['/'].map((objectItem, objectIndex) => (
 						<Tree.File
 							key={`${objectItem.name}-${objectIndex}`}
 							name={objectItem.name}

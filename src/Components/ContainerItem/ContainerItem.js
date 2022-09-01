@@ -8,7 +8,6 @@ import {
 	Notification,
 	Panel,
 	Form,
-	Tag,
 } from 'react-bulma-components';
 import TreeView from '../TreeView/TreeView';
 import api from '../../api';
@@ -20,25 +19,25 @@ function formatForTreeView(objects) {
 			const lastPart = parts[parts.length - 1];
 			if (parts.length === 1 && lastPart === '') {
 				let childrenTemp = [];
-				if (root.children) {
-					childrenTemp = root.children;
+				if (root['/']) {
+					childrenTemp = root['/'];
 				}
-				root = { ...root, children: [...childrenTemp, item] };
+				root = { ...root, '/': [...childrenTemp, item] };
 			}
 			parts.filter((n) => n !== '').reduce((acc, part) => {
 				let children = [];
 				if (part === lastPart) {
 					let childrenTemp = [];
 					if (acc[part]) {
-						childrenTemp = acc[part].children;
+						childrenTemp = acc[part]['/'];
 					}
 					children = [...childrenTemp, item];
 				} else if (acc[part]) {
 					let childrenTemp = [];
-					childrenTemp = acc[part].children;
+					childrenTemp = acc[part]['/'];
 					children = [...childrenTemp];
 				}
-				return (acc[part] && (acc[part] = { ...acc[part], children })) || (acc[part] = { children });
+				return (acc[part] && (acc[part] = { ...acc[part], '/': children })) || (acc[part] = { '/': children });
 			}, root);
 			return root;
 		}, Object.create(null))
