@@ -12,6 +12,9 @@
 *output.json
 /release
 
+# jest
+__snapshots__
+
 # misc
 .DS_Store
 .env.local
