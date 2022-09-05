@@ -48,7 +48,6 @@ export function formatForTreeView(objects) {
 		}
 
 		objects[i].fullName = `${objects[i].filePath ? `${objects[i].filePath.trim()}/` : ''}${objects[i].name.trim()}`;
-		console.log(objects[i])
 	}
 	
 	objects.sort((a, b) => {
