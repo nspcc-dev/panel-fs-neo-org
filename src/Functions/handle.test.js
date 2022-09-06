@@ -12,10 +12,17 @@ describe('testTreeView', () => {
     }, {
       "address": { "containerId": "789", "objectId": "012" },
       "name": "cat.jpg",
+    }, {
+      "address": { "containerId": "123", "objectId": "456" }
     }];
   
     const tree = {
       "/": [{
+        "address": { "containerId": "123", "objectId": "456" },
+        "filePath": "",
+        "fullName": "456",
+        "name": "456",
+      }, {
         "address": { "containerId": "123", "objectId": "456" },
         "filePath": "",
         "fullName": "cat.jpg",
