@@ -52,19 +52,33 @@ describe('testTreeView', () => {
       "filePath": "my/folder/children//photos//photo2",
     }, {
       "address": { "containerId": "789", "objectId": "012" },
-      "name": "345/ё\\ferkln/kmper/\\\\v////4345fk/-~s\\%<dp>20q\]%r",
+      "filePath": "345/ё\\ferkln/kmper/\\\\v////4345fk/-~s\\%<dp>20q\]%r",
     }];
   
     const tree = {
-      "/": [{
-        "address": {
-          "containerId": "789",
-          "objectId": "012"
-        },
-        "filePath": "",
-        "fullName": "345/ё\\ferkln/kmper/\\\\v////4345fk/-~s\\%<dp>20q]%r",
-        "name": "345/ё\\ferkln/kmper/\\\\v////4345fk/-~s\\%<dp>20q]%r"
-      }],
+      "345": {
+        "/": [],
+        "ё\\ferkln": {
+          "/": [],
+          "kmper": {
+            "/": [],
+            "\\v": {
+              "/": [],
+              "4345fk": {
+                "/": [{
+                  "address": {
+                    "containerId": "789",
+                    "objectId": "012"
+                  },
+                  "filePath": "345/ё\\ferkln/kmper/\\v/4345fk",
+                  "fullName": "345/ё\\ferkln/kmper/\\v/4345fk/-~s\\%<dp>20q]%r",
+                  "name": "-~s\\%<dp>20q]%r"
+                }]
+              }
+            }
+          }
+        }
+      },
       "my": {
         "/": [],
         "folder": {
