@@ -9,7 +9,20 @@ const Tree = ({ children }) => {
 	return <div className="objects_tree">{children}</div>;
 };
 
-const Branch = ({ objectPath, containerItem, containerChildren, walletData, onGetObjects, containerIndex, onPopup }) => {
+const Branch = ({
+		objectPath,
+		containerItem,
+		containerChildren,
+		walletData,
+		onGetObjects,
+		containerIndex,
+		onPopup,
+		ContentTypeHeader,
+		AuthorizationHeader,
+		BearerOwnerIdHeader,
+		BearerSignatureHeader,
+		BearerSignatureKeyHeader,
+	}) => {
 	return (
 		<Tree.Folder name={objectPath}>
 			{Object.keys(containerChildren[objectPath]).length > 1 && Object.keys(containerChildren[objectPath]).map((objectPathNew) => ( objectPathNew !== '/' && (
@@ -22,6 +35,11 @@ const Branch = ({ objectPath, containerItem, containerChildren, walletData, onGe
 					containerChildren={containerChildren[objectPath]}
 					containerIndex={containerIndex}
 					onGetObjects={onGetObjects}
+					ContentTypeHeader={ContentTypeHeader}
+					AuthorizationHeader={AuthorizationHeader}
+					BearerOwnerIdHeader={BearerOwnerIdHeader}
+					BearerSignatureHeader={BearerSignatureHeader}
+					BearerSignatureKeyHeader={BearerSignatureKeyHeader}
 				/>
 			)))}
 			{containerChildren[objectPath]['/'] && containerChildren[objectPath]['/'].map((objectItem, objectIndex) => (
@@ -32,6 +50,11 @@ const Branch = ({ objectPath, containerItem, containerChildren, walletData, onGe
 					objectItem={objectItem}
 					walletData={walletData}
 					onPopup={onPopup}
+					ContentTypeHeader={ContentTypeHeader}
+					AuthorizationHeader={AuthorizationHeader}
+					BearerOwnerIdHeader={BearerOwnerIdHeader}
+					BearerSignatureHeader={BearerSignatureHeader}
+					BearerSignatureKeyHeader={BearerSignatureKeyHeader}
 				/>
 			))}
 		</Tree.Folder>
@@ -203,6 +226,11 @@ export default function TreeView({
 							containerChildren={objects}
 							containerIndex={containerIndex}
 							onGetObjects={onGetObjects}
+							ContentTypeHeader={ContentTypeHeader}
+							AuthorizationHeader={AuthorizationHeader}
+							BearerOwnerIdHeader={BearerOwnerIdHeader}
+							BearerSignatureHeader={BearerSignatureHeader}
+							BearerSignatureKeyHeader={BearerSignatureKeyHeader}
 						/>
 					)}
 					{Object.keys(objects).length === (index + 1) && objects['/'] && objects['/'].map((objectItem, objectIndex) => (
