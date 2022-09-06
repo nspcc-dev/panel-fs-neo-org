@@ -197,7 +197,7 @@ const Profile = ({
 												}}
 											>
 												<Heading size={6} weight="bold" style={{ display: 'flex' }}>
-													<span>{neoFSBalance ? `${(neoFSBalance * 0.00000001).toFixed(8)} GAS` : '-'}</span>
+													<span>{neoFSBalance ? `${(neoFSBalance * 0.000000000001).toFixed(12)} GAS` : '-'}</span>
 													<img
 														src="./img/sync.svg"
 														width={20}
