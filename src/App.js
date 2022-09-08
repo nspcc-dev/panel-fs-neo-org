@@ -153,7 +153,11 @@ export const App = () => {
 				[BearerSignatureHeader]: walletData.tokens.container.PUT.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then((e) => {
-				if (e.message) {
+				if (e.message && e.message.indexOf('insufficient balance to create container') !== -1) {
+					onPopup('failed', 'Insufficient balance to create container');
+				} else if (e.message && e.message.indexOf('name is already taken') !== -1) {
+					onPopup('failed', 'Name is already taken');
+				} else if (e.message) {
 					onPopup('failed', e.message);
 				} else {
 					setLoadContainers(true);
