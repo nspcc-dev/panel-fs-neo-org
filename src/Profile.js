@@ -328,7 +328,7 @@ const Profile = ({
 						))}
 						<Button
 							color="primary"
-							onClick={() => onModal('createContainer')}
+							onClick={() => onModal('createContainer', { neoFSBalance })}
 							style={{ display: 'flex', margin: 'auto' }}
 						>
 							New container
