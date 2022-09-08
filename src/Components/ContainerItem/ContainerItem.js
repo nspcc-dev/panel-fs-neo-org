@@ -19,6 +19,7 @@ import api from '../../api';
 export default function ContainerItem({
 	containerItem,
 	walletData,
+	onModal,
 	onPopup,
 	index,
 	isLoadContainers,
@@ -34,12 +35,13 @@ export default function ContainerItem({
 	const [eACLParams, setEACLParams] = useState([]);
 	const [activePanel, setActivePanel] = useState('');
 	const [isSending, setSending] = useState(false);
+	const [isLoadingForm, setLoadingForm] = useState(false);
 
 	useEffect(() => {
 		if (isLoadContainers === containerItem.containerId) {
 			onGetObjects(isLoadContainers);
 			setLoadContainers(false);
-			onPopup();
+			onModal();
 		}
 	}, [isLoadContainers]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -59,7 +61,7 @@ export default function ContainerItem({
 
 	const onGetEACL = (containerId) => {
 		if (walletData.tokens.container.SETEACL) {
-			onPopup('loading');
+			onModal('loading');
 			api('GET', `/containers/${containerId}/eacl?walletConnect=true`, {}, {
 				[ContentTypeHeader]: "application/json",
 				[AuthorizationHeader]: `Bearer ${walletData.tokens.container.SETEACL.token}`,
@@ -67,20 +69,20 @@ export default function ContainerItem({
 				[BearerSignatureHeader]: walletData.tokens.container.SETEACL.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then((e) => {
-				onPopup();
+				onModal();
 				if (e.records) {
 					setEACLParams(e.records);
 				}
 			});
 		} else {
-			onPopup('signTokens', 'container.SETEACL');
+			onModal('signTokens', 'container.SETEACL');
 		}
 	};
 
 	const onSetEACL = (containerId) => {
 		if (eACLParams.every((eACLItem) => eACLItem.operation !== '' && eACLItem.action !== '' && eACLItem.targets[0].role !== '' && eACLItem.filters.every((filterItem) => filterItem.headerType !== '' && filterItem.matchType !== '' && filterItem.key !== '' && filterItem.value !== ''))) {
 			setSending(false);
-			onPopup('loading');
+			setLoadingForm(true);
 			api('PUT', `/containers/${containerId}/eacl?walletConnect=true`, {
 				"records": eACLParams.filter((item) => delete item.isOpen),
 			}, {
@@ -89,8 +91,13 @@ export default function ContainerItem({
 				[BearerOwnerIdHeader]: walletData.account,
 				[BearerSignatureHeader]: walletData.tokens.container.SETEACL.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
-			}).then(() => {
-				setLoadContainers(true);
+			}).then((e) => {
+				setLoadingForm(false);
+				if (e.message) {
+					onPopup('failed', e.message);
+				} else {
+					setLoadContainers(true);
+				}
 			});
 		} else {
 			setSending(true);
@@ -132,7 +139,7 @@ export default function ContainerItem({
 								alt="delete"
 								style={{ cursor: 'pointer' }}
 								onClick={(e) => {
-									onPopup('deleteContainer', { containerId: containerItem.containerId });
+									onModal('deleteContainer', { containerId: containerItem.containerId });
 									e.stopPropagation();
 								}}
 							/>
@@ -177,7 +184,7 @@ export default function ContainerItem({
 											weight="bolder"
 											onClick={() => {
 												if (!walletData.tokens.container.SETEACL) {
-													onPopup('signTokens', 'container.SETEACL');
+													onModal('signTokens', 'container.SETEACL');
 												} else if (activePanel === 'eACL') {
 													setActivePanel('');
 													setSending(false);
@@ -423,7 +430,12 @@ export default function ContainerItem({
 												<Button
 													color="primary"
 													onClick={() => onSetEACL(containerItem.containerId)}
-													style={{
+													style={isLoadingForm ? {
+														display: 'flex',
+														margin: '20px auto 0',
+														pointerEvents: 'none',
+														opacity: 0.8,
+													} : {
 														display: 'flex',
 														margin: '20px auto 0',
 													}}
@@ -462,7 +474,7 @@ export default function ContainerItem({
 											weight="bolder"
 											onClick={() => {
 												if (!walletData.tokens.object.GET) {
-													onPopup('signTokens', 'object.GET');
+													onModal('signTokens', 'object.GET');
 												} else if (activePanel === 'objects') {
 													setActivePanel('');
 												} else {
@@ -491,7 +503,7 @@ export default function ContainerItem({
 											>
 												<TreeView
 													walletData={walletData}
-													onPopup={onPopup}
+													onModal={onModal}
 													containerIndex={index}
 													containerItem={containerItem}
 													objects={objects}
@@ -503,7 +515,7 @@ export default function ContainerItem({
 												/>
 												<Button
 													color="primary"
-													onClick={() => onPopup('createObject', { containerId: containerItem.containerId })}
+													onClick={() => onModal('createObject', { containerId: containerItem.containerId })}
 													style={{ display: 'flex', margin: '20px auto 0' }}
 												>
 													New object
@@ -514,7 +526,7 @@ export default function ContainerItem({
 								</div>
 							) : (
 								<img
-									className="popup_loader"
+									className="modal_loader"
 									src="./img/loader.svg"
 									height={30}
 									width={30}

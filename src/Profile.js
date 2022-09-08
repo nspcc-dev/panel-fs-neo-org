@@ -16,6 +16,7 @@ import api from './api';
 const Profile = ({
 		walletData,
 		onDisconnectWallet,
+		onModal,
 		onPopup,
 		walletConnectCtx,
 		isLoadContainers,
@@ -63,6 +64,7 @@ const Profile = ({
 	const onNeoFSBalance = async () => {
 		setIsLoadingNeoFSBalance(true);
 		api('GET', `/accounting/balance/${walletData.account}`).then((e) => {
+			onPopup('success', 'NeoFS balance has been updated');
 			setNeoFSBalance(e.value);
 			setTimeout(() => {
 				setIsLoadingNeoFSBalance(false);
@@ -73,8 +75,9 @@ const Profile = ({
 	const onGetContainers = () => {
 		setIsLoadingContainers(true);
 		api('GET', `/containers?ownerId=${walletData.account}`).then((e) => {
+			onPopup('success', 'Containers has been updated');
 			setContainers(e.containers);
-			onPopup();
+			onModal();
 			setTimeout(() => {
 				setIsLoadingContainers(false);
 			}, 1000);
@@ -83,7 +86,7 @@ const Profile = ({
 
 	const onDeposit = async () => {
 		if (depositQuantity >= 0.00000001) {
-			onPopup('approveRequest');
+			onModal('approveRequest');
 			const senderAddress = walletConnectCtx.getAccountAddress(0);
 			const invocations = [{
 				scriptHash: NeoFSContract.gasToken,
@@ -102,13 +105,13 @@ const Profile = ({
 
 			const response = await walletConnectCtx.invokeFunction({ invocations, signers });
 			if (!response.result.error) {
-				onPopup('success', response.result);
+				onModal('success', response.result);
 			} else if (response.result.error.message === 'Failed or Rejected Request') {
-				onPopup('failed', 'Failed or Rejected Request');
+				onModal('failed', 'Failed or Rejected Request');
 			} else if (response.toString() === 'Error: intrinsic gas too low') {
-				onPopup('failed', 'Transaction intrinsic gas too low');
+				onModal('failed', 'Transaction intrinsic gas too low');
 			} else {
-				onPopup('failed', 'Something went wrong, try again');
+				onModal('failed', 'Something went wrong, try again');
 			}
 		} else {
 			onPopup('failed', 'Incorrect quantity value');
@@ -117,7 +120,7 @@ const Profile = ({
 
 	const onWithdraw = async () => {
 		if (withdrawQuantity >= 0.00000001) {
-			onPopup('approveRequest');
+			onModal('approveRequest');
 			const senderAddress = walletConnectCtx.getAccountAddress(0);
 			const invocations = [{
 				scriptHash: NeoFSContract.scriptHash,
@@ -134,13 +137,13 @@ const Profile = ({
 
 			const response = await walletConnectCtx.invokeFunction({ invocations, signers });
 			if (!response.result.error) {
-				onPopup('success', response.result);
+				onModal('success', response.result);
 			} else if (response.result.error.message === 'Failed or Rejected Request') {
-				onPopup('failed', 'Failed or Rejected Request');
+				onModal('failed', 'Failed or Rejected Request');
 			} else if (response.toString() === 'Error: intrinsic gas too low') {
-				onPopup('failed', 'Transaction intrinsic gas too low');
+				onModal('failed', 'Transaction intrinsic gas too low');
 			} else {
-				onPopup('failed', 'Something went wrong, try again');
+				onModal('failed', 'Something went wrong, try again');
 			}
 		} else {
 			onPopup('failed', 'Incorrect quantity value');
@@ -302,13 +305,14 @@ const Profile = ({
 								height={22}
 								alt="settings"
 								style={{ marginLeft: 5, cursor: 'pointer' }}
-								onClick={() => onPopup('signTokens', '')}
+								onClick={() => onModal('signTokens', '')}
 							/>
 						</Heading>
 						{containers.map((containerItem, index) => (
 							<ContainerItem
 								key={containerItem.containerId}
 								walletData={walletData}
+								onModal={onModal}
 								onPopup={onPopup}
 								index={index}
 								containerItem={containerItem}
@@ -324,7 +328,7 @@ const Profile = ({
 						))}
 						<Button
 							color="primary"
-							onClick={() => onPopup('createContainer')}
+							onClick={() => onModal('createContainer')}
 							style={{ display: 'flex', margin: 'auto' }}
 						>
 							New container
@@ -336,7 +340,7 @@ const Profile = ({
 					<Box>
 						<Heading align="center" size={5}>Loading</Heading>
 						<img
-							className="popup_loader"
+							className="modal_loader"
 							src="./img/loader.svg"
 							height={30}
 							width={30}
