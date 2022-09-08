@@ -267,7 +267,11 @@ export const App = () => {
 					onPopup('success', 'New object has been created');
 					setLoadContainers(containerId);
 					setAttributes([]);
-					setObjectForm({ name: '', base64file: '' });
+					setObjectForm({
+						name: '',
+						base64file: '',
+						loading: false,
+					});
 				}
 			});
 		} else {
@@ -569,6 +573,11 @@ export const App = () => {
 							onModal();
 							setAttributes([]);
 							setSending(false);
+							setContainerForm({
+								containerName: '',
+								placementPolicy: '',
+								basicAcl: '',
+							});
 						}}
 					/>
 					<div className="modal_content">
@@ -578,6 +587,11 @@ export const App = () => {
 								onModal();
 								setAttributes([]);
 								setSending(false);
+								setContainerForm({
+									containerName: '',
+									placementPolicy: '',
+									basicAcl: '',
+								});
 							}}
 						>
 							<img
@@ -822,6 +836,11 @@ export const App = () => {
 							onModal();
 							setAttributes([]);
 							setSending(false);
+							setObjectForm({
+								name: '',
+								base64file: '',
+								loading: false,
+							});
 						}}
 					/>
 					<div className="modal_content">
@@ -831,6 +850,11 @@ export const App = () => {
 								onModal();
 								setAttributes([]);
 								setSending(false);
+								setObjectForm({
+									name: '',
+									base64file: '',
+									loading: false,
+								});
 							}}
 						>
 							<img
