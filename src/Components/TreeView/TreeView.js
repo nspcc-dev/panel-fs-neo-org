@@ -16,7 +16,7 @@ const Branch = ({
 		walletData,
 		onGetObjects,
 		containerIndex,
-		onPopup,
+		onModal,
 		ContentTypeHeader,
 		AuthorizationHeader,
 		BearerOwnerIdHeader,
@@ -30,7 +30,7 @@ const Branch = ({
 					key={objectPathNew}
 					objectPath={objectPathNew}
 					walletData={walletData}
-					onPopup={onPopup}
+					onModal={onModal}
 					containerItem={containerItem}
 					containerChildren={containerChildren[objectPath]}
 					containerIndex={containerIndex}
@@ -49,7 +49,7 @@ const Branch = ({
 					containerItem={containerItem}
 					objectItem={objectItem}
 					walletData={walletData}
-					onPopup={onPopup}
+					onModal={onModal}
 					ContentTypeHeader={ContentTypeHeader}
 					AuthorizationHeader={AuthorizationHeader}
 					BearerOwnerIdHeader={BearerOwnerIdHeader}
@@ -92,7 +92,7 @@ const File = ({
 		containerItem,
 		objectItem,
 		walletData,
-		onPopup,
+		onModal,
 		ContentTypeHeader,
 		AuthorizationHeader,
 		BearerOwnerIdHeader,
@@ -147,7 +147,7 @@ const File = ({
 								alt="delete"
 								className="objects_tree_file_delete"
 								onClick={(e) => {
-									onPopup('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.address.objectId });
+									onModal('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.address.objectId });
 									e.stopPropagation();
 								}}
 							/>
@@ -183,7 +183,7 @@ const File = ({
 						</>
 					) : (
 						<img
-							className="popup_loader"
+							className="modal_loader"
 							src="./img/loader.svg"
 							height={30}
 							width={30}
@@ -203,7 +203,7 @@ Tree.Branch = Branch;
 export default function TreeView({
 	containerItem,
 	walletData,
-	onPopup,
+	onModal,
 	containerIndex,
 	onGetObjects,
 	objects,
@@ -221,7 +221,7 @@ export default function TreeView({
 						<Tree.Branch
 							objectPath={objectPath}
 							walletData={walletData}
-							onPopup={onPopup}
+							onModal={onModal}
 							containerItem={containerItem}
 							containerChildren={objects}
 							containerIndex={containerIndex}
@@ -240,7 +240,7 @@ export default function TreeView({
 							containerItem={containerItem}
 							objectItem={objectItem}
 							walletData={walletData}
-							onPopup={onPopup}
+							onModal={onModal}
 							ContentTypeHeader={ContentTypeHeader}
 							AuthorizationHeader={AuthorizationHeader}
 							BearerOwnerIdHeader={BearerOwnerIdHeader}

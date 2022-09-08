@@ -64,18 +64,6 @@ ul {
     cursor: pointer;
 }
 
-.popup_highlighted_copy {
-    font-size: 12px;
-    font-family: monospace;
-    background: #e2e2e2;
-    display: flex;
-    padding: 10px;
-    border-radius: 4px;
-    word-break: break-all;
-    margin: 10px 10px 20px;
-    cursor: pointer;
-}
-
 .field.is-grouped>.control {
     flex-shrink: unset;
 }
@@ -277,6 +265,48 @@ ul {
 /* popup */
 .popup {
     position: fixed;
+    z-index: 104;
+    display: flex;
+    justify-content: center;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.popup_content {
+    position: absolute;
+    background: #fff;
+    box-shadow: 0 0 10px rgb(255 255 255 / 15%);
+    border-radius: 6px;
+    z-index: 105;
+    padding: 10px;
+    margin-top: 20px;
+    min-width: 200px;
+    max-width: 450px;
+    pointer-events: auto;
+}
+
+.popup_content_success {
+    color: #ffffff;
+    background: #25b87f;
+    border: 1px solid #25b87f99;
+}
+
+.popup_content_failed {
+    color: #ffffff;
+    background: #fc5758;
+    border: 1px solid #dc5253;
+}
+
+.popup_content .title {
+    color: inherit;
+}
+
+/* modal */
+.modal {
+    position: fixed;
     z-index: 102;
     display: flex;
     justify-content: center;
@@ -288,7 +318,7 @@ ul {
     background: rgba(0, 0, 0, 0.4);
 }
 
-.popup_close_panel {
+.modal_close_panel {
     position: fixed;
     z-index: 102;
     display: flex;
@@ -301,7 +331,7 @@ ul {
     margin: auto;
 }
 
-.popup_content {
+.modal_content {
     position: absolute;
     background: #fff;
     border-radius: 6px;
@@ -312,18 +342,30 @@ ul {
     margin: 10px;
 }
 
-.popup_close {
+.modal_highlighted_copy {
+    font-size: 12px;
+    font-family: monospace;
+    background: #e2e2e2;
+    display: flex;
+    padding: 10px;
+    border-radius: 4px;
+    word-break: break-all;
+    margin: 10px 10px 20px;
+    cursor: pointer;
+}
+
+.modal_close {
     padding: 5px;
     position: absolute;
     top: 0;
     right: 0;
 }
 
-.popup_close img {
+.modal_close img {
     cursor: pointer;
 }
 
-.popup_loader {
+.modal_loader {
     display: flex;
     margin: 5px auto 15px;
     -webkit-animation: pulse 1.5s infinite linear;

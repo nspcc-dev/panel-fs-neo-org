@@ -35,6 +35,7 @@ export const App = () => {
 
 	const [attributes, setAttributes] = useState([]);
 	const [isLoadContainers, setLoadContainers] = useState(false);
+	const [isLoadingForm, setLoadingForm] = useState(false);
 	const [isSending, setSending] = useState(false);
 	const [objectForm, setObjectForm] = useState({
 		name: '',
@@ -48,18 +49,29 @@ export const App = () => {
 	});
 	const [walletData, setWalletData] = useState(null);
 
+	const [modal, setModal] = useState({
+		current: null,
+		text: '',
+	});
 	const [popup, setPopup] = useState({
 		current: null,
 		text: '',
 	});
 
+	const onModal = (current = null, text = null) => {
+		setModal({ current, text });
+	};
+
 	const onPopup = (current = null, text = null) => {
 		setPopup({ current, text });
+		setTimeout(() => {
+			setPopup({ current: null, text: null });
+		}, 1500)
 	};
 
 	useEffect(() => {
 		if (walletConnectCtx.uri.length) {
-			onPopup('connectWallet', walletConnectCtx.uri);
+			onModal('connectWallet', walletConnectCtx.uri);
 		}
 	}, [walletConnectCtx.uri]);
 
@@ -71,6 +83,7 @@ export const App = () => {
 
 	useEffect(() => {
 		if (walletConnectCtx.accounts.length !== 0) {
+			onPopup('success', 'Wallet connected');
 			setWalletData({
 				type: walletConnectCtx.accounts[0].split(':')[0],
 				net: walletConnectCtx.accounts[0].split(':')[1],
@@ -81,7 +94,7 @@ export const App = () => {
 					object: {}
 				}
 			});
-			onPopup();
+			onModal();
 		}
 	}, [walletConnectCtx.accounts]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -118,7 +131,7 @@ export const App = () => {
 	const onSignMessage = async (msg = '', type, operation) => {
 		const response = await walletConnectCtx.signMessage(msg);
 		if (response.result.error) {
-			onPopup('failed', response.result.error.message)
+			onModal('failed', response.result.error.message)
 		} else {
 			setWalletData({
 				...walletData,
@@ -140,7 +153,7 @@ export const App = () => {
 	const onCreateContainer = () => {
 		if (containerForm.containerName.length >= 3 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0 && attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0)) {
 			setSending(false);
-			onPopup('loading');
+			setLoadingForm(true);
 			api('PUT', '/containers?walletConnect=true&name-scope-global=true', {
 				"containerName": containerForm.containerName,
 				"placementPolicy": containerForm.placementPolicy,
@@ -153,13 +166,19 @@ export const App = () => {
 				[BearerSignatureHeader]: walletData.tokens.container.PUT.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then((e) => {
+				setLoadingForm(false);
 				if (e.message && e.message.indexOf('insufficient balance to create container') !== -1) {
 					onPopup('failed', 'Insufficient balance to create container');
 				} else if (e.message && e.message.indexOf('name is already taken') !== -1) {
 					onPopup('failed', 'Name is already taken');
+				} else if (e.message && e.message.indexOf('couldn\'t parse placement policy') !== -1) {
+					onPopup('failed', 'Incorrect placement policy');
+				} else if (e.message && e.message.indexOf('couldn\'t parse basic acl') !== -1) {
+					onPopup('failed', 'Incorrect basic acl');
 				} else if (e.message) {
 					onPopup('failed', e.message);
 				} else {
+					onPopup('success', 'New container has been created');
 					setLoadContainers(true);
 					setContainerForm({
 						containerName: '',
@@ -176,7 +195,7 @@ export const App = () => {
 
 	const onDeleteContainer = (containerName) => {
 		if (walletData.tokens.container.DELETE) {
-			onPopup('loading');
+			onModal('loading');
 			api('DELETE', `/containers/${containerName}?walletConnect=true`, {}, {
 				[ContentTypeHeader]: "application/json",
 				[AuthorizationHeader]: `Bearer ${walletData.tokens.container.DELETE.token}`,
@@ -184,10 +203,11 @@ export const App = () => {
 				[BearerSignatureHeader]: walletData.tokens.container.DELETE.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then(() => {
+				onPopup('success', 'Container was deleted successfully');
 				setLoadContainers(true);
 			});
 		} else {
-			onPopup('signTokens', 'container.DELETE');
+			onModal('signTokens', 'container.DELETE');
 		}
 	};
 
@@ -210,7 +230,7 @@ export const App = () => {
 				});
 			};
 			reader.onerror = (error) => {
-				onPopup('failed', error);
+				onModal('failed', error);
 				document.getElementById('upload').value = '';
 			};
 		} else {
@@ -225,7 +245,7 @@ export const App = () => {
 	const onCreateObject = (containerId) => {
 		if (objectForm.name !== '' && attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0)) {
 			setSending(false);
-			onPopup('loading');
+			setLoadingForm(true);
 			api('PUT', '/objects?walletConnect=true', {
 				"containerId": containerId,
 				"fileName": objectForm.name,
@@ -238,9 +258,13 @@ export const App = () => {
 				[BearerSignatureHeader]: walletData.tokens.object.PUT.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then((e) => {
-				if (e.message) {
+				setLoadingForm(false);
+				if (e.message && e.message.indexOf('access to object operation denied') !== -1) {
+					onPopup('failed', 'Access to object operation denied');
+				} else if (e.message) {
 					onPopup('failed', e.message);
 				} else {
+					onPopup('success', 'New object has been created');
 					setLoadContainers(containerId);
 					setAttributes([]);
 					setObjectForm({ name: '', base64file: '' });
@@ -253,7 +277,7 @@ export const App = () => {
 
 	const onDeleteObject = (containerId, objectId) => {
 		if (walletData.tokens.object.DELETE) {
-			onPopup('loading');
+			onModal('loading');
 			api('DELETE', `/objects/${containerId}/${objectId}?walletConnect=true`, {}, {
 				[ContentTypeHeader]: "application/json",
 				[AuthorizationHeader]: `Bearer ${walletData.tokens.object.DELETE.token}`,
@@ -261,10 +285,11 @@ export const App = () => {
 				[BearerSignatureHeader]: walletData.tokens.object.DELETE.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then(() => {
+				onPopup('success', 'Object was deleted successfully');
 				setLoadContainers(containerId);
 			});
 		} else {
-			onPopup('signTokens', 'object.DELETE');
+			onModal('signTokens', 'object.DELETE');
 		}
 	};
 
@@ -280,6 +305,7 @@ export const App = () => {
 
 	const onDisconnectWallet = () => {
 		walletConnectCtx.disconnect();
+		onPopup('success', 'Wallet disconnected');
 		setWalletData(null);
 		localStorage.removeItem('wc@2:client//pairing:settled');
 		localStorage.removeItem('wc@2:client//session:pending');
@@ -294,13 +320,22 @@ export const App = () => {
 			{(popup.current === 'success' || popup.current === 'failed') && (
 				<div className="popup">
 					<div
-						className="popup_close_panel"
-						onClick={onPopup}
+						className={popup.current === 'success' ? "popup_content popup_content_success" : "popup_content popup_content_failed"}
+					>
+						<Heading align="center" size={7}>{popup.text}</Heading>
+					</div>
+				</div>
+			)}
+			{(modal.current === 'success' || modal.current === 'failed') && (
+				<div className="modal">
+					<div
+						className="modal_close_panel"
+						onClick={onModal}
 					/>
-					<div className="popup_content">
+					<div className="modal_content">
 						<div
-							className="popup_close"
-							onClick={onPopup}
+							className="modal_close"
+							onClick={onModal}
 						>
 							<img
 								src="/img/close.svg"
@@ -309,21 +344,21 @@ export const App = () => {
 								alt="loader"
 							/>
 						</div>
-						<Heading align="center" size={5}>{popup.current === 'success' ? 'Success' : 'Failed'}</Heading>
-						<Heading align="center" size={6} weight="normal">{popup.text}</Heading>
+						<Heading align="center" size={5}>{modal.current === 'success' ? 'Success' : 'Failed'}</Heading>
+						<Heading align="center" size={6} weight="normal">{modal.text}</Heading>
 					</div>
 				</div>
 			)}
-			{popup.current === 'connectWallet' && (
-				<div className="popup">
+			{modal.current === 'connectWallet' && (
+				<div className="modal">
 					<div
-						className="popup_close_panel"
-						onClick={onPopup}
+						className="modal_close_panel"
+						onClick={onModal}
 					/>
-					<div className="popup_content" style={{ maxWidth: 400 }}>
+					<div className="modal_content" style={{ maxWidth: 400 }}>
 						<div
-							className="popup_close"
-							onClick={onPopup}
+							className="modal_close"
+							onClick={onModal}
 						>
 							<img
 								src="./img/close.svg"
@@ -337,16 +372,17 @@ export const App = () => {
 						<Heading align="center" size={6} weight="normal">Copy and paste the connection URL into the Add connection page in your wallet</Heading>
 						<div>
 							<CopyToClipboardBlock
-								copy={popup.text}
-								text={popup.text}
-								className="popup_highlighted_copy"
+								copy={modal.text}
+								text={modal.text}
+								onPopup={onPopup}
+								className="modal_highlighted_copy"
 							/>
 						</div>
 						<Heading align="center" size={6}>QR code connection</Heading>
 						<Heading align="center" size={6} weight="normal">Please scan QR code to connect your wallet on a compatible device</Heading>
 						<Button
 							color="primary"
-							onClick={() => window.open(`https://neon.coz.io/connect?uri=${popup.text}`, '_blank').focus()}
+							onClick={() => window.open(`https://neon.coz.io/connect?uri=${modal.text}`, '_blank').focus()}
 							style={{ margin: 'auto', display: 'flex' }}
 						>
 							Scan
@@ -354,16 +390,16 @@ export const App = () => {
 					</div>
 				</div>
 			)}
-			{popup.current === 'signTokens' && (
-				<div className="popup">
+			{modal.current === 'signTokens' && (
+				<div className="modal">
 					<div
-						className="popup_close_panel"
-						onClick={onPopup}
+						className="modal_close_panel"
+						onClick={onModal}
 					/>
-					<div className="popup_content" style={{ maxWidth: 650 }}>
+					<div className="modal_content" style={{ maxWidth: 650 }}>
 						<div
-							className="popup_close"
-							onClick={onPopup}
+							className="modal_close"
+							onClick={onModal}
 						>
 							<img
 								src="./img/close.svg"
@@ -375,10 +411,10 @@ export const App = () => {
 						<Heading align="center" size={5}>Please sign your tokens</Heading>
 						<Heading align="center" size={6} weight="normal">To use all functions, you must use signed user tokens</Heading>
 						<Columns>
-							{(popup.text === '' || popup.text === 'container.PUT' || popup.text === 'container.DELETE' || popup.text === 'container.SETEACL') && (
+							{(modal.text === '' || modal.text === 'container.PUT' || modal.text === 'container.DELETE' || modal.text === 'container.SETEACL') && (
 								<Columns.Column>
 									<Heading align="center" size={6}>Containers</Heading>
-									{(popup.text === '' || popup.text === 'container.PUT') && (
+									{(modal.text === '' || modal.text === 'container.PUT') && (
 										<div className="token_status_panel">
 											<div>For creation operations</div>
 											{walletData && walletData.tokens.container.PUT ? (
@@ -399,7 +435,7 @@ export const App = () => {
 											)}
 										</div>
 									)}
-									{(popup.text === '' || popup.text === 'container.DELETE') && (
+									{(modal.text === '' || modal.text === 'container.DELETE') && (
 										<div className="token_status_panel">
 											<div>For deletion operations</div>
 											{walletData && walletData.tokens.container.DELETE ? (
@@ -420,7 +456,7 @@ export const App = () => {
 											)}
 										</div>
 									)}
-									{(popup.text === '' || popup.text === 'container.SETEACL') && (
+									{(modal.text === '' || modal.text === 'container.SETEACL') && (
 										<div className="token_status_panel">
 											<div>For eACL management</div>
 											{walletData && walletData.tokens.container.SETEACL ? (
@@ -443,10 +479,10 @@ export const App = () => {
 									)}
 								</Columns.Column>
 							)}
-							{(popup.text === '' || popup.text === 'object.PUT' || popup.text === 'object.DELETE' || popup.text === 'object.GET') && (
+							{(modal.text === '' || modal.text === 'object.PUT' || modal.text === 'object.DELETE' || modal.text === 'object.GET') && (
 								<Columns.Column>
 									<Heading align="center" size={6}>Objects</Heading>
-									{(popup.text === '' || popup.text === 'object.PUT') && (
+									{(modal.text === '' || modal.text === 'object.PUT') && (
 										<div className="token_status_panel">
 											<div>For creation operations</div>
 											{walletData && walletData.tokens.object.PUT ? (
@@ -467,7 +503,7 @@ export const App = () => {
 											)}
 										</div>
 									)}
-									{(popup.text === '' || popup.text === 'object.DELETE') && (
+									{(modal.text === '' || modal.text === 'object.DELETE') && (
 										<div className="token_status_panel">
 											<div>For deletion operations</div>
 											{walletData && walletData.tokens.object.DELETE ? (
@@ -488,7 +524,7 @@ export const App = () => {
 											)}
 										</div>
 									)}
-									{(popup.text === '' || popup.text === 'object.GET') && (
+									{(modal.text === '' || modal.text === 'object.GET') && (
 										<div className="token_status_panel">
 											<div>For getting operations</div>
 											{walletData && walletData.tokens.object.GET ? (
@@ -516,7 +552,7 @@ export const App = () => {
 							&& walletData.tokens.object.PUT && walletData.tokens.object.DELETE && walletData.tokens.object.GET && (
 							<Button
 								color="primary"
-								onClick={onPopup}
+								onClick={onModal}
 								style={{ margin: '20px auto 0', display: 'flex' }}
 							>
 								Start
@@ -525,21 +561,21 @@ export const App = () => {
 					</div>
 				</div>
 			)}
-			{popup.current === 'createContainer' && (
-				<div className="popup">
+			{modal.current === 'createContainer' && (
+				<div className="modal">
 					<div
-						className="popup_close_panel"
+						className="modal_close_panel"
 						onClick={() => {
-							onPopup();
+							onModal();
 							setAttributes([]);
 							setSending(false);
 						}}
 					/>
-					<div className="popup_content">
+					<div className="modal_content">
 						<div
-							className="popup_close"
+							className="modal_close"
 							onClick={() => {
-								onPopup();
+								onModal();
 								setAttributes([]);
 								setSending(false);
 							}}
@@ -700,7 +736,15 @@ export const App = () => {
 								<Button
 									color="primary"
 									onClick={onCreateContainer}
-									style={{ display: 'flex', margin: '30px auto 0' }}
+									style={isLoadingForm ? {
+										display: 'flex',
+										margin: '30px auto 0',
+										pointerEvents: 'none',
+										opacity: 0.8,
+									} : {
+										display: 'flex',
+										margin: '30px auto 0',
+									}}
 								>
 									Create
 								</Button>
@@ -709,16 +753,16 @@ export const App = () => {
 					</div>
 				</div>
 			)}
-			{popup.current === 'deleteContainer' && (
-				<div className="popup">
+			{modal.current === 'deleteContainer' && (
+				<div className="modal">
 					<div
-						className="popup_close_panel"
-						onClick={onPopup}
+						className="modal_close_panel"
+						onClick={onModal}
 					/>
-					<div className="popup_content">
+					<div className="modal_content">
 						<div
-							className="popup_close"
-							onClick={onPopup}
+							className="modal_close"
+							onClick={onModal}
 						>
 							<img
 								src="./img/close.svg"
@@ -748,14 +792,14 @@ export const App = () => {
 								<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
 									<Button
 										color="gray"
-										onClick={onPopup}
+										onClick={onModal}
 										style={{ marginRight: 10 }}
 									>
 										No
 									</Button>
 									<Button
 										color="danger"
-										onClick={() => onDeleteContainer(popup.text.containerId)}
+										onClick={() => onDeleteContainer(modal.text.containerId)}
 									>
 										Yes
 									</Button>
@@ -765,21 +809,21 @@ export const App = () => {
 					</div>
 				</div>
 			)}
-			{popup.current === 'createObject' && (
-				<div className="popup">
+			{modal.current === 'createObject' && (
+				<div className="modal">
 					<div
-						className="popup_close_panel"
+						className="modal_close_panel"
 						onClick={() => {
-							onPopup();
+							onModal();
 							setAttributes([]);
 							setSending(false);
 						}}
 					/>
-					<div className="popup_content">
+					<div className="modal_content">
 						<div
-							className="popup_close"
+							className="modal_close"
 							onClick={() => {
-								onPopup();
+								onModal();
 								setAttributes([]);
 								setSending(false);
 							}}
@@ -893,8 +937,16 @@ export const App = () => {
 								)}
 								<Button
 									color="primary"
-									onClick={() => onCreateObject(popup.text.containerId)}
-									style={{ display: 'flex', margin: '30px auto 0' }}
+									onClick={() => onCreateObject(modal.text.containerId)}
+									style={isLoadingForm ? {
+										display: 'flex',
+										margin: '30px auto 0',
+										pointerEvents: 'none',
+										opacity: 0.8,
+									} : {
+										display: 'flex',
+										margin: '30px auto 0',
+									}}
 								>
 									Create
 								</Button>
@@ -903,16 +955,16 @@ export const App = () => {
 					</div>
 				</div>
 			)}
-			{popup.current === 'deleteObject' && (
-				<div className="popup">
+			{modal.current === 'deleteObject' && (
+				<div className="modal">
 					<div
-						className="popup_close_panel"
-						onClick={onPopup}
+						className="modal_close_panel"
+						onClick={onModal}
 					/>
-					<div className="popup_content">
+					<div className="modal_content">
 						<div
-							className="popup_close"
-							onClick={onPopup}
+							className="modal_close"
+							onClick={onModal}
 						>
 							<img
 								src="./img/close.svg"
@@ -942,14 +994,14 @@ export const App = () => {
 								<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
 									<Button
 										color="gray"
-										onClick={onPopup}
+										onClick={onModal}
 										style={{ marginRight: 10 }}
 									>
 										No
 									</Button>
 									<Button
 										color="danger"
-										onClick={() => onDeleteObject(popup.text.containerId, popup.text.objectId)}
+										onClick={() => onDeleteObject(modal.text.containerId, modal.text.objectId)}
 									>
 										Yes
 									</Button>
@@ -959,16 +1011,16 @@ export const App = () => {
 					</div>
 				</div>
 			)}
-			{popup.current === 'loading' && (
-				<div className="popup">
+			{modal.current === 'loading' && (
+				<div className="modal">
 					<div
-						className="popup_close_panel"
-						onClick={onPopup}
+						className="modal_close_panel"
+						onClick={onModal}
 					/>
-					<div className="popup_content">
+					<div className="modal_content">
 						<div
-							className="popup_close"
-							onClick={onPopup}
+							className="modal_close"
+							onClick={onModal}
 						>
 							<img
 								src="./img/close.svg"
@@ -979,7 +1031,7 @@ export const App = () => {
 						</div>
 						<Heading align="center" size={5}>Loading</Heading>
 						<img
-							className="popup_loader"
+							className="modal_loader"
 							src="./img/loader.svg"
 							height={30}
 							width={30}
@@ -988,16 +1040,16 @@ export const App = () => {
 					</div>
 				</div>
 			)}
-			{popup.current === 'approveRequest' && (
-				<div className="popup">
+			{modal.current === 'approveRequest' && (
+				<div className="modal">
 					<div
-						className="popup_close_panel"
-						onClick={onPopup}
+						className="modal_close_panel"
+						onClick={onModal}
 					/>
-					<div className="popup_content">
+					<div className="modal_content">
 						<div
-							className="popup_close"
-							onClick={onPopup}
+							className="modal_close"
+							onClick={onModal}
 						>
 							<img
 								src="./img/close.svg"
@@ -1008,7 +1060,7 @@ export const App = () => {
 						</div>
 						<Heading align="center" size={5}>Pending Call Request</Heading>
 						<img
-							className="popup_loader"
+							className="modal_loader"
 							src="./img/loader.svg"
 							height={30}
 							width={30}
@@ -1055,6 +1107,7 @@ export const App = () => {
 						BearerOwnerIdHeader={BearerOwnerIdHeader}
 						BearerSignatureHeader={BearerSignatureHeader}
 						BearerSignatureKeyHeader={BearerSignatureKeyHeader}
+						onModal={onModal}
 						onPopup={onPopup}
 					/>}
 				/>
