@@ -897,6 +897,7 @@ export const App = () => {
 											<label
 												htmlFor="upload"
 												className={isSending && objectForm.name === '' ? 'is-error' : ""}
+												style={objectForm.name ? { background: '#f5f5f5', borderStyle: 'double' } : {}}
 											>{objectForm.name ? objectForm.name : 'Upload object'}</label>
 										)}
 										<input
