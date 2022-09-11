@@ -440,7 +440,15 @@ export default function ContainerItem({
 														margin: '20px auto 0',
 													}}
 												>
-													Update
+													{isLoadingForm ? (
+														<img
+															src="./img/spinner.svg"
+															className="spinner"
+															width={20}
+															height={20}
+															alt="spinner"
+														/>
+													) : "Update"}
 												</Button>
 											</Box>
 										)}
