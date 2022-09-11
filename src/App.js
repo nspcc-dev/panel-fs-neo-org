@@ -765,7 +765,15 @@ export const App = () => {
 										margin: '30px auto 0',
 									}}
 								>
-									Create
+									{isLoadingForm ? (
+										<img
+											src="./img/spinner.svg"
+											className="spinner"
+											width={20}
+											height={20}
+											alt="spinner"
+										/>
+									) : "Create"}
 								</Button>
 							</>
 						)}
@@ -977,7 +985,15 @@ export const App = () => {
 										margin: '30px auto 0',
 									}}
 								>
-									Create
+									{isLoadingForm ? (
+										<img
+											src="./img/spinner.svg"
+											className="spinner"
+											width={20}
+											height={20}
+											alt="spinner"
+										/>
+									) : "Create"}
 								</Button>
 							</>
 						)}
