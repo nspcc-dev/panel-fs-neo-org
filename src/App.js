@@ -66,7 +66,7 @@ export const App = () => {
 		setPopup({ current, text });
 		setTimeout(() => {
 			setPopup({ current: null, text: null });
-		}, 1500)
+		}, 2000);
 	};
 
 	useEffect(() => {
