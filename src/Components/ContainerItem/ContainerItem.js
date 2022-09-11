@@ -269,7 +269,7 @@ export default function ContainerItem({
 																			}}
 																		>
 																			<option value="" disabled>Operation</option>
-																			{['PUT', 'GET', 'HEAD', 'DELETE', 'SEARCH', 'GETRANGE', 'GETRANGEHASH'].map((item) => (
+																			{['PUT', 'GET', 'HEAD', 'DELETE', 'SEARCH', 'RANGE', 'RANGEHASH'].map((item) => (
 																				<option value={item} key={item}>{item}</option>
 																			))}
 																		</Form.Select>
