@@ -36,7 +36,11 @@ export const App = () => {
 	const [attributes, setAttributes] = useState([]);
 	const [isLoadContainers, setLoadContainers] = useState(false);
 	const [isLoadingForm, setLoadingForm] = useState(false);
-	const [isSending, setSending] = useState(false);
+	const [isError, setError] = useState({
+		active: false,
+		type: [],
+		text: '',
+	});
 	const [objectForm, setObjectForm] = useState({
 		name: '',
 		base64file: '',
@@ -151,60 +155,84 @@ export const App = () => {
 	};
 
 	const onCreateContainer = () => {
-		if (containerForm.containerName.length >= 3 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0 && attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0)) {
-			setSending(false);
-			setLoadingForm(true);
-			api('PUT', '/containers?walletConnect=true&name-scope-global=true', {
-				"containerName": containerForm.containerName,
-				"placementPolicy": containerForm.placementPolicy,
-				"basicAcl": containerForm.basicAcl,
-				"attributes": attributes,
-			}, {
-				[ContentTypeHeader]: "application/json",
-				[AuthorizationHeader]: `Bearer ${walletData.tokens.container.PUT.token}`,
-				[BearerOwnerIdHeader]: walletData.account,
-				[BearerSignatureHeader]: walletData.tokens.container.PUT.signature,
-				[BearerSignatureKeyHeader]: walletData.publicKey,
-			}).then((e) => {
-				setLoadingForm(false);
-				if (e.message && e.message.indexOf('insufficient balance to create container') !== -1) {
-					onPopup('failed', 'Insufficient balance to create container');
-				} else if (e.message && e.message.indexOf('name is already taken') !== -1) {
-					onPopup('failed', 'Name is already taken');
-				} else if (e.message && e.message.indexOf('couldn\'t parse placement policy') !== -1) {
-					onPopup('failed', 'Incorrect placement policy');
-				} else if (e.message && e.message.indexOf('couldn\'t parse basic acl') !== -1) {
-					onPopup('failed', 'Incorrect basic acl');
-				} else if (e.message) {
-					onPopup('failed', e.message);
-				} else {
-					onPopup('success', 'New container has been created');
-					setLoadContainers(true);
-					setContainerForm({
-						containerName: '',
-						placementPolicy: '',
-						basicAcl: '',
+		if (attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0)) {
+			if (containerForm.containerName.length > 0 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0) {
+				if (containerForm.containerName.length >= 3) {
+					setError({ active: false, type: [], text: '' });
+					setLoadingForm(true);
+					api('PUT', '/containers?walletConnect=true&name-scope-global=true', {
+						"containerName": containerForm.containerName,
+						"placementPolicy": containerForm.placementPolicy,
+						"basicAcl": containerForm.basicAcl,
+						"attributes": attributes,
+					}, {
+						[ContentTypeHeader]: "application/json",
+						[AuthorizationHeader]: `Bearer ${walletData.tokens.container.PUT.token}`,
+						[BearerOwnerIdHeader]: walletData.account,
+						[BearerSignatureHeader]: walletData.tokens.container.PUT.signature,
+						[BearerSignatureKeyHeader]: walletData.publicKey,
+					}).then((e) => {
+						setLoadingForm(false);
+						if (e.message && e.message.indexOf('insufficient balance to create container') !== -1) {
+							setError({ active: true, type: [], text: 'Insufficient balance to create container' });
+						} else if (e.message && e.message.indexOf('name is already taken') !== -1) {
+							setError({ active: true, type: ['containerName'], text: 'Name is already taken' });
+						} else if (e.message && e.message.indexOf('couldn\'t parse placement policy') !== -1) {
+							setError({ active: true, type: ['placementPolicy'], text: 'Incorrect placement policy' });
+						} else if (e.message && e.message.indexOf('couldn\'t parse basic acl') !== -1) {
+							setError({ active: true, type: ['basicAcl'], text: 'Incorrect basic acl' });
+						} else if (e.message) {
+							setError({ active: true, type: [], text: e.message });
+						} else {
+							onPopup('success', 'New container has been created');
+							setLoadContainers(true);
+							setContainerForm({
+								containerName: '',
+								placementPolicy: '',
+								basicAcl: '',
+							});
+							setAttributes([]);
+						}
 					});
-					setAttributes([]);
+				} else {
+					setError({ active: true, type: ['containerName'], text: 'Container name must contain at least 3 characters.' });
 				}
-			});
+			} else {
+				let fields = [];
+				if (containerForm.containerName.length === 0) {
+					fields.push('containerName');
+				}
+				if (containerForm.placementPolicy.length === 0) {
+					fields.push('placementPolicy');
+				}
+				if (containerForm.basicAcl.length === 0) {
+					fields.push('basicAcl');
+				}
+				setError({ active: true, type: fields, text: 'Please fill in all required fields.' });
+			}
 		} else {
-			setSending(true);
+			setError({ active: true, type: ['attributes'], text: 'Attributes should not be empty.' });
 		}
 	};
 
 	const onDeleteContainer = (containerName) => {
 		if (walletData.tokens.container.DELETE) {
-			onModal('loading');
+			setLoadingForm(true);
+			setError({ active: false, type: [], text: '' });
 			api('DELETE', `/containers/${containerName}?walletConnect=true`, {}, {
 				[ContentTypeHeader]: "application/json",
 				[AuthorizationHeader]: `Bearer ${walletData.tokens.container.DELETE.token}`,
 				[BearerOwnerIdHeader]: walletData.account,
 				[BearerSignatureHeader]: walletData.tokens.container.DELETE.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
-			}).then(() => {
-				onPopup('success', 'Container was deleted successfully');
-				setLoadContainers(true);
+			}).then((e) => {
+				setLoadingForm(false);
+				if (e.message) {
+					setError({ active: true, type: [], text: e.message });
+				} else {
+					onPopup('success', 'Container was deleted successfully');
+					setLoadContainers(true);
+				}
 			});
 		} else {
 			onModal('signTokens', 'container.DELETE');
@@ -243,54 +271,64 @@ export const App = () => {
 	};
 
 	const onCreateObject = (containerId) => {
-		if (objectForm.name !== '' && attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0)) {
-			setSending(false);
-			setLoadingForm(true);
-			api('PUT', '/objects?walletConnect=true', {
-				"containerId": containerId,
-				"fileName": objectForm.name,
-				"payload": objectForm.base64file.split('base64,')[1],
-				"attributes": attributes,
-			}, {
-				[ContentTypeHeader]: "application/json",
-				[AuthorizationHeader]: `Bearer ${walletData.tokens.object.PUT.token}`,
-				[BearerOwnerIdHeader]: walletData.account,
-				[BearerSignatureHeader]: walletData.tokens.object.PUT.signature,
-				[BearerSignatureKeyHeader]: walletData.publicKey,
-			}).then((e) => {
-				setLoadingForm(false);
-				if (e.message && e.message.indexOf('access to object operation denied') !== -1) {
-					onPopup('failed', 'Access to object operation denied');
-				} else if (e.message) {
-					onPopup('failed', e.message);
-				} else {
-					onPopup('success', 'New object has been created');
-					setLoadContainers(containerId);
-					setAttributes([]);
-					setObjectForm({
-						name: '',
-						base64file: '',
-						loading: false,
-					});
-				}
-			});
-		} else {
-			setSending(true);
+		if (objectForm.name !== '') {
+			if (attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0)) {
+				setError({ active: false, type: [], text: '' });
+				setLoadingForm(true);
+				api('PUT', '/objects?walletConnect=true', {
+					"containerId": containerId,
+					"fileName": objectForm.name,
+					"payload": objectForm.base64file.split('base64,')[1],
+					"attributes": attributes,
+				}, {
+					[ContentTypeHeader]: "application/json",
+					[AuthorizationHeader]: `Bearer ${walletData.tokens.object.PUT.token}`,
+					[BearerOwnerIdHeader]: walletData.account,
+					[BearerSignatureHeader]: walletData.tokens.object.PUT.signature,
+					[BearerSignatureKeyHeader]: walletData.publicKey,
+				}).then((e) => {
+					setLoadingForm(false);
+					if (e.message && e.message.indexOf('access to object operation denied') !== -1) {
+						setError({ active: true, type: [], text: 'Access to object operation denied' });
+					} else if (e.message) {
+						setError({ active: true, type: [], text: e.message });
+					} else {
+						onPopup('success', 'New object has been created');
+						setLoadContainers(containerId);
+						setAttributes([]);
+						setObjectForm({
+							name: '',
+							base64file: '',
+							loading: false,
+						});
+					}
+				});
+			} else {
+				setError({ active: true, type: ['attributes'], text: 'Attributes should not be empty.' });
+			}
+		}	else {
+			setError({ active: true, type: ['objectName'], text: 'Object should not be empty.' });
 		}
 	};
 
 	const onDeleteObject = (containerId, objectId) => {
 		if (walletData.tokens.object.DELETE) {
-			onModal('loading');
+			setError({ active: true, type: [], text: '' });
+			setLoadingForm(true);
 			api('DELETE', `/objects/${containerId}/${objectId}?walletConnect=true`, {}, {
 				[ContentTypeHeader]: "application/json",
 				[AuthorizationHeader]: `Bearer ${walletData.tokens.object.DELETE.token}`,
 				[BearerOwnerIdHeader]: walletData.account,
 				[BearerSignatureHeader]: walletData.tokens.object.DELETE.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
-			}).then(() => {
-				onPopup('success', 'Object was deleted successfully');
-				setLoadContainers(containerId);
+			}).then((e) => {
+				setLoadingForm(false);
+				if (e.message) {
+					setError({ active: true, type: [], text: e.message });
+				} else {
+					onPopup('success', 'Object was deleted successfully');
+					setLoadContainers(containerId);
+				}
 			});
 		} else {
 			onModal('signTokens', 'object.DELETE');
@@ -572,7 +610,7 @@ export const App = () => {
 						onClick={() => {
 							onModal();
 							setAttributes([]);
-							setSending(false);
+							setError({ active: false, type: [], text: '' });
 							setContainerForm({
 								containerName: '',
 								placementPolicy: '',
@@ -586,7 +624,7 @@ export const App = () => {
 							onClick={() => {
 								onModal();
 								setAttributes([]);
-								setSending(false);
+								setError({ active: false, type: [], text: '' });
 								setContainerForm({
 									containerName: '',
 									placementPolicy: '',
@@ -629,7 +667,7 @@ export const App = () => {
 										<Form.Input
 											type="text"
 											value={containerForm.containerName}
-											className={isSending && containerForm.containerName.length < 3 ? 'is-error' : ""}
+											className={isError.active && isError.type.indexOf('containerName') !== -1 ? 'is-error' : ""}
 											onChange={(e) => setContainerForm({ ...containerForm , containerName: e.target.value })}
 										/>
 									</Form.Control>
@@ -640,7 +678,7 @@ export const App = () => {
 										<Form.Input
 											type="text"
 											value={containerForm.placementPolicy}
-											className={isSending && containerForm.placementPolicy === '' ? 'is-error' : ""}
+											className={isError.active && isError.type.indexOf('placementPolicy') !== -1 ? 'is-error' : ""}
 											onChange={(e) => setContainerForm({ ...containerForm , placementPolicy: e.target.value })}
 										/>
 										{[
@@ -661,7 +699,7 @@ export const App = () => {
 										<Form.Input
 											type="text"
 											value={containerForm.basicAcl}
-											className={isSending && containerForm.basicAcl === '' ? 'is-error' : ""}
+											className={isError.active && isError.type.indexOf('basicAcl') !== -1 ? 'is-error' : ""}
 											onChange={(e) => setContainerForm({ ...containerForm , basicAcl: e.target.value })}
 										/>
 										{[
@@ -692,6 +730,7 @@ export const App = () => {
 													<Form.Input
 														placeholder="Key"
 														value={attribute.key}
+														className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.key.length === 0 ? 'is-error' : ""}
 														onChange={(e) => {
 															const attributesTemp = [...attributes];
 															attributesTemp[index].key = e.target.value;
@@ -703,6 +742,7 @@ export const App = () => {
 													<Form.Input
 														placeholder="Value"
 														value={attribute.value}
+														className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.value.length === 0 ? 'is-error' : ""}
 														onChange={(e) => {
 															const attributesTemp = [...attributes];
 															attributesTemp[index].value = e.target.value;
@@ -743,13 +783,9 @@ export const App = () => {
 										Add attribute
 									</Button>
 								</Form.Field>
-								{isSending && (!(containerForm.containerName.length >= 3 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0) || attributes.some((attribute) => attribute.key.length <= 0 || attribute.value.length <= 0))&& (
+								{isError.active && (
 									<Notification className="error_message" style={{ margin: '20px 0' }}>
-										{attributes.some((attribute) => attribute.key.length <= 0 || attribute.value.length <= 0) ? (
-											'Attributes should not be empty.'
-										) : (
-											<span>{containerForm.containerName.length > 0 && containerForm.containerName.length < 3 ? 'Container name must contain at least 3 characters.' : 'Please fill in all required fields.'}</span>
-										)}
+										{isError.text}
 									</Notification>
 								)}
 								<Button
@@ -784,12 +820,18 @@ export const App = () => {
 				<div className="modal">
 					<div
 						className="modal_close_panel"
-						onClick={onModal}
+						onClick={() => {
+							onModal();
+							setError({ active: false, type: [], text: '' });
+						}}
 					/>
 					<div className="modal_content">
 						<div
 							className="modal_close"
-							onClick={onModal}
+							onClick={() => {
+								onModal();
+								setError({ active: false, type: [], text: '' });
+							}}
 						>
 							<img
 								src="./img/close.svg"
@@ -816,6 +858,11 @@ export const App = () => {
 						) : (
 							<>
 								<Heading align="center" size={6}>Are you sure you want to delete container?</Heading>
+								{isError.active && (
+									<Notification className="error_message" style={{ margin: '20px 0' }}>
+										{isError.text}
+									</Notification>
+								)}
 								<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
 									<Button
 										color="gray"
@@ -828,7 +875,15 @@ export const App = () => {
 										color="danger"
 										onClick={() => onDeleteContainer(modal.text.containerId)}
 									>
-										Yes
+										{isLoadingForm ? (
+										<img
+											src="./img/spinner.svg"
+											className="spinner"
+											width={20}
+											height={20}
+											alt="spinner"
+										/>
+									) : "Yes"}
 									</Button>
 								</div>
 							</>
@@ -843,7 +898,7 @@ export const App = () => {
 						onClick={() => {
 							onModal();
 							setAttributes([]);
-							setSending(false);
+							setError({ active: false, type: [], text: '' });
 							setObjectForm({
 								name: '',
 								base64file: '',
@@ -857,7 +912,7 @@ export const App = () => {
 							onClick={() => {
 								onModal();
 								setAttributes([]);
-								setSending(false);
+								setError({ active: false, type: [], text: '' });
 								setObjectForm({
 									name: '',
 									base64file: '',
@@ -896,7 +951,7 @@ export const App = () => {
 										) : (
 											<label
 												htmlFor="upload"
-												className={isSending && objectForm.name === '' ? 'is-error' : ""}
+												className={isError.active && isError.type.indexOf('objectName') !== -1 ? 'is-error' : ""}
 												style={objectForm.name ? { background: '#f5f5f5', borderStyle: 'double' } : {}}
 											>{objectForm.name ? objectForm.name : 'Upload object'}</label>
 										)}
@@ -917,6 +972,7 @@ export const App = () => {
 													<Form.Input
 														placeholder="Key"
 														value={attribute.key}
+														className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.key.length === 0 ? 'is-error' : ""}
 														onChange={(e) => {
 															const attributesTemp = [...attributes];
 															attributesTemp[index].key = e.target.value;
@@ -928,6 +984,7 @@ export const App = () => {
 													<Form.Input
 														placeholder="Value"
 														value={attribute.value}
+														className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.value.length === 0 ? 'is-error' : ""}
 														onChange={(e) => {
 															const attributesTemp = [...attributes];
 															attributesTemp[index].value = e.target.value;
@@ -968,9 +1025,9 @@ export const App = () => {
 										Add attribute
 									</Button>
 								</Form.Field>
-								{isSending && (objectForm.name === '' || attributes.some((attribute) => attribute.key.length <= 0 || attribute.value.length <= 0)) && (
+								{isError.active && (
 									<Notification className="error_message" style={{ margin: '20px 0' }}>
-										{objectForm.name === '' ? 'Object should not be empty.' : 'Attributes should not be empty.'}
+										{isError.text}
 									</Notification>
 								)}
 								<Button
@@ -1005,12 +1062,18 @@ export const App = () => {
 				<div className="modal">
 					<div
 						className="modal_close_panel"
-						onClick={onModal}
+						onClick={() => {
+							onModal();
+							setError({ active: false, type: [], text: '' });
+						}}
 					/>
 					<div className="modal_content">
 						<div
 							className="modal_close"
-							onClick={onModal}
+							onClick={() => {
+								onModal();
+								setError({ active: false, type: [], text: '' });
+							}}
 						>
 							<img
 								src="./img/close.svg"
@@ -1037,6 +1100,11 @@ export const App = () => {
 						) : (
 							<>
 								<Heading align="center" size={6}>Are you sure you want to delete object?</Heading>
+								{isError.active && (
+									<Notification className="error_message" style={{ margin: '20px 0' }}>
+										{isError.text}
+									</Notification>
+								)}
 								<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
 									<Button
 										color="gray"
@@ -1049,7 +1117,15 @@ export const App = () => {
 										color="danger"
 										onClick={() => onDeleteObject(modal.text.containerId, modal.text.objectId)}
 									>
-										Yes
+										{isLoadingForm ? (
+											<img
+												src="./img/spinner.svg"
+												className="spinner"
+												width={20}
+												height={20}
+												alt="spinner"
+											/>
+										) : "Yes"}
 									</Button>
 								</div>
 							</>
