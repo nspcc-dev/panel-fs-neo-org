@@ -175,8 +175,8 @@ const File = ({
 								<Heading size={7} weight="bolder" style={{ color: '#828282' }}>Attributes</Heading>
 								{objectDate.attributes.map((attribute) => (
 									<Heading size={6} weight="light" key={attribute.key}>
-										<span>{`${attribute.key === 'Timestamp' ? 'Creation' : attribute.key}: `}</span>
-										{attribute.key === 'Timestamp' ? new Date(attribute.value * 1000).toLocaleDateString() : attribute.value}
+										<span>{`${attribute.key}: `}</span>
+										{attribute.value}
 									</Heading>
 								))}
 							</Section>
