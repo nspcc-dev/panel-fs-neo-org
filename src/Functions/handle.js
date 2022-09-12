@@ -67,7 +67,9 @@ export function formatForTreeView(objects) {
 export function formatForContainerName(attributes, containerId) {
 	if (attributes.length > 0) {
 		const pos = attributes.map((item) => item.key).indexOf('Name');
-		return attributes[pos].value;
+		if (pos !== -1) {
+			return attributes[pos].value;
+		}
 	}
 	return containerId;
 }
