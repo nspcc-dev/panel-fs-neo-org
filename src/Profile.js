@@ -64,23 +64,31 @@ const Profile = ({
 	const onNeoFSBalance = async () => {
 		setIsLoadingNeoFSBalance(true);
 		api('GET', `/accounting/balance/${walletData.account}`).then((e) => {
-			onPopup('success', 'NeoFS balance has been updated');
-			setNeoFSBalance(e.value);
-			setTimeout(() => {
-				setIsLoadingNeoFSBalance(false);
-			}, 500);
+			if (e.message) {
+				onPopup('failed', e.message);
+			} else {
+				onPopup('success', 'NeoFS balance has been updated');
+				setNeoFSBalance(e.value);
+				setTimeout(() => {
+					setIsLoadingNeoFSBalance(false);
+				}, 500);
+			}
 		});
 	};
 
 	const onGetContainers = () => {
 		setIsLoadingContainers(true);
 		api('GET', `/containers?ownerId=${walletData.account}`).then((e) => {
-			onPopup('success', 'Containers has been updated');
-			setContainers(e.containers);
 			onModal();
-			setTimeout(() => {
-				setIsLoadingContainers(false);
-			}, 1000);
+			if (e.message) {
+				onPopup('failed', e.message);
+			} else {
+				onPopup('success', 'Containers has been updated');
+				setContainers(e.containers);
+				setTimeout(() => {
+					setIsLoadingContainers(false);
+				}, 1000);
+			}
 		});
 	};
 
