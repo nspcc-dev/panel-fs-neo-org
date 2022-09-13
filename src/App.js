@@ -17,6 +17,7 @@ import {
 } from 'react-bulma-components';
 import Home from './Home';
 import Profile from './Profile';
+import EACLPanel from './Components/EACLPanel/EACLPanel';
 import api from './api';
 import { useWalletConnect } from "@cityofzion/wallet-connect-sdk-react";
 import { CopyToClipboardBlock } from './CopyToClipboardBlock';
@@ -50,6 +51,8 @@ export const App = () => {
 		containerName: '',
 		placementPolicy: '',
 		basicAcl: '',
+		eACLParams: [],
+		preset: 'custom',
 	});
 	const [walletData, setWalletData] = useState(null);
 
@@ -155,63 +158,69 @@ export const App = () => {
 	};
 
 	const onCreateContainer = () => {
-		if (attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0)) {
-			if (containerForm.containerName.length > 0 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0) {
-				if (containerForm.containerName.length >= 3) {
-					setError({ active: false, type: [], text: '' });
-					setLoadingForm(true);
-					api('PUT', '/containers?walletConnect=true&name-scope-global=true', {
-						"containerName": containerForm.containerName,
-						"placementPolicy": containerForm.placementPolicy,
-						"basicAcl": containerForm.basicAcl,
-						"attributes": attributes,
-					}, {
-						[ContentTypeHeader]: "application/json",
-						[AuthorizationHeader]: `Bearer ${walletData.tokens.container.PUT.token}`,
-						[BearerOwnerIdHeader]: walletData.account,
-						[BearerSignatureHeader]: walletData.tokens.container.PUT.signature,
-						[BearerSignatureKeyHeader]: walletData.publicKey,
-					}).then((e) => {
-						setLoadingForm(false);
-						if (e.message && e.message.indexOf('insufficient balance to create container') !== -1) {
-							setError({ active: true, type: [], text: 'Insufficient balance to create container' });
-						} else if (e.message && e.message.indexOf('name is already taken') !== -1) {
-							setError({ active: true, type: ['containerName'], text: 'Name is already taken' });
-						} else if (e.message && e.message.indexOf('couldn\'t parse placement policy') !== -1) {
-							setError({ active: true, type: ['placementPolicy'], text: 'Incorrect placement policy' });
-						} else if (e.message && e.message.indexOf('couldn\'t parse basic acl') !== -1) {
-							setError({ active: true, type: ['basicAcl'], text: 'Incorrect basic acl' });
-						} else if (e.message) {
-							setError({ active: true, type: [], text: e.message });
-						} else {
-							onPopup('success', 'New container has been created');
-							setLoadContainers(true);
-							setContainerForm({
-								containerName: '',
-								placementPolicy: '',
-								basicAcl: '',
-							});
-							setAttributes([]);
-						}
-					});
+		if (containerForm.eACLParams.every((eACLItem) => eACLItem.operation !== '' && eACLItem.action !== '' && eACLItem.targets[0].role !== '' && eACLItem.filters.every((filterItem) => filterItem.headerType !== '' && filterItem.matchType !== '' && filterItem.key !== '' && filterItem.value !== ''))) {
+			if (attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0)) {
+				if (containerForm.containerName.length > 0 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0) {
+					if (containerForm.containerName.length >= 3) {
+						setError({ active: false, type: [], text: '' });
+						setLoadingForm(true);
+						api('PUT', '/containers?walletConnect=true&name-scope-global=true', {
+							"containerName": containerForm.containerName,
+							"placementPolicy": containerForm.placementPolicy,
+							"basicAcl": containerForm.basicAcl,
+							"attributes": attributes,
+						}, {
+							[ContentTypeHeader]: "application/json",
+							[AuthorizationHeader]: `Bearer ${walletData.tokens.container.PUT.token}`,
+							[BearerOwnerIdHeader]: walletData.account,
+							[BearerSignatureHeader]: walletData.tokens.container.PUT.signature,
+							[BearerSignatureKeyHeader]: walletData.publicKey,
+						}).then((e) => {
+							setLoadingForm(false);
+							if (e.message && e.message.indexOf('insufficient balance to create container') !== -1) {
+								setError({ active: true, type: [], text: 'Insufficient balance to create container' });
+							} else if (e.message && e.message.indexOf('name is already taken') !== -1) {
+								setError({ active: true, type: ['containerName'], text: 'Name is already taken' });
+							} else if (e.message && e.message.indexOf('couldn\'t parse placement policy') !== -1) {
+								setError({ active: true, type: ['placementPolicy'], text: 'Incorrect placement policy' });
+							} else if (e.message && e.message.indexOf('couldn\'t parse basic acl') !== -1) {
+								setError({ active: true, type: ['basicAcl'], text: 'Incorrect basic acl' });
+							} else if (e.message) {
+								setError({ active: true, type: [], text: e.message });
+							} else {
+								onPopup('success', 'New container has been created');
+								setLoadContainers(true);
+								setContainerForm({
+									containerName: '',
+									placementPolicy: '',
+									basicAcl: '',
+									eACLParams: [],
+									preset: 'custom',
+								});
+								setAttributes([]);
+							}
+						});
+					} else {
+						setError({ active: true, type: ['containerName'], text: 'Container name must contain at least 3 characters.' });
+					}
 				} else {
-					setError({ active: true, type: ['containerName'], text: 'Container name must contain at least 3 characters.' });
+					let fields = [];
+					if (containerForm.containerName.length === 0) {
+						fields.push('containerName');
+					}
+					if (containerForm.placementPolicy.length === 0) {
+						fields.push('placementPolicy');
+					}
+					if (containerForm.basicAcl.length === 0) {
+						fields.push('basicAcl');
+					}
+					setError({ active: true, type: fields, text: 'Please fill in all required fields.' });
 				}
 			} else {
-				let fields = [];
-				if (containerForm.containerName.length === 0) {
-					fields.push('containerName');
-				}
-				if (containerForm.placementPolicy.length === 0) {
-					fields.push('placementPolicy');
-				}
-				if (containerForm.basicAcl.length === 0) {
-					fields.push('basicAcl');
-				}
-				setError({ active: true, type: fields, text: 'Please fill in all required fields.' });
+				setError({ active: true, type: ['attributes'], text: 'Attributes should not be empty.' });
 			}
 		} else {
-			setError({ active: true, type: ['attributes'], text: 'Attributes should not be empty.' });
+			setError({ active: true, type: ['eacl'], text: 'Please fill in all required fields in Extended ACL section.' });
 		}
 	};
 
@@ -615,6 +624,8 @@ export const App = () => {
 								containerName: '',
 								placementPolicy: '',
 								basicAcl: '',
+								eACLParams: [],
+								preset: 'custom',
 							});
 						}}
 					/>
@@ -629,6 +640,8 @@ export const App = () => {
 									containerName: '',
 									placementPolicy: '',
 									basicAcl: '',
+									eACLParams: [],
+									preset: 'custom',
 								});
 							}}
 						>
@@ -694,34 +707,6 @@ export const App = () => {
 									</Form.Control>
 								</Form.Field>
 								<Form.Field>
-									<Form.Label>Basic acl</Form.Label>
-									<Form.Control>
-										<Form.Input
-											type="text"
-											value={containerForm.basicAcl}
-											className={isError.active && isError.type.indexOf('basicAcl') !== -1 ? 'is-error' : ""}
-											onChange={(e) => setContainerForm({ ...containerForm , basicAcl: e.target.value })}
-										/>
-										{[
-											'private',
-											'eacl-private',
-											'public-read',
-											'eacl-public-read',
-											'public-read-write',
-											'eacl-public-read-write',
-											'public-append',
-											'eacl-public-append',
-											'0x1C8C8CCC',
-										].map((basicAclExample) => (
-											<Tag
-												key={basicAclExample}
-												onClick={() => setContainerForm({ ...containerForm , basicAcl: basicAclExample })}
-												style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
-											>{basicAclExample}</Tag>
-										))}
-									</Form.Control>
-								</Form.Field>
-								<Form.Field>
 									<Form.Label>Attributes</Form.Label>
 									<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
 										{attributes.map((attribute, index) => (
@@ -782,6 +767,104 @@ export const App = () => {
 									>
 										Add attribute
 									</Button>
+								</Form.Field>
+								<Form.Field>
+									<Form.Label>Access Control</Form.Label>
+									{[{
+											preset: 'personal',
+											basicAcl: 'eacl-public-read-write',
+											eACLParams: [{
+												"operation": "GET",
+												"action": "DENY",
+												"filters": [],
+												"targets": [{ "keys": [], "role": "OTHERS" }],
+											}, {
+												"operation": "HEAD",
+												"action": "DENY",
+												"filters": [],
+												"targets": [{ "keys": [], "role": "OTHERS" }],
+											}, {
+												"operation": "PUT",
+												"action": "DENY",
+												"filters": [],
+												"targets": [{ "keys": [], "role": "OTHERS" }],
+											}, {
+												"operation": "DELETE",
+												"action": "DENY",
+												"filters": [],
+												"targets": [{ "keys": [], "role": "OTHERS" }],
+											}, {
+												"operation": "SEARCH",
+												"action": "DENY",
+												"filters": [],
+												"targets": [{ "keys": [], "role": "OTHERS" }],
+											}, {
+												"operation": "RANGE",
+												"action": "DENY",
+												"filters": [],
+												"targets": [{ "keys": [], "role": "OTHERS" }],
+											}, {
+												"operation": "RANGEHASH",
+												"action": "DENY",
+												"filters": [],
+												"targets": [{ "keys": [], "role": "OTHERS" }],
+											}],
+										}, {
+											preset: 'shared',
+											basicAcl: 'eacl-public-read-write',
+											eACLParams: [{
+												"operation": "PUT",
+												"action": "DENY",
+												"filters": [],
+												"targets": [{ "keys": [], "role": "OTHERS" }],
+											}, {
+												"operation": "DELETE",
+												"action": "DENY",
+												"filters": [],
+												"targets": [{ "keys": [], "role": "OTHERS" }],
+											}],
+										}, {
+											preset: 'custom',
+											basicAcl: '',
+											eACLParams: [],
+									}].map((basicAclExample) => (
+										<Tag
+											key={basicAclExample.preset}
+											onClick={() => setContainerForm({
+												...containerForm,
+												basicAcl: basicAclExample.basicAcl,
+												eACLParams: basicAclExample.eACLParams,
+												preset: basicAclExample.preset,
+											})}
+											style={basicAclExample.preset === containerForm.preset ? {
+												margin: '5px 5px 0 0',
+												cursor: 'pointer',
+												background: '#21b87e',
+												color: '#fff',
+											} : {
+												margin: '5px 5px 0 0',
+												cursor: 'pointer',
+											}}
+										>{basicAclExample.preset}</Tag>
+									))}
+								</Form.Field>
+								<Form.Field>
+									<Form.Label size="small">Basic ACL</Form.Label>
+									<Form.Control>
+										<Form.Input
+											type="text"
+											value={containerForm.basicAcl}
+											className={isError.active && isError.type.indexOf('basicAcl') !== -1 ? 'is-error' : ""}
+											onChange={(e) => setContainerForm({ ...containerForm , basicAcl: e.target.value })}
+										/>
+									</Form.Control>
+									<Form.Label size="small" style={{ marginTop: 10 }}>Extended ACL</Form.Label>
+									<EACLPanel
+										isErrorParent={isError}
+										isEdit={!(containerForm.preset === 'personal' || containerForm.preset === 'shared')}
+										eACLParams={containerForm.eACLParams}
+										setEACLParams={(e) => setContainerForm({ ...containerForm, eACLParams: e })}
+									/>
 								</Form.Field>
 								{isError.active && (
 									<Notification className="error_message" style={{ margin: '20px 0' }}>
