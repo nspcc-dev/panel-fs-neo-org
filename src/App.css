@@ -98,6 +98,11 @@ ul {
     flex-basis: 33%;
 }
 
+a.panel-block:hover,
+label.panel-block:hover {
+    background: #fff;
+}
+
 .container_panel {
     margin: 20px 0 10px;
 }
