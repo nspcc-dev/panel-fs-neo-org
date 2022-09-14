@@ -361,6 +361,18 @@ label.panel-block:hover {
     margin: 10px;
 }
 
+.modal_scroll {
+    overflow: scroll;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.modal_scroll .modal_content {
+    position: relative;
+}
+
 .modal_highlighted_copy {
     font-size: 12px;
     font-family: monospace;

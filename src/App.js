@@ -629,273 +629,275 @@ export const App = () => {
 							});
 						}}
 					/>
-					<div className="modal_content">
-						<div
-							className="modal_close"
-							onClick={() => {
-								onModal();
-								setAttributes([]);
-								setError({ active: false, type: [], text: '' });
-								setContainerForm({
-									containerName: '',
-									placementPolicy: '',
-									basicAcl: '',
-									eACLParams: [],
-									preset: 'custom',
-								});
-							}}
-						>
-							<img
-								src="./img/close.svg"
-								height={30}
-								width={30}
-								alt="loader"
-							/>
-						</div>
-						<Heading align="center" size={5}>New container</Heading>
-						{!walletData.tokens.container.PUT ? (
-							<>
-								<Heading align="center" size={6} weight="normal">To use creation function, you must use signed user token</Heading>
-								<div className="token_status_panel">
-									<div>For creation operations</div>
-									<Button
-										color="primary"
-										size="small"
-										onClick={() => onAuth('container', 'PUT')}
-									>
-										Sign
-									</Button>
-								</div>
-							</>
-						) : (
-							<>
-								{modal.text.neoFSBalance === 0 && (
-									<Notification className="error_message" style={{ margin: '20px 0' }}>
-										Container creation is a paid operation, make sure you have sufficient NeoFS balance
-									</Notification>
-								)}
-								<Form.Field>
-									<Form.Label>Name</Form.Label>
-									<Form.Control>
-										<Form.Input
-											type="text"
-											value={containerForm.containerName}
-											className={isError.active && isError.type.indexOf('containerName') !== -1 ? 'is-error' : ""}
-											onChange={(e) => setContainerForm({ ...containerForm , containerName: e.target.value })}
-										/>
-									</Form.Control>
-								</Form.Field>
-								<Form.Field>
-									<Form.Label>Placement policy</Form.Label>
-									<Form.Control>
-										<Form.Input
-											type="text"
-											value={containerForm.placementPolicy}
-											className={isError.active && isError.type.indexOf('placementPolicy') !== -1 ? 'is-error' : ""}
-											onChange={(e) => setContainerForm({ ...containerForm , placementPolicy: e.target.value })}
-										/>
-										{[
-											'REP 2 IN X CBF 3 SELECT 2 FROM * AS X',
-											'REP 3',
-										].map((placementPolicyExample) => (
-											<Tag
-												key={placementPolicyExample}
-												onClick={() => setContainerForm({ ...containerForm , placementPolicy: placementPolicyExample })}
-												style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
-											>{placementPolicyExample}</Tag>
-										))}
-									</Form.Control>
-								</Form.Field>
-								<Form.Field>
-									<Form.Label>Attributes</Form.Label>
-									<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
-										{attributes.map((attribute, index) => (
-											<Form.Field kind="group" key={index}>
-												<Form.Control>
-													<Form.Input
-														placeholder="Key"
-														value={attribute.key}
-														className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.key.length === 0 ? 'is-error' : ""}
-														onChange={(e) => {
-															const attributesTemp = [...attributes];
-															attributesTemp[index].key = e.target.value;
-															setAttributes(attributesTemp);
-														}}
-													/>
-												</Form.Control>
-												<Form.Control>
-													<Form.Input
-														placeholder="Value"
-														value={attribute.value}
-														className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.value.length === 0 ? 'is-error' : ""}
-														onChange={(e) => {
-															const attributesTemp = [...attributes];
-															attributesTemp[index].value = e.target.value;
-															setAttributes(attributesTemp);
-														}}
-													/>
-												</Form.Control>
-												<Form.Control>
-													<img
-														src="./img/trashbin.svg"
-														width={30}
-														height={30}
-														alt="delete"
-														style={{ cursor: 'pointer', margin: 4 }}
-														onClick={() => {
-															let attributesTemp = [...attributes];
-															attributesTemp.splice(index, 1);
-															setAttributes(attributesTemp);
-														}}
-													/>
-												</Form.Control>
-											</Form.Field>
-										))}
+					<div className="modal_scroll">
+						<div className="modal_content">
+							<div
+								className="modal_close"
+								onClick={() => {
+									onModal();
+									setAttributes([]);
+									setError({ active: false, type: [], text: '' });
+									setContainerForm({
+										containerName: '',
+										placementPolicy: '',
+										basicAcl: '',
+										eACLParams: [],
+										preset: 'custom',
+									});
+								}}
+							>
+								<img
+									src="./img/close.svg"
+									height={30}
+									width={30}
+									alt="loader"
+								/>
+							</div>
+							<Heading align="center" size={5}>New container</Heading>
+							{!walletData.tokens.container.PUT ? (
+								<>
+									<Heading align="center" size={6} weight="normal">To use creation function, you must use signed user token</Heading>
+									<div className="token_status_panel">
+										<div>For creation operations</div>
+										<Button
+											color="primary"
+											size="small"
+											onClick={() => onAuth('container', 'PUT')}
+										>
+											Sign
+										</Button>
 									</div>
+								</>
+							) : (
+								<>
+									{modal.text.neoFSBalance === 0 && (
+										<Notification className="error_message" style={{ margin: '20px 0' }}>
+											Container creation is a paid operation, make sure you have sufficient NeoFS balance
+										</Notification>
+									)}
+									<Form.Field>
+										<Form.Label>Name</Form.Label>
+										<Form.Control>
+											<Form.Input
+												type="text"
+												value={containerForm.containerName}
+												className={isError.active && isError.type.indexOf('containerName') !== -1 ? 'is-error' : ""}
+												onChange={(e) => setContainerForm({ ...containerForm , containerName: e.target.value })}
+											/>
+										</Form.Control>
+									</Form.Field>
+									<Form.Field>
+										<Form.Label>Placement policy</Form.Label>
+										<Form.Control>
+											<Form.Input
+												type="text"
+												value={containerForm.placementPolicy}
+												className={isError.active && isError.type.indexOf('placementPolicy') !== -1 ? 'is-error' : ""}
+												onChange={(e) => setContainerForm({ ...containerForm , placementPolicy: e.target.value })}
+											/>
+											{[
+												'REP 2 IN X CBF 3 SELECT 2 FROM * AS X',
+												'REP 3',
+											].map((placementPolicyExample) => (
+												<Tag
+													key={placementPolicyExample}
+													onClick={() => setContainerForm({ ...containerForm , placementPolicy: placementPolicyExample })}
+													style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
+												>{placementPolicyExample}</Tag>
+											))}
+										</Form.Control>
+									</Form.Field>
+									<Form.Field>
+										<Form.Label>Attributes</Form.Label>
+										<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
+											{attributes.map((attribute, index) => (
+												<Form.Field kind="group" key={index}>
+													<Form.Control>
+														<Form.Input
+															placeholder="Key"
+															value={attribute.key}
+															className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.key.length === 0 ? 'is-error' : ""}
+															onChange={(e) => {
+																const attributesTemp = [...attributes];
+																attributesTemp[index].key = e.target.value;
+																setAttributes(attributesTemp);
+															}}
+														/>
+													</Form.Control>
+													<Form.Control>
+														<Form.Input
+															placeholder="Value"
+															value={attribute.value}
+															className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.value.length === 0 ? 'is-error' : ""}
+															onChange={(e) => {
+																const attributesTemp = [...attributes];
+																attributesTemp[index].value = e.target.value;
+																setAttributes(attributesTemp);
+															}}
+														/>
+													</Form.Control>
+													<Form.Control>
+														<img
+															src="./img/trashbin.svg"
+															width={30}
+															height={30}
+															alt="delete"
+															style={{ cursor: 'pointer', margin: 4 }}
+															onClick={() => {
+																let attributesTemp = [...attributes];
+																attributesTemp.splice(index, 1);
+																setAttributes(attributesTemp);
+															}}
+														/>
+													</Form.Control>
+												</Form.Field>
+											))}
+										</div>
+										<Button
+											color="primary"
+											size="small"
+											onClick={() => {
+												let attributesTemp = [...attributes];
+												attributesTemp.push({
+													key: "",
+													value: "",
+												});
+												setAttributes(attributesTemp);
+											}}
+											style={{ display: 'flex', margin: '10px auto 0' }}
+										>
+											Add attribute
+										</Button>
+									</Form.Field>
+									<Form.Field>
+										<Form.Label>Access Control</Form.Label>
+										{[{
+												preset: 'personal',
+												basicAcl: 'eacl-public-read-write',
+												eACLParams: [{
+													"operation": "GET",
+													"action": "DENY",
+													"filters": [],
+													"targets": [{ "keys": [], "role": "OTHERS" }],
+												}, {
+													"operation": "HEAD",
+													"action": "DENY",
+													"filters": [],
+													"targets": [{ "keys": [], "role": "OTHERS" }],
+												}, {
+													"operation": "PUT",
+													"action": "DENY",
+													"filters": [],
+													"targets": [{ "keys": [], "role": "OTHERS" }],
+												}, {
+													"operation": "DELETE",
+													"action": "DENY",
+													"filters": [],
+													"targets": [{ "keys": [], "role": "OTHERS" }],
+												}, {
+													"operation": "SEARCH",
+													"action": "DENY",
+													"filters": [],
+													"targets": [{ "keys": [], "role": "OTHERS" }],
+												}, {
+													"operation": "RANGE",
+													"action": "DENY",
+													"filters": [],
+													"targets": [{ "keys": [], "role": "OTHERS" }],
+												}, {
+													"operation": "RANGEHASH",
+													"action": "DENY",
+													"filters": [],
+													"targets": [{ "keys": [], "role": "OTHERS" }],
+												}],
+											}, {
+												preset: 'shared',
+												basicAcl: 'eacl-public-read-write',
+												eACLParams: [{
+													"operation": "PUT",
+													"action": "DENY",
+													"filters": [],
+													"targets": [{ "keys": [], "role": "OTHERS" }],
+												}, {
+													"operation": "DELETE",
+													"action": "DENY",
+													"filters": [],
+													"targets": [{ "keys": [], "role": "OTHERS" }],
+												}],
+											}, {
+												preset: 'custom',
+												basicAcl: '',
+												eACLParams: [],
+										}].map((basicAclExample) => (
+											<Tag
+												key={basicAclExample.preset}
+												onClick={() => setContainerForm({
+													...containerForm,
+													basicAcl: basicAclExample.basicAcl,
+													eACLParams: basicAclExample.eACLParams,
+													preset: basicAclExample.preset,
+												})}
+												style={basicAclExample.preset === containerForm.preset ? {
+													margin: '5px 5px 0 0',
+													cursor: 'pointer',
+													background: '#21b87e',
+													color: '#fff',
+												} : {
+													margin: '5px 5px 0 0',
+													cursor: 'pointer',
+												}}
+											>{basicAclExample.preset}</Tag>
+										))}
+									</Form.Field>
+									<Form.Field>
+										<Form.Label size="small">Basic ACL</Form.Label>
+										<Form.Control>
+											<Form.Input
+												type="text"
+												value={containerForm.basicAcl}
+												className={isError.active && isError.type.indexOf('basicAcl') !== -1 ? 'is-error' : ""}
+												onChange={(e) => setContainerForm({ ...containerForm , basicAcl: e.target.value })}
+											/>
+										</Form.Control>
+										<Form.Label size="small" style={{ marginTop: 10 }}>Extended ACL</Form.Label>
+										<EACLPanel
+											isErrorParent={isError}
+											isEdit={!(containerForm.preset === 'personal' || containerForm.preset === 'shared')}
+											eACLParams={containerForm.eACLParams}
+											setEACLParams={(e) => setContainerForm({ ...containerForm, eACLParams: e })}
+										/>
+									</Form.Field>
+									{isError.active && (
+										<Notification className="error_message" style={{ margin: '20px 0' }}>
+											{isError.text}
+										</Notification>
+									)}
 									<Button
 										color="primary"
-										size="small"
-										onClick={() => {
-											let attributesTemp = [...attributes];
-											attributesTemp.push({
-												key: "",
-												value: "",
-											});
-											setAttributes(attributesTemp);
+										onClick={onCreateContainer}
+										style={isLoadingForm ? {
+											display: 'flex',
+											margin: '30px auto 0',
+											pointerEvents: 'none',
+											opacity: 0.8,
+										} : {
+											display: 'flex',
+											margin: '30px auto 0',
 										}}
-										style={{ display: 'flex', margin: '10px auto 0' }}
 									>
-										Add attribute
+										{isLoadingForm ? (
+											<img
+												src="./img/spinner.svg"
+												className="spinner"
+												width={20}
+												height={20}
+												alt="spinner"
+											/>
+										) : "Create"}
 									</Button>
-								</Form.Field>
-								<Form.Field>
-									<Form.Label>Access Control</Form.Label>
-									{[{
-											preset: 'personal',
-											basicAcl: 'eacl-public-read-write',
-											eACLParams: [{
-												"operation": "GET",
-												"action": "DENY",
-												"filters": [],
-												"targets": [{ "keys": [], "role": "OTHERS" }],
-											}, {
-												"operation": "HEAD",
-												"action": "DENY",
-												"filters": [],
-												"targets": [{ "keys": [], "role": "OTHERS" }],
-											}, {
-												"operation": "PUT",
-												"action": "DENY",
-												"filters": [],
-												"targets": [{ "keys": [], "role": "OTHERS" }],
-											}, {
-												"operation": "DELETE",
-												"action": "DENY",
-												"filters": [],
-												"targets": [{ "keys": [], "role": "OTHERS" }],
-											}, {
-												"operation": "SEARCH",
-												"action": "DENY",
-												"filters": [],
-												"targets": [{ "keys": [], "role": "OTHERS" }],
-											}, {
-												"operation": "RANGE",
-												"action": "DENY",
-												"filters": [],
-												"targets": [{ "keys": [], "role": "OTHERS" }],
-											}, {
-												"operation": "RANGEHASH",
-												"action": "DENY",
-												"filters": [],
-												"targets": [{ "keys": [], "role": "OTHERS" }],
-											}],
-										}, {
-											preset: 'shared',
-											basicAcl: 'eacl-public-read-write',
-											eACLParams: [{
-												"operation": "PUT",
-												"action": "DENY",
-												"filters": [],
-												"targets": [{ "keys": [], "role": "OTHERS" }],
-											}, {
-												"operation": "DELETE",
-												"action": "DENY",
-												"filters": [],
-												"targets": [{ "keys": [], "role": "OTHERS" }],
-											}],
-										}, {
-											preset: 'custom',
-											basicAcl: '',
-											eACLParams: [],
-									}].map((basicAclExample) => (
-										<Tag
-											key={basicAclExample.preset}
-											onClick={() => setContainerForm({
-												...containerForm,
-												basicAcl: basicAclExample.basicAcl,
-												eACLParams: basicAclExample.eACLParams,
-												preset: basicAclExample.preset,
-											})}
-											style={basicAclExample.preset === containerForm.preset ? {
-												margin: '5px 5px 0 0',
-												cursor: 'pointer',
-												background: '#21b87e',
-												color: '#fff',
-											} : {
-												margin: '5px 5px 0 0',
-												cursor: 'pointer',
-											}}
-										>{basicAclExample.preset}</Tag>
-									))}
-								</Form.Field>
-								<Form.Field>
-									<Form.Label size="small">Basic ACL</Form.Label>
-									<Form.Control>
-										<Form.Input
-											type="text"
-											value={containerForm.basicAcl}
-											className={isError.active && isError.type.indexOf('basicAcl') !== -1 ? 'is-error' : ""}
-											onChange={(e) => setContainerForm({ ...containerForm , basicAcl: e.target.value })}
-										/>
-									</Form.Control>
-									<Form.Label size="small" style={{ marginTop: 10 }}>Extended ACL</Form.Label>
-									<EACLPanel
-										isErrorParent={isError}
-										isEdit={!(containerForm.preset === 'personal' || containerForm.preset === 'shared')}
-										eACLParams={containerForm.eACLParams}
-										setEACLParams={(e) => setContainerForm({ ...containerForm, eACLParams: e })}
-									/>
-								</Form.Field>
-								{isError.active && (
-									<Notification className="error_message" style={{ margin: '20px 0' }}>
-										{isError.text}
-									</Notification>
-								)}
-								<Button
-									color="primary"
-									onClick={onCreateContainer}
-									style={isLoadingForm ? {
-										display: 'flex',
-										margin: '30px auto 0',
-										pointerEvents: 'none',
-										opacity: 0.8,
-									} : {
-										display: 'flex',
-										margin: '30px auto 0',
-									}}
-								>
-									{isLoadingForm ? (
-										<img
-											src="./img/spinner.svg"
-											className="spinner"
-											width={20}
-											height={20}
-											alt="spinner"
-										/>
-									) : "Create"}
-								</Button>
-							</>
-						)}
+								</>
+							)}
+						</div>
 					</div>
 				</div>
 			)}
