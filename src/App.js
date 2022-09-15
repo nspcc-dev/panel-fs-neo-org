@@ -176,28 +176,59 @@ export const App = () => {
 							[BearerSignatureHeader]: walletData.tokens.container.PUT.signature,
 							[BearerSignatureKeyHeader]: walletData.publicKey,
 						}).then((e) => {
-							setLoadingForm(false);
 							if (e.message && e.message.indexOf('insufficient balance to create container') !== -1) {
+								setLoadingForm(false);
 								setError({ active: true, type: [], text: 'Insufficient balance to create container' });
 							} else if (e.message && e.message.indexOf('name is already taken') !== -1) {
+								setLoadingForm(false);
 								setError({ active: true, type: ['containerName'], text: 'Name is already taken' });
 							} else if (e.message && e.message.indexOf('couldn\'t parse placement policy') !== -1) {
+								setLoadingForm(false);
 								setError({ active: true, type: ['placementPolicy'], text: 'Incorrect placement policy' });
 							} else if (e.message && e.message.indexOf('couldn\'t parse basic acl') !== -1) {
+								setLoadingForm(false);
 								setError({ active: true, type: ['basicAcl'], text: 'Incorrect basic acl' });
 							} else if (e.message) {
+								setLoadingForm(false);
 								setError({ active: true, type: [], text: e.message });
 							} else {
-								onPopup('success', 'New container has been created');
-								setLoadContainers(true);
-								setContainerForm({
-									containerName: '',
-									placementPolicy: '',
-									basicAcl: '',
-									eACLParams: [],
-									preset: 'custom',
-								});
-								setAttributes([]);
+								if (containerForm.eACLParams.length > 0) {
+									api('PUT', `/containers/${e.containerId}/eacl?walletConnect=true`, {
+										"records": containerForm.eACLParams.filter((item) => delete item.isOpen),
+									}, {
+										[ContentTypeHeader]: "application/json",
+										[AuthorizationHeader]: `Bearer ${walletData.tokens.container.SETEACL.token}`,
+										[BearerOwnerIdHeader]: walletData.account,
+										[BearerSignatureHeader]: walletData.tokens.container.SETEACL.signature,
+										[BearerSignatureKeyHeader]: walletData.publicKey,
+									}).then(() => {
+										setLoadingForm(false);
+										onPopup('success', 'New container with EACL has been created');
+										setLoadContainers(true);
+										setContainerForm({
+											containerName: '',
+											placementPolicy: '',
+											basicAcl: '',
+											eACLParams: [],
+											preset: 'custom',
+										});
+										setAttributes([]);
+										onModal();
+									});
+								} else {
+									setLoadingForm(false);
+									onPopup('success', 'New container has been created');
+									setLoadContainers(true);
+									setContainerForm({
+										containerName: '',
+										placementPolicy: '',
+										basicAcl: '',
+										eACLParams: [],
+										preset: 'custom',
+									});
+									setAttributes([]);
+									onModal();
+								}
 							}
 						});
 					} else {
