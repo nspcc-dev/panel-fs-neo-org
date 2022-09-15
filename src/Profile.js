@@ -93,7 +93,7 @@ const Profile = ({
 	};
 
 	const onDeposit = async () => {
-		if (depositQuantity >= 0.000000000001) {
+		if (depositQuantity >= 0.00000001) {
 			onModal('approveRequest');
 			const senderAddress = walletConnectCtx.getAccountAddress(0);
 			const invocations = [{
@@ -102,7 +102,7 @@ const Profile = ({
 				args: [
 					{ type: 'Address', value: senderAddress },
 					{ type: 'Address', value: NeoFSContract.account },
-					{ type: 'Integer', value: depositQuantity * 1000000000000 },
+					{ type: 'Integer', value: depositQuantity * 100000000 },
 					{ type: 'ByteArray', value: '' },
 				]
 			}];
@@ -127,7 +127,7 @@ const Profile = ({
 	};
 
 	const onWithdraw = async () => {
-		if (withdrawQuantity >= 0.000000000001) {
+		if (withdrawQuantity >= 0.00000001) {
 			onModal('approveRequest');
 			const senderAddress = walletConnectCtx.getAccountAddress(0);
 			const invocations = [{
@@ -135,7 +135,7 @@ const Profile = ({
 				operation: 'withdraw',
 				args: [
 					{ type: 'Address', value: senderAddress },
-					{ type: 'Integer', value: withdrawQuantity * 1000000000000 },
+					{ type: 'Integer', value: withdrawQuantity * 100000000 },
 				]
 			}];
 
