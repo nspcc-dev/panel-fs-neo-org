@@ -654,18 +654,46 @@ export const App = () => {
 								/>
 							</div>
 							<Heading align="center" size={5}>New container</Heading>
-							{!walletData.tokens.container.PUT ? (
+							{!(walletData.tokens.container.PUT && walletData.tokens.container.SETEACL) ? (
 								<>
 									<Heading align="center" size={6} weight="normal">To use creation function, you must use signed user token</Heading>
 									<div className="token_status_panel">
 										<div>For creation operations</div>
-										<Button
-											color="primary"
-											size="small"
-											onClick={() => onAuth('container', 'PUT')}
-										>
-											Sign
-										</Button>
+										{walletData.tokens.container.PUT ? (
+											<img
+												src="./img/success.svg"
+												height={25}
+												width={25}
+												alt="success"
+											/>
+										) : (
+											<Button
+												color="primary"
+												size="small"
+												onClick={() => onAuth('container', 'PUT')}
+											>
+												Sign
+											</Button>
+										)}
+									</div>
+									<div className="token_status_panel">
+										<div>For eACL management</div>
+										{walletData.tokens.container.SETEACL ? (
+											<img
+												src="./img/success.svg"
+												height={25}
+												width={25}
+												alt="success"
+											/>
+										) : (
+											<Button
+												color="primary"
+												size="small"
+												onClick={() => onAuth('container', 'SETEACL')}
+											>
+												Sign
+											</Button>
+										)}
 									</div>
 								</>
 							) : (
