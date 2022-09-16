@@ -887,16 +887,16 @@ export const App = () => {
 												preset: 'custom',
 												basicAcl: '',
 												eACLParams: [],
-										}].map((basicAclExample) => (
+										}].map((basicPresetExample) => (
 											<Tag
-												key={basicAclExample.preset}
+												key={basicPresetExample.preset}
 												onClick={() => setContainerForm({
 													...containerForm,
-													basicAcl: basicAclExample.basicAcl,
-													eACLParams: basicAclExample.eACLParams,
-													preset: basicAclExample.preset,
+													basicAcl: basicPresetExample.basicAcl,
+													eACLParams: basicPresetExample.eACLParams,
+													preset: basicPresetExample.preset,
 												})}
-												style={basicAclExample.preset === containerForm.preset ? {
+												style={basicPresetExample.preset === containerForm.preset ? {
 													margin: '5px 5px 0 0',
 													cursor: 'pointer',
 													background: '#21b87e',
@@ -905,7 +905,7 @@ export const App = () => {
 													margin: '5px 5px 0 0',
 													cursor: 'pointer',
 												}}
-											>{basicAclExample.preset}</Tag>
+											>{basicPresetExample.preset}</Tag>
 										))}
 									</Form.Field>
 									<Form.Field>
@@ -916,7 +916,25 @@ export const App = () => {
 												value={containerForm.basicAcl}
 												className={isError.active && isError.type.indexOf('basicAcl') !== -1 ? 'is-error' : ""}
 												onChange={(e) => setContainerForm({ ...containerForm , basicAcl: e.target.value })}
+												disabled={containerForm.preset !== 'custom'}
 											/>
+											{containerForm.preset === 'custom' && ([
+												'private',
+												'eacl-private',
+												'public-read',
+												'eacl-public-read',
+												'public-read-write',
+												'eacl-public-read-write',
+												'public-append',
+												'eacl-public-append',
+												'0x1C8C8CCC',
+											].map((basicAclExample) => (
+												<Tag
+													key={basicAclExample}
+													onClick={() => setContainerForm({ ...containerForm , basicAcl: basicAclExample })}
+													style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
+												>{basicAclExample}</Tag>
+											)))}
 										</Form.Control>
 										<Form.Label size="small" style={{ marginTop: 10 }}>Extended ACL</Form.Label>
 										<EACLPanel
