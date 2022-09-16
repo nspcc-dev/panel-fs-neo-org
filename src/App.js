@@ -742,6 +742,7 @@ export const App = () => {
 												value={containerForm.containerName}
 												className={isError.active && isError.type.indexOf('containerName') !== -1 ? 'is-error' : ""}
 												onChange={(e) => setContainerForm({ ...containerForm , containerName: e.target.value })}
+												disabled={isLoadingForm}
 											/>
 										</Form.Control>
 									</Form.Field>
@@ -753,6 +754,7 @@ export const App = () => {
 												value={containerForm.placementPolicy}
 												className={isError.active && isError.type.indexOf('placementPolicy') !== -1 ? 'is-error' : ""}
 												onChange={(e) => setContainerForm({ ...containerForm , placementPolicy: e.target.value })}
+												disabled={isLoadingForm}
 											/>
 											{[
 												'REP 2 IN X CBF 3 SELECT 2 FROM * AS X',
@@ -760,7 +762,11 @@ export const App = () => {
 											].map((placementPolicyExample) => (
 												<Tag
 													key={placementPolicyExample}
-													onClick={() => setContainerForm({ ...containerForm , placementPolicy: placementPolicyExample })}
+													onClick={() => {
+														if (!isLoadingForm) {
+															setContainerForm({ ...containerForm , placementPolicy: placementPolicyExample })
+														}
+													}}
 													style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
 												>{placementPolicyExample}</Tag>
 											))}
@@ -781,6 +787,7 @@ export const App = () => {
 																attributesTemp[index].key = e.target.value;
 																setAttributes(attributesTemp);
 															}}
+															disabled={isLoadingForm}
 														/>
 													</Form.Control>
 													<Form.Control>
@@ -793,6 +800,7 @@ export const App = () => {
 																attributesTemp[index].value = e.target.value;
 																setAttributes(attributesTemp);
 															}}
+															disabled={isLoadingForm}
 														/>
 													</Form.Control>
 													<Form.Control>
@@ -803,9 +811,11 @@ export const App = () => {
 															alt="delete"
 															style={{ cursor: 'pointer', margin: 4 }}
 															onClick={() => {
-																let attributesTemp = [...attributes];
-																attributesTemp.splice(index, 1);
-																setAttributes(attributesTemp);
+																if (!isLoadingForm) {
+																	let attributesTemp = [...attributes];
+																	attributesTemp.splice(index, 1);
+																	setAttributes(attributesTemp);
+																}
 															}}
 														/>
 													</Form.Control>
@@ -816,12 +826,14 @@ export const App = () => {
 											color="primary"
 											size="small"
 											onClick={() => {
-												let attributesTemp = [...attributes];
-												attributesTemp.push({
-													key: "",
-													value: "",
-												});
-												setAttributes(attributesTemp);
+												if (!isLoadingForm) {
+													let attributesTemp = [...attributes];
+													attributesTemp.push({
+														key: "",
+														value: "",
+													});
+													setAttributes(attributesTemp);
+												}
 											}}
 											style={{ display: 'flex', margin: '10px auto 0' }}
 										>
@@ -890,12 +902,16 @@ export const App = () => {
 										}].map((basicPresetExample) => (
 											<Tag
 												key={basicPresetExample.preset}
-												onClick={() => setContainerForm({
-													...containerForm,
-													basicAcl: basicPresetExample.basicAcl,
-													eACLParams: basicPresetExample.eACLParams,
-													preset: basicPresetExample.preset,
-												})}
+												onClick={() => {
+													if (!isLoadingForm) {
+														setContainerForm({
+															...containerForm,
+															basicAcl: basicPresetExample.basicAcl,
+															eACLParams: basicPresetExample.eACLParams,
+															preset: basicPresetExample.preset,
+														})}
+													}
+												}
 												style={basicPresetExample.preset === containerForm.preset ? {
 													margin: '5px 5px 0 0',
 													cursor: 'pointer',
@@ -916,7 +932,7 @@ export const App = () => {
 												value={containerForm.basicAcl}
 												className={isError.active && isError.type.indexOf('basicAcl') !== -1 ? 'is-error' : ""}
 												onChange={(e) => setContainerForm({ ...containerForm , basicAcl: e.target.value })}
-												disabled={containerForm.preset !== 'custom'}
+												disabled={containerForm.preset !== 'custom' || isLoadingForm}
 											/>
 											{containerForm.preset === 'custom' && ([
 												'private',
@@ -931,7 +947,11 @@ export const App = () => {
 											].map((basicAclExample) => (
 												<Tag
 													key={basicAclExample}
-													onClick={() => setContainerForm({ ...containerForm , basicAcl: basicAclExample })}
+													onClick={() => {
+														if (!isLoadingForm) {
+															setContainerForm({ ...containerForm , basicAcl: basicAclExample })}
+														}
+													}
 													style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
 												>{basicAclExample}</Tag>
 											)))}
@@ -939,7 +959,7 @@ export const App = () => {
 										<Form.Label size="small" style={{ marginTop: 10 }}>Extended ACL</Form.Label>
 										<EACLPanel
 											isErrorParent={isError}
-											isEdit={!(containerForm.preset === 'personal' || containerForm.preset === 'shared')}
+											isEdit={!(containerForm.preset === 'personal' || containerForm.preset === 'shared' || isLoadingForm)}
 											eACLParams={containerForm.eACLParams}
 											setEACLParams={(e) => setContainerForm({ ...containerForm, eACLParams: e })}
 										/>
@@ -1026,13 +1046,15 @@ export const App = () => {
 									</Notification>
 								)}
 								<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
-									<Button
-										color="gray"
-										onClick={onModal}
-										style={{ marginRight: 10 }}
-									>
-										No
-									</Button>
+									{!isLoadingForm && (
+										<Button
+											color="gray"
+											onClick={onModal}
+											style={{ marginRight: 10 }}
+										>
+											No
+										</Button>
+									)}
 									<Button
 										color="danger"
 										onClick={() => onDeleteContainer(modal.text.containerId)}
@@ -1122,6 +1144,7 @@ export const App = () => {
 											type="file"
 											name="Upload"
 											onChange={onHandleObject}
+											onClick={isLoadingForm ? (e) => e.preventDefault() : () => {}}
 										/>
 									</div>
 								</Form.Field>
@@ -1140,6 +1163,7 @@ export const App = () => {
 															attributesTemp[index].key = e.target.value;
 															setAttributes(attributesTemp);
 														}}
+														disabled={isLoadingForm}
 													/>
 												</Form.Control>
 												<Form.Control>
@@ -1152,6 +1176,7 @@ export const App = () => {
 															attributesTemp[index].value = e.target.value;
 															setAttributes(attributesTemp);
 														}}
+														disabled={isLoadingForm}
 													/>
 												</Form.Control>
 												<Form.Control>
@@ -1162,9 +1187,11 @@ export const App = () => {
 														alt="delete"
 														style={{ cursor: 'pointer', margin: 4 }}
 														onClick={() => {
-															let attributesTemp = [...attributes];
-															attributesTemp.splice(index, 1);
-															setAttributes(attributesTemp);
+															if (!isLoadingForm) {
+																let attributesTemp = [...attributes];
+																attributesTemp.splice(index, 1);
+																setAttributes(attributesTemp);
+															}
 														}}
 													/>
 												</Form.Control>
@@ -1268,13 +1295,15 @@ export const App = () => {
 									</Notification>
 								)}
 								<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
-									<Button
-										color="gray"
-										onClick={onModal}
-										style={{ marginRight: 10 }}
-									>
-										No
-									</Button>
+									{!isLoadingForm && (
+										<Button
+											color="gray"
+											onClick={onModal}
+											style={{ marginRight: 10 }}
+										>
+											No
+										</Button>
+									)}
 									<Button
 										color="danger"
 										onClick={() => onDeleteObject(modal.text.containerId, modal.text.objectId)}

@@ -108,10 +108,12 @@ export default function ContainerItem({
 									alt="delete"
 									style={{ cursor: 'pointer', position: 'absolute', right: 0, top: 0 }}
 									onClick={(e) => {
-										const aECLParamsTemp = [...eACLParams];
-										aECLParamsTemp.splice(index, 1);
-										setEACLParams(aECLParamsTemp);
-										e.stopPropagation();
+										if (!isLoadingForm) {
+											const aECLParamsTemp = [...eACLParams];
+											aECLParamsTemp.splice(index, 1);
+											setEACLParams(aECLParamsTemp);
+											e.stopPropagation();
+										}
 									}}
 								/>
 							</Panel.Icon>
@@ -129,7 +131,7 @@ export default function ContainerItem({
 											aECLParamsTemp[index].operation = e.target.value;
 											setEACLParams(aECLParamsTemp);
 										}}
-										disabled={!isEdit}
+										disabled={!isEdit || isLoadingForm}
 									>
 										<option value="" disabled>Operation</option>
 										{['PUT', 'GET', 'HEAD', 'DELETE', 'SEARCH', 'RANGE', 'RANGEHASH'].map((item) => (
@@ -146,7 +148,7 @@ export default function ContainerItem({
 											aECLParamsTemp[index].action = e.target.value;
 											setEACLParams(aECLParamsTemp);
 										}}
-										disabled={!isEdit}
+										disabled={!isEdit || isLoadingForm}
 									>
 										<option value="" disabled>Action</option>
 										{['ALLOW', 'DENY'].map((item) => (
@@ -163,7 +165,7 @@ export default function ContainerItem({
 											aECLParamsTemp[index].targets[0].role = e.target.value;
 											setEACLParams(aECLParamsTemp);
 										}}
-										disabled={!isEdit}
+										disabled={!isEdit || isLoadingForm}
 									>
 										<option value="" disabled>Role</option>
 										{['USER', 'SYSTEM', 'OTHERS'].map((item) => (
@@ -184,7 +186,7 @@ export default function ContainerItem({
 												aECLParamsTemp[index].filters[filterIndex].headerType = e.target.value;
 												setEACLParams(aECLParamsTemp);
 											}}
-											disabled={!isEdit}
+											disabled={!isEdit || isLoadingForm}
 										>
 											<option value="" disabled>headerType</option>
 											{['REQUEST', 'OBJECT', 'SERVICE'].map((item) => (
@@ -201,7 +203,7 @@ export default function ContainerItem({
 												aECLParamsTemp[index].filters[filterIndex].matchType = e.target.value;
 												setEACLParams(aECLParamsTemp);
 											}}
-											disabled={!isEdit}
+											disabled={!isEdit || isLoadingForm}
 										>
 											<option value="" disabled>matchType</option>
 											{['STRING_EQUAL', 'STRING_NOT_EQUAL'].map((item) => (
@@ -219,7 +221,7 @@ export default function ContainerItem({
 												aECLParamsTemp[index].filters[filterIndex].key = e.target.value;
 												setEACLParams(aECLParamsTemp);
 											}}
-											disabled={!isEdit}
+											disabled={!isEdit || isLoadingForm}
 										/>
 									</Form.Control>
 									<Form.Control>
@@ -232,7 +234,7 @@ export default function ContainerItem({
 												aECLParamsTemp[index].filters[filterIndex].value = e.target.value;
 												setEACLParams(aECLParamsTemp);
 											}}
-											disabled={!isEdit}
+											disabled={!isEdit || isLoadingForm}
 										/>
 									</Form.Control>
 									{isEdit && (
@@ -243,9 +245,11 @@ export default function ContainerItem({
 											alt="delete"
 											style={{ cursor: 'pointer', right: 0, top: 0 }}
 											onClick={() => {
-												const aECLParamsTemp = [...eACLParams];
-												aECLParamsTemp[index].filters.splice(filterIndex, 1);
-												setEACLParams(aECLParamsTemp);
+												if (!isLoadingForm) {
+													const aECLParamsTemp = [...eACLParams];
+													aECLParamsTemp[index].filters.splice(filterIndex, 1);
+													setEACLParams(aECLParamsTemp);
+												}
 											}}
 										/>
 									)}
@@ -255,14 +259,16 @@ export default function ContainerItem({
 								<Button
 									outlined
 									onClick={() => {
-										let aECLParamsTemp = [...eACLParams];
-										aECLParamsTemp[index].filters.push({
-											headerType: "",
-											matchType: "",
-											key: "",
-											value: ""
-										});
-										setEACLParams(aECLParamsTemp);
+										if (!isLoadingForm) {
+											let aECLParamsTemp = [...eACLParams];
+											aECLParamsTemp[index].filters.push({
+												headerType: "",
+												matchType: "",
+												key: "",
+												value: ""
+											});
+											setEACLParams(aECLParamsTemp);
+										}
 									}}
 									style={{ display: 'flex', margin: 'auto' }}
 								>
@@ -279,18 +285,20 @@ export default function ContainerItem({
 						fullwidth
 						outlined
 						onClick={() => {
-							let aECLParamsTemp = [...eACLParams];
-							aECLParamsTemp.push({
-								operation: "",
-								action: "",
-								isOpen: true,
-								filters: [],
-								targets: [{
-									keys: [],
-									role: '',
-								}],
-							});
-							setEACLParams(aECLParamsTemp);
+							if (!isLoadingForm) {
+								let aECLParamsTemp = [...eACLParams];
+								aECLParamsTemp.push({
+									operation: "",
+									action: "",
+									isOpen: true,
+									filters: [],
+									targets: [{
+										keys: [],
+										role: '',
+									}],
+								});
+								setEACLParams(aECLParamsTemp);
+							}
 						}}
 					>
 						Add rule
