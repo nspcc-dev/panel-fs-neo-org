@@ -103,6 +103,16 @@ label.panel-block:hover {
     background: #fff;
 }
 
+.tag_disabled {
+    pointer-events: none !important;
+    background-color: #e9e9e9 !important;
+}
+
+.button_disabled {
+    pointer-events: none !important;
+    background-color: #8d9994 !important;
+}
+
 .container_panel {
     margin: 20px 0 10px;
 }

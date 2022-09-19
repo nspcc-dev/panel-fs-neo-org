@@ -764,11 +764,8 @@ export const App = () => {
 											].map((placementPolicyExample) => (
 												<Tag
 													key={placementPolicyExample}
-													onClick={() => {
-														if (!isLoadingForm) {
-															setContainerForm({ ...containerForm , placementPolicy: placementPolicyExample })
-														}
-													}}
+													className={isLoadingForm ? "tag_disabled" : ""}
+													onClick={() => setContainerForm({ ...containerForm , placementPolicy: placementPolicyExample })}
 													style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
 												>{placementPolicyExample}</Tag>
 											))}
@@ -827,15 +824,14 @@ export const App = () => {
 										<Button
 											color="primary"
 											size="small"
+											className={isLoadingForm ? "button_disabled" : ""}
 											onClick={() => {
-												if (!isLoadingForm) {
-													let attributesTemp = [...attributes];
-													attributesTemp.push({
-														key: "",
-														value: "",
-													});
-													setAttributes(attributesTemp);
-												}
+												let attributesTemp = [...attributes];
+												attributesTemp.push({
+													key: "",
+													value: "",
+												});
+												setAttributes(attributesTemp);
 											}}
 											style={{ display: 'flex', margin: '10px auto 0' }}
 										>
@@ -904,15 +900,14 @@ export const App = () => {
 										}].map((basicPresetExample) => (
 											<Tag
 												key={basicPresetExample.preset}
+												className={isLoadingForm && basicPresetExample.preset !== containerForm.preset ? "tag_disabled" : ""}
 												onClick={() => {
-													if (!isLoadingForm) {
-														setContainerForm({
-															...containerForm,
-															basicAcl: basicPresetExample.basicAcl,
-															eACLParams: basicPresetExample.eACLParams,
-															preset: basicPresetExample.preset,
-														})}
-													}
+													setContainerForm({
+														...containerForm,
+														basicAcl: basicPresetExample.basicAcl,
+														eACLParams: basicPresetExample.eACLParams,
+														preset: basicPresetExample.preset,
+													})}
 												}
 												style={basicPresetExample.preset === containerForm.preset ? {
 													margin: '5px 5px 0 0',
@@ -949,11 +944,8 @@ export const App = () => {
 											].map((basicAclExample) => (
 												<Tag
 													key={basicAclExample}
-													onClick={() => {
-														if (!isLoadingForm) {
-															setContainerForm({ ...containerForm , basicAcl: basicAclExample })}
-														}
-													}
+													className={isLoadingForm ? "tag_disabled" : ""}
+													onClick={() => setContainerForm({ ...containerForm , basicAcl: basicAclExample })}
 													style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
 												>{basicAclExample}</Tag>
 											)))}
@@ -1205,6 +1197,7 @@ export const App = () => {
 									<Button
 										color="primary"
 										size="small"
+										className={isLoadingForm ? "button_disabled" : ""}
 										onClick={() => {
 											let attributesTemp = [...attributes];
 											attributesTemp.push({
