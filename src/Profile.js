@@ -307,14 +307,21 @@ const Profile = ({
 									onClick={onGetContainers}
 								/>
 							</span>
-							<img
+							{/* <img
 								src="./img/settings.svg"
 								width={22}
 								height={22}
 								alt="settings"
 								style={{ marginLeft: 5, cursor: 'pointer' }}
 								onClick={() => onModal('signTokens', '')}
-							/>
+							/> */}
+							<Button
+								color="primary"
+								size="small"
+								onClick={() => onModal('createContainer', { neoFSBalance })}
+							>
+								New container
+							</Button>
 						</Heading>
 						{containers.map((containerItem, index) => (
 							<ContainerItem
@@ -334,13 +341,6 @@ const Profile = ({
 								BearerSignatureKeyHeader={BearerSignatureKeyHeader}
 							/>
 						))}
-						<Button
-							color="primary"
-							onClick={() => onModal('createContainer', { neoFSBalance })}
-							style={{ display: 'flex', margin: 'auto' }}
-						>
-							New container
-						</Button>
 					</Box>
 				</Section>
 			) : (
