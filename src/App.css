@@ -372,7 +372,7 @@ label.panel-block:hover {
 }
 
 .modal_scroll {
-    overflow-y: scroll;
+    overflow-y: auto;
     width: 100%;
     display: flex;
     justify-content: center;
