@@ -649,6 +649,7 @@ export const App = () => {
 						className="modal_close_panel"
 						onClick={() => {
 							onModal();
+							setLoadingForm(false);
 							setAttributes([]);
 							setError({ active: false, type: [], text: '' });
 							setContainerForm({
@@ -666,6 +667,7 @@ export const App = () => {
 								className="modal_close"
 								onClick={() => {
 									onModal();
+									setLoadingForm(false);
 									setAttributes([]);
 									setError({ active: false, type: [], text: '' });
 									setContainerForm({
@@ -1082,6 +1084,7 @@ export const App = () => {
 						onClick={() => {
 							onModal();
 							setAttributes([]);
+							setLoadingForm(false);
 							setError({ active: false, type: [], text: '' });
 							setObjectForm({
 								name: '',
@@ -1096,6 +1099,7 @@ export const App = () => {
 							onClick={() => {
 								onModal();
 								setAttributes([]);
+								setLoadingForm(false);
 								setError({ active: false, type: [], text: '' });
 								setObjectForm({
 									name: '',
