@@ -31,6 +31,7 @@ export default function ContainerItem({
 }) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [objects, setObjects] = useState(null);
+	const [isLoadingEACL, setLoadingEACL] = useState(false);
 	const [eACLParams, setEACLParams] = useState([]);
 	const [activePanel, setActivePanel] = useState('');
 
@@ -74,7 +75,7 @@ export default function ContainerItem({
 
 	const onGetEACL = (containerId) => {
 		if (walletData.tokens.container.SETEACL) {
-			onModal('loading');
+			setLoadingEACL(true);
 			api('GET', `/containers/${containerId}/eacl?walletConnect=true`, {}, {
 				[ContentTypeHeader]: "application/json",
 				[AuthorizationHeader]: `Bearer ${walletData.tokens.container.SETEACL.token}`,
@@ -82,7 +83,7 @@ export default function ContainerItem({
 				[BearerSignatureHeader]: walletData.tokens.container.SETEACL.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then((e) => {
-				onModal();
+				setLoadingEACL(false);
 				if (e.records) {
 					setEACLParams(e.records);
 				}
@@ -192,18 +193,30 @@ export default function ContainerItem({
 											eACL
 										</Heading>
 										{activePanel === 'eACL' && (
-											<EACLPanel
-												walletData={walletData}
-												containerItem={containerItem}
-												setLoadContainers={setLoadContainers}
-												eACLParams={eACLParams}
-												setEACLParams={setEACLParams}
-												ContentTypeHeader={ContentTypeHeader}
-												AuthorizationHeader={AuthorizationHeader}
-												BearerOwnerIdHeader={BearerOwnerIdHeader}
-												BearerSignatureHeader={BearerSignatureHeader}
-												BearerSignatureKeyHeader={BearerSignatureKeyHeader}
-											/>
+											<>
+												{!isLoadingEACL ? (
+													<EACLPanel
+														walletData={walletData}
+														containerItem={containerItem}
+														setLoadContainers={setLoadContainers}
+														eACLParams={eACLParams}
+														setEACLParams={setEACLParams}
+														ContentTypeHeader={ContentTypeHeader}
+														AuthorizationHeader={AuthorizationHeader}
+														BearerOwnerIdHeader={BearerOwnerIdHeader}
+														BearerSignatureHeader={BearerSignatureHeader}
+														BearerSignatureKeyHeader={BearerSignatureKeyHeader}
+													/>
+												) : (
+													<img
+														className="modal_loader"
+														src="./img/loader.svg"
+														height={30}
+														width={30}
+														alt="loader"
+													/>
+												)}
+											</>
 										)}
 									</Section>
 									<Section>
