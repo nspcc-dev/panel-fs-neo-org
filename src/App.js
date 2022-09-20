@@ -59,14 +59,15 @@ export const App = () => {
 	const [modal, setModal] = useState({
 		current: null,
 		text: '',
+		params: '',
 	});
 	const [popup, setPopup] = useState({
 		current: null,
 		text: '',
 	});
 
-	const onModal = (current = null, text = null) => {
-		setModal({ current, text });
+	const onModal = (current = null, text = null, params = null) => {
+		setModal({ current, text, params });
 	};
 
 	const onPopup = (current = null, text = null) => {
@@ -105,7 +106,7 @@ export const App = () => {
 		}
 	}, [walletConnectCtx.accounts]); // eslint-disable-line react-hooks/exhaustive-deps
 
-	const onAuth = async (type, operation) => {
+	const onAuth = async (type, operation, params = {}) => {
 		let body = {};
 		if (type === 'container') {
 			body = [{
@@ -131,11 +132,11 @@ export const App = () => {
 			[BearerOwnerIdHeader]: walletData.account,
 		}
 		api('POST', '/auth', body, headers).then((e) => {
-			onSignMessage(e[0].token, type, operation);
+			onSignMessage(e[0].token, type, operation, params);
 		});
 	};
 
-	const onSignMessage = async (msg = '', type, operation) => {
+	const onSignMessage = async (msg = '', type, operation, params) => {
 		const response = await walletConnectCtx.signMessage(msg);
 		if (response.result.error) {
 			onModal('failed', response.result.error.message)
@@ -148,6 +149,7 @@ export const App = () => {
 					[type]: {
 						...walletData.tokens[type],
 						[operation]: {
+							...params,
 							token: msg,
 							signature: response.result.data + response.result.salt,
 						}
@@ -552,7 +554,7 @@ export const App = () => {
 												<Button
 													color="primary"
 													size="small"
-													onClick={() => onAuth('container', 'SETEACL')}
+													onClick={() => onAuth('container', 'SETEACL', modal.params)}
 												>
 													Sign
 												</Button>
@@ -620,7 +622,7 @@ export const App = () => {
 												<Button
 													color="primary"
 													size="small"
-													onClick={() => onAuth('object', 'GET')}
+													onClick={() => onAuth('object', 'GET', modal.params)}
 												>
 													Sign
 												</Button>

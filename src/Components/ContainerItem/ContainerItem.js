@@ -42,6 +42,18 @@ export default function ContainerItem({
 		}
 	}, [isLoadContainers]); // eslint-disable-line react-hooks/exhaustive-deps
 
+	useEffect(() => {
+		if (walletData.tokens.object.GET && walletData.tokens.object.GET.containerId === containerItem.containerId) {
+			setActivePanel('objects');
+			onGetObjects(containerItem.containerId);
+			onModal();
+		} else if (walletData.tokens.container.SETEACL && walletData.tokens.container.SETEACL.containerId === containerItem.containerId) {
+			onGetEACL(containerItem.containerId);
+			setActivePanel('eACL');
+			onModal();
+		}
+	}, [walletData]); // eslint-disable-line react-hooks/exhaustive-deps
+
 	const onGetObjects = (containerId) => {
 		api('POST', `/objects/${containerId}/search?walletConnect=true`, {
 			"filters": [],
@@ -76,7 +88,7 @@ export default function ContainerItem({
 				}
 			});
 		} else {
-			onModal('signTokens', 'container.SETEACL');
+			onModal('signTokens', 'container.SETEACL', { containerId });
 		}
 	};
 
@@ -160,7 +172,7 @@ export default function ContainerItem({
 											weight="bolder"
 											onClick={() => {
 												if (!walletData.tokens.container.SETEACL) {
-													onModal('signTokens', 'container.SETEACL');
+													onModal('signTokens', 'container.SETEACL', { containerId: containerItem.containerId });
 												} else if (activePanel === 'eACL') {
 													setActivePanel('');
 												} else {
@@ -223,7 +235,7 @@ export default function ContainerItem({
 											weight="bolder"
 											onClick={() => {
 												if (!walletData.tokens.object.GET) {
-													onModal('signTokens', 'object.GET');
+													onModal('signTokens', 'object.GET', { containerId: containerItem.containerId });
 												} else if (activePanel === 'objects') {
 													setActivePanel('');
 												} else {
