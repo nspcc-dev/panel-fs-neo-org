@@ -15,6 +15,7 @@ import api from './api';
 
 const Profile = ({
 		walletData,
+		setWalletData,
 		onDisconnectWallet,
 		onModal,
 		onPopup,
@@ -326,6 +327,7 @@ const Profile = ({
 						{containers.map((containerItem, index) => (
 							<ContainerItem
 								key={containerItem.containerId}
+								setWalletData={setWalletData}
 								walletData={walletData}
 								onModal={onModal}
 								onPopup={onPopup}
