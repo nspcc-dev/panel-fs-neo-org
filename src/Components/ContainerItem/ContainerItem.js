@@ -18,6 +18,7 @@ import api from '../../api';
 export default function ContainerItem({
 	containerItem,
 	walletData,
+	setWalletData,
 	onModal,
 	onPopup,
 	index,
@@ -48,10 +49,36 @@ export default function ContainerItem({
 			setActivePanel('objects');
 			onGetObjects(containerItem.containerId);
 			onModal();
+			setWalletData({
+				...walletData,
+				tokens: {
+					...walletData.tokens,
+					object: {
+						...walletData.tokens.object,
+						GET: {
+							...walletData.tokens.object.GET,
+							containerId: null,
+						}
+					}
+				}
+			});
 		} else if (walletData.tokens.container.SETEACL && walletData.tokens.container.SETEACL.containerId === containerItem.containerId) {
 			onGetEACL(containerItem.containerId);
 			setActivePanel('eACL');
 			onModal();
+			setWalletData({
+				...walletData,
+				tokens: {
+					...walletData.tokens,
+					container: {
+						...walletData.tokens.container,
+						SETEACL: {
+							...walletData.tokens.container.SETEACL,
+							containerId: null,
+						}
+					}
+				}
+			});
 		}
 	}, [walletData]); // eslint-disable-line react-hooks/exhaustive-deps
 

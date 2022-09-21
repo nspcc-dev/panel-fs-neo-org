@@ -355,7 +355,7 @@ export const App = () => {
 
 	const onDeleteObject = (containerId, objectId) => {
 		if (walletData.tokens.object.DELETE) {
-			setError({ active: true, type: [], text: '' });
+			setError({ active: false, type: [], text: '' });
 			setLoadingForm(true);
 			api('DELETE', `/objects/${containerId}/${objectId}?walletConnect=true`, {}, {
 				[ContentTypeHeader]: "application/json",
@@ -492,15 +492,13 @@ export const App = () => {
 								alt="loader"
 							/>
 						</div>
-						<Heading align="center" size={5}>Please sign your tokens</Heading>
-						<Heading align="center" size={6} weight="normal">To use all functions, you must use signed user tokens</Heading>
+						<Heading align="center" size={5}>Token signing</Heading>
 						<Columns>
 							{(modal.text === '' || modal.text === 'container.PUT' || modal.text === 'container.DELETE' || modal.text === 'container.SETEACL') && (
 								<Columns.Column>
-									<Heading align="center" size={6}>Containers</Heading>
 									{(modal.text === '' || modal.text === 'container.PUT') && (
 										<div className="token_status_panel">
-											<div>For creation operations</div>
+											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock create&nbsp;operation</Heading>
 											{walletData && walletData.tokens.container.PUT ? (
 												<img
 													src="./img/success.svg"
@@ -521,7 +519,7 @@ export const App = () => {
 									)}
 									{(modal.text === '' || modal.text === 'container.DELETE') && (
 										<div className="token_status_panel">
-											<div>For deletion operations</div>
+											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock delete&nbsp;operation</Heading>
 											{walletData && walletData.tokens.container.DELETE ? (
 												<img
 													src="./img/success.svg"
@@ -542,7 +540,7 @@ export const App = () => {
 									)}
 									{(modal.text === '' || modal.text === 'container.SETEACL') && (
 										<div className="token_status_panel">
-											<div>For eACL management</div>
+											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock eACL&nbsp;management</Heading>
 											{walletData && walletData.tokens.container.SETEACL ? (
 												<img
 													src="./img/success.svg"
@@ -565,10 +563,9 @@ export const App = () => {
 							)}
 							{(modal.text === '' || modal.text === 'object.PUT' || modal.text === 'object.DELETE' || modal.text === 'object.GET') && (
 								<Columns.Column>
-									<Heading align="center" size={6}>Objects</Heading>
 									{(modal.text === '' || modal.text === 'object.PUT') && (
 										<div className="token_status_panel">
-											<div>For creation operations</div>
+											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock create&nbsp;operation</Heading>
 											{walletData && walletData.tokens.object.PUT ? (
 												<img
 													src="./img/success.svg"
@@ -589,7 +586,7 @@ export const App = () => {
 									)}
 									{(modal.text === '' || modal.text === 'object.DELETE') && (
 										<div className="token_status_panel">
-											<div>For deletion operations</div>
+											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock delete&nbsp;operation</Heading>
 											{walletData && walletData.tokens.object.DELETE ? (
 												<img
 													src="./img/success.svg"
@@ -610,7 +607,7 @@ export const App = () => {
 									)}
 									{(modal.text === '' || modal.text === 'object.GET') && (
 										<div className="token_status_panel">
-											<div>For getting operations</div>
+											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock get&nbsp;operation</Heading>
 											{walletData && walletData.tokens.object.GET ? (
 												<img
 													src="./img/success.svg"
@@ -689,11 +686,242 @@ export const App = () => {
 								/>
 							</div>
 							<Heading align="center" size={5}>New container</Heading>
+							{modal.text.neoFSBalance === 0 && (
+								<Notification className="error_message" style={{ margin: '20px 0' }}>
+									Container creation is a paid operation, make sure you have sufficient NeoFS balance
+								</Notification>
+							)}
+							<Form.Field>
+								<Form.Label>Name</Form.Label>
+								<Form.Control>
+									<Form.Input
+										type="text"
+										value={containerForm.containerName}
+										className={isError.active && isError.type.indexOf('containerName') !== -1 ? 'is-error' : ""}
+										onChange={(e) => setContainerForm({ ...containerForm , containerName: e.target.value })}
+										disabled={isLoadingForm}
+									/>
+								</Form.Control>
+							</Form.Field>
+							<Form.Field>
+								<Form.Label>Placement policy</Form.Label>
+								<Form.Control>
+									<Form.Input
+										type="text"
+										value={containerForm.placementPolicy}
+										className={isError.active && isError.type.indexOf('placementPolicy') !== -1 ? 'is-error' : ""}
+										onChange={(e) => setContainerForm({ ...containerForm , placementPolicy: e.target.value })}
+										disabled={isLoadingForm}
+									/>
+									{[
+										'REP 2 IN X CBF 3 SELECT 2 FROM * AS X',
+										'REP 3',
+									].map((placementPolicyExample) => (
+										<Tag
+											key={placementPolicyExample}
+											className={isLoadingForm ? "tag_disabled" : ""}
+											onClick={() => setContainerForm({ ...containerForm , placementPolicy: placementPolicyExample })}
+											style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
+										>{placementPolicyExample}</Tag>
+									))}
+								</Form.Control>
+							</Form.Field>
+							<Form.Field>
+								<Form.Label>Attributes</Form.Label>
+								<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
+									{attributes.map((attribute, index) => (
+										<Form.Field kind="group" key={index}>
+											<Form.Control>
+												<Form.Input
+													placeholder="Key"
+													value={attribute.key}
+													className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.key.length === 0 ? 'is-error' : ""}
+													onChange={(e) => {
+														const attributesTemp = [...attributes];
+														attributesTemp[index].key = e.target.value;
+														setAttributes(attributesTemp);
+													}}
+													disabled={isLoadingForm}
+												/>
+											</Form.Control>
+											<Form.Control>
+												<Form.Input
+													placeholder="Value"
+													value={attribute.value}
+													className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.value.length === 0 ? 'is-error' : ""}
+													onChange={(e) => {
+														const attributesTemp = [...attributes];
+														attributesTemp[index].value = e.target.value;
+														setAttributes(attributesTemp);
+													}}
+													disabled={isLoadingForm}
+												/>
+											</Form.Control>
+											<Form.Control>
+												<img
+													src="./img/trashbin.svg"
+													width={30}
+													height={30}
+													alt="delete"
+													style={{ cursor: 'pointer', margin: 4 }}
+													onClick={() => {
+														if (!isLoadingForm) {
+															let attributesTemp = [...attributes];
+															attributesTemp.splice(index, 1);
+															setAttributes(attributesTemp);
+														}
+													}}
+												/>
+											</Form.Control>
+										</Form.Field>
+									))}
+								</div>
+								<Button
+									color="primary"
+									size="small"
+									className={isLoadingForm ? "button_disabled" : ""}
+									onClick={() => {
+										let attributesTemp = [...attributes];
+										attributesTemp.push({
+											key: "",
+											value: "",
+										});
+										setAttributes(attributesTemp);
+									}}
+									style={{ display: 'flex', margin: '10px auto 0' }}
+								>
+									Add attribute
+								</Button>
+							</Form.Field>
+							<Form.Field>
+								<Form.Label>Access Control</Form.Label>
+								{[{
+										preset: 'personal',
+										basicAcl: 'eacl-public-read-write',
+										eACLParams: [{
+											"operation": "GET",
+											"action": "DENY",
+											"filters": [],
+											"targets": [{ "keys": [], "role": "OTHERS" }],
+										}, {
+											"operation": "HEAD",
+											"action": "DENY",
+											"filters": [],
+											"targets": [{ "keys": [], "role": "OTHERS" }],
+										}, {
+											"operation": "PUT",
+											"action": "DENY",
+											"filters": [],
+											"targets": [{ "keys": [], "role": "OTHERS" }],
+										}, {
+											"operation": "DELETE",
+											"action": "DENY",
+											"filters": [],
+											"targets": [{ "keys": [], "role": "OTHERS" }],
+										}, {
+											"operation": "SEARCH",
+											"action": "DENY",
+											"filters": [],
+											"targets": [{ "keys": [], "role": "OTHERS" }],
+										}, {
+											"operation": "RANGE",
+											"action": "DENY",
+											"filters": [],
+											"targets": [{ "keys": [], "role": "OTHERS" }],
+										}, {
+											"operation": "RANGEHASH",
+											"action": "DENY",
+											"filters": [],
+											"targets": [{ "keys": [], "role": "OTHERS" }],
+										}],
+									}, {
+										preset: 'shared',
+										basicAcl: 'eacl-public-read-write',
+										eACLParams: [{
+											"operation": "PUT",
+											"action": "DENY",
+											"filters": [],
+											"targets": [{ "keys": [], "role": "OTHERS" }],
+										}, {
+											"operation": "DELETE",
+											"action": "DENY",
+											"filters": [],
+											"targets": [{ "keys": [], "role": "OTHERS" }],
+										}],
+									}, {
+										preset: 'custom',
+										basicAcl: '',
+										eACLParams: [],
+								}].map((basicPresetExample) => (
+									<Tag
+										key={basicPresetExample.preset}
+										className={isLoadingForm && basicPresetExample.preset !== containerForm.preset ? "tag_disabled" : ""}
+										onClick={() => {
+											setContainerForm({
+												...containerForm,
+												basicAcl: basicPresetExample.basicAcl,
+												eACLParams: basicPresetExample.eACLParams,
+												preset: basicPresetExample.preset,
+											})}
+										}
+										style={basicPresetExample.preset === containerForm.preset ? {
+											margin: '5px 5px 0 0',
+											cursor: 'pointer',
+											background: '#21b87e',
+											color: '#fff',
+										} : {
+											margin: '5px 5px 0 0',
+											cursor: 'pointer',
+										}}
+									>{basicPresetExample.preset}</Tag>
+								))}
+							</Form.Field>
+							<Form.Field>
+								<Form.Label size="small">Basic ACL</Form.Label>
+								<Form.Control>
+									<Form.Input
+										type="text"
+										value={containerForm.basicAcl}
+										className={isError.active && isError.type.indexOf('basicAcl') !== -1 ? 'is-error' : ""}
+										onChange={(e) => setContainerForm({ ...containerForm , basicAcl: e.target.value })}
+										disabled={containerForm.preset !== 'custom' || isLoadingForm}
+									/>
+									{containerForm.preset === 'custom' && ([
+										'private',
+										'eacl-private',
+										'public-read',
+										'eacl-public-read',
+										'public-read-write',
+										'eacl-public-read-write',
+										'public-append',
+										'eacl-public-append',
+										'0x1C8C8CCC',
+									].map((basicAclExample) => (
+										<Tag
+											key={basicAclExample}
+											className={isLoadingForm ? "tag_disabled" : ""}
+											onClick={() => setContainerForm({ ...containerForm , basicAcl: basicAclExample })}
+											style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
+										>{basicAclExample}</Tag>
+									)))}
+								</Form.Control>
+								<Form.Label size="small" style={{ marginTop: 10 }}>Extended ACL</Form.Label>
+								<EACLPanel
+									isErrorParent={isError}
+									isEdit={!(containerForm.preset === 'personal' || containerForm.preset === 'shared' || isLoadingForm)}
+									eACLParams={containerForm.eACLParams}
+									setEACLParams={(e) => setContainerForm({ ...containerForm, eACLParams: e })}
+								/>
+							</Form.Field>
+							{isError.active && (
+								<Notification className="error_message" style={{ margin: '20px 0' }}>
+									{isError.text}
+								</Notification>
+							)}
 							{!(walletData.tokens.container.PUT && walletData.tokens.container.SETEACL) ? (
 								<>
-									<Heading align="center" size={6} weight="normal">To use creation function, you must use signed user token</Heading>
-									<div className="token_status_panel">
-										<div>For creation operations</div>
+									<div className="token_status_panel" style={{ margin: '25px 0 10px', maxWidth: 'unset' }}>
+										<Heading size={6} style={{ margin: '0 10px 0 0', maxWidth: 300 }}>Sign token to unlock create&nbsp;operation</Heading>
 										{walletData.tokens.container.PUT ? (
 											<img
 												src="./img/success.svg"
@@ -711,8 +939,8 @@ export const App = () => {
 											</Button>
 										)}
 									</div>
-									<div className="token_status_panel">
-										<div>For eACL management</div>
+									<div className="token_status_panel" style={{ margin: '10px 0', maxWidth: 'unset' }}>
+										<Heading size={6} style={{ margin: '0 10px 0 0', maxWidth: 300 }}>Sign token to unlock eACL&nbsp;management</Heading>
 										{walletData.tokens.container.SETEACL ? (
 											<img
 												src="./img/success.svg"
@@ -732,263 +960,29 @@ export const App = () => {
 									</div>
 								</>
 							) : (
-								<>
-									{modal.text.neoFSBalance === 0 && (
-										<Notification className="error_message" style={{ margin: '20px 0' }}>
-											Container creation is a paid operation, make sure you have sufficient NeoFS balance
-										</Notification>
-									)}
-									<Form.Field>
-										<Form.Label>Name</Form.Label>
-										<Form.Control>
-											<Form.Input
-												type="text"
-												value={containerForm.containerName}
-												className={isError.active && isError.type.indexOf('containerName') !== -1 ? 'is-error' : ""}
-												onChange={(e) => setContainerForm({ ...containerForm , containerName: e.target.value })}
-												disabled={isLoadingForm}
-											/>
-										</Form.Control>
-									</Form.Field>
-									<Form.Field>
-										<Form.Label>Placement policy</Form.Label>
-										<Form.Control>
-											<Form.Input
-												type="text"
-												value={containerForm.placementPolicy}
-												className={isError.active && isError.type.indexOf('placementPolicy') !== -1 ? 'is-error' : ""}
-												onChange={(e) => setContainerForm({ ...containerForm , placementPolicy: e.target.value })}
-												disabled={isLoadingForm}
-											/>
-											{[
-												'REP 2 IN X CBF 3 SELECT 2 FROM * AS X',
-												'REP 3',
-											].map((placementPolicyExample) => (
-												<Tag
-													key={placementPolicyExample}
-													className={isLoadingForm ? "tag_disabled" : ""}
-													onClick={() => setContainerForm({ ...containerForm , placementPolicy: placementPolicyExample })}
-													style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
-												>{placementPolicyExample}</Tag>
-											))}
-										</Form.Control>
-									</Form.Field>
-									<Form.Field>
-										<Form.Label>Attributes</Form.Label>
-										<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
-											{attributes.map((attribute, index) => (
-												<Form.Field kind="group" key={index}>
-													<Form.Control>
-														<Form.Input
-															placeholder="Key"
-															value={attribute.key}
-															className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.key.length === 0 ? 'is-error' : ""}
-															onChange={(e) => {
-																const attributesTemp = [...attributes];
-																attributesTemp[index].key = e.target.value;
-																setAttributes(attributesTemp);
-															}}
-															disabled={isLoadingForm}
-														/>
-													</Form.Control>
-													<Form.Control>
-														<Form.Input
-															placeholder="Value"
-															value={attribute.value}
-															className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.value.length === 0 ? 'is-error' : ""}
-															onChange={(e) => {
-																const attributesTemp = [...attributes];
-																attributesTemp[index].value = e.target.value;
-																setAttributes(attributesTemp);
-															}}
-															disabled={isLoadingForm}
-														/>
-													</Form.Control>
-													<Form.Control>
-														<img
-															src="./img/trashbin.svg"
-															width={30}
-															height={30}
-															alt="delete"
-															style={{ cursor: 'pointer', margin: 4 }}
-															onClick={() => {
-																if (!isLoadingForm) {
-																	let attributesTemp = [...attributes];
-																	attributesTemp.splice(index, 1);
-																	setAttributes(attributesTemp);
-																}
-															}}
-														/>
-													</Form.Control>
-												</Form.Field>
-											))}
-										</div>
-										<Button
-											color="primary"
-											size="small"
-											className={isLoadingForm ? "button_disabled" : ""}
-											onClick={() => {
-												let attributesTemp = [...attributes];
-												attributesTemp.push({
-													key: "",
-													value: "",
-												});
-												setAttributes(attributesTemp);
-											}}
-											style={{ display: 'flex', margin: '10px auto 0' }}
-										>
-											Add attribute
-										</Button>
-									</Form.Field>
-									<Form.Field>
-										<Form.Label>Access Control</Form.Label>
-										{[{
-												preset: 'personal',
-												basicAcl: 'eacl-public-read-write',
-												eACLParams: [{
-													"operation": "GET",
-													"action": "DENY",
-													"filters": [],
-													"targets": [{ "keys": [], "role": "OTHERS" }],
-												}, {
-													"operation": "HEAD",
-													"action": "DENY",
-													"filters": [],
-													"targets": [{ "keys": [], "role": "OTHERS" }],
-												}, {
-													"operation": "PUT",
-													"action": "DENY",
-													"filters": [],
-													"targets": [{ "keys": [], "role": "OTHERS" }],
-												}, {
-													"operation": "DELETE",
-													"action": "DENY",
-													"filters": [],
-													"targets": [{ "keys": [], "role": "OTHERS" }],
-												}, {
-													"operation": "SEARCH",
-													"action": "DENY",
-													"filters": [],
-													"targets": [{ "keys": [], "role": "OTHERS" }],
-												}, {
-													"operation": "RANGE",
-													"action": "DENY",
-													"filters": [],
-													"targets": [{ "keys": [], "role": "OTHERS" }],
-												}, {
-													"operation": "RANGEHASH",
-													"action": "DENY",
-													"filters": [],
-													"targets": [{ "keys": [], "role": "OTHERS" }],
-												}],
-											}, {
-												preset: 'shared',
-												basicAcl: 'eacl-public-read-write',
-												eACLParams: [{
-													"operation": "PUT",
-													"action": "DENY",
-													"filters": [],
-													"targets": [{ "keys": [], "role": "OTHERS" }],
-												}, {
-													"operation": "DELETE",
-													"action": "DENY",
-													"filters": [],
-													"targets": [{ "keys": [], "role": "OTHERS" }],
-												}],
-											}, {
-												preset: 'custom',
-												basicAcl: '',
-												eACLParams: [],
-										}].map((basicPresetExample) => (
-											<Tag
-												key={basicPresetExample.preset}
-												className={isLoadingForm && basicPresetExample.preset !== containerForm.preset ? "tag_disabled" : ""}
-												onClick={() => {
-													setContainerForm({
-														...containerForm,
-														basicAcl: basicPresetExample.basicAcl,
-														eACLParams: basicPresetExample.eACLParams,
-														preset: basicPresetExample.preset,
-													})}
-												}
-												style={basicPresetExample.preset === containerForm.preset ? {
-													margin: '5px 5px 0 0',
-													cursor: 'pointer',
-													background: '#21b87e',
-													color: '#fff',
-												} : {
-													margin: '5px 5px 0 0',
-													cursor: 'pointer',
-												}}
-											>{basicPresetExample.preset}</Tag>
-										))}
-									</Form.Field>
-									<Form.Field>
-										<Form.Label size="small">Basic ACL</Form.Label>
-										<Form.Control>
-											<Form.Input
-												type="text"
-												value={containerForm.basicAcl}
-												className={isError.active && isError.type.indexOf('basicAcl') !== -1 ? 'is-error' : ""}
-												onChange={(e) => setContainerForm({ ...containerForm , basicAcl: e.target.value })}
-												disabled={containerForm.preset !== 'custom' || isLoadingForm}
-											/>
-											{containerForm.preset === 'custom' && ([
-												'private',
-												'eacl-private',
-												'public-read',
-												'eacl-public-read',
-												'public-read-write',
-												'eacl-public-read-write',
-												'public-append',
-												'eacl-public-append',
-												'0x1C8C8CCC',
-											].map((basicAclExample) => (
-												<Tag
-													key={basicAclExample}
-													className={isLoadingForm ? "tag_disabled" : ""}
-													onClick={() => setContainerForm({ ...containerForm , basicAcl: basicAclExample })}
-													style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
-												>{basicAclExample}</Tag>
-											)))}
-										</Form.Control>
-										<Form.Label size="small" style={{ marginTop: 10 }}>Extended ACL</Form.Label>
-										<EACLPanel
-											isErrorParent={isError}
-											isEdit={!(containerForm.preset === 'personal' || containerForm.preset === 'shared' || isLoadingForm)}
-											eACLParams={containerForm.eACLParams}
-											setEACLParams={(e) => setContainerForm({ ...containerForm, eACLParams: e })}
+								<Button
+									color="primary"
+									onClick={onCreateContainer}
+									style={isLoadingForm ? {
+										display: 'flex',
+										margin: '30px auto 0',
+										pointerEvents: 'none',
+										opacity: 0.8,
+									} : {
+										display: 'flex',
+										margin: '30px auto 0',
+									}}
+								>
+									{isLoadingForm ? (
+										<img
+											src="./img/spinner.svg"
+											className="spinner"
+											width={20}
+											height={20}
+											alt="spinner"
 										/>
-									</Form.Field>
-									{isError.active && (
-										<Notification className="error_message" style={{ margin: '20px 0' }}>
-											{isError.text}
-										</Notification>
-									)}
-									<Button
-										color="primary"
-										onClick={onCreateContainer}
-										style={isLoadingForm ? {
-											display: 'flex',
-											margin: '30px auto 0',
-											pointerEvents: 'none',
-											opacity: 0.8,
-										} : {
-											display: 'flex',
-											margin: '30px auto 0',
-										}}
-									>
-										{isLoadingForm ? (
-											<img
-												src="./img/spinner.svg"
-												className="spinner"
-												width={20}
-												height={20}
-												alt="spinner"
-											/>
-										) : "Create"}
-									</Button>
-								</>
+									) : "Create"}
+								</Button>
 							)}
 						</div>
 					</div>
@@ -1019,54 +1013,49 @@ export const App = () => {
 							/>
 						</div>
 						<Heading align="center" size={5}>Container Deletion</Heading>
+						<Heading align="center" size={6}>Are you sure you want to delete container?</Heading>
+						{isError.active && (
+							<Notification className="error_message" style={{ margin: '20px 0' }}>
+								{isError.text}
+							</Notification>
+						)}
 						{!walletData.tokens.container.DELETE ? (
-							<>
-								<Heading align="center" size={6} weight="normal">To use deletion function, you must use signed user token</Heading>
-								<div className="token_status_panel">
-									<div>For deletion operations</div>
-									<Button
-										color="primary"
-										size="small"
-										onClick={() => onAuth('container', 'DELETE')}
-									>
-										Sign
-									</Button>
-								</div>
-							</>
+							<div className="token_status_panel">
+								<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock delete&nbsp;operation</Heading>
+								<Button
+									color="primary"
+									size="small"
+									onClick={() => onAuth('container', 'DELETE')}
+								>
+									Sign
+								</Button>
+							</div>
 						) : (
-							<>
-								<Heading align="center" size={6}>Are you sure you want to delete container?</Heading>
-								{isError.active && (
-									<Notification className="error_message" style={{ margin: '20px 0' }}>
-										{isError.text}
-									</Notification>
-								)}
-								<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
-									{!isLoadingForm && (
-										<Button
-											color="gray"
-											onClick={onModal}
-											style={{ marginRight: 10 }}
-										>
-											No
-										</Button>
-									)}
+							<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
+								{!isLoadingForm && (
 									<Button
-										color="danger"
-										onClick={() => onDeleteContainer(modal.text.containerId)}
+										color="gray"
+										onClick={onModal}
+										style={{ marginRight: 10 }}
 									>
-										{isLoadingForm ? (
-										<img
-											src="./img/spinner.svg"
-											className="spinner"
-											width={20}
-											height={20}
-											alt="spinner"
-										/>
-									) : "Yes"}
+										No
 									</Button>
-								</div>
-							</>
+								)}
+								<Button
+									color="danger"
+									onClick={() => onDeleteContainer(modal.text.containerId)}
+								>
+									{isLoadingForm ? (
+									<img
+										src="./img/spinner.svg"
+										className="spinner"
+										width={20}
+										height={20}
+										alt="spinner"
+									/>
+								) : "Yes"}
+								</Button>
+							</div>
 						)}
 					</div>
 				</div>
@@ -1110,138 +1099,133 @@ export const App = () => {
 							/>
 						</div>
 						<Heading align="center" size={5}>New object</Heading>
-						{!walletData.tokens.object.PUT ? (
-							<>
-								<Heading align="center" size={6} weight="normal">To use creation function, you must use signed user token</Heading>
-								<div className="token_status_panel">
-									<div>For creation operations</div>
-									<Button
-										color="primary"
-										size="small"
-										onClick={() => onAuth('object', 'PUT')}
-									>
-										Sign
-									</Button>
-								</div>
-							</>
-						) : (
-							<>
-								<Form.Field>
-									<div className="input_block" style={{ marginTop: 30 }}>
-										{objectForm.loading ? (
-											<label htmlFor="upload">Loading...</label>
-										) : (
-											<label
-												htmlFor="upload"
-												className={isError.active && isError.type.indexOf('objectName') !== -1 ? 'is-error' : ""}
-												style={objectForm.name ? { background: '#f5f5f5', borderStyle: 'double' } : {}}
-											>{objectForm.name ? objectForm.name : 'Upload object'}</label>
-										)}
-										<input
-											id="upload"
-											type="file"
-											name="Upload"
-											onChange={onHandleObject}
-											onClick={isLoadingForm ? (e) => e.preventDefault() : () => {}}
-										/>
-									</div>
-								</Form.Field>
-								<Form.Field>
-									<Form.Label>Attributes</Form.Label>
-									<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
-										{attributes.map((attribute, index) => (
-											<Form.Field kind="group" key={index}>
-												<Form.Control>
-													<Form.Input
-														placeholder="Key"
-														value={attribute.key}
-														className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.key.length === 0 ? 'is-error' : ""}
-														onChange={(e) => {
-															const attributesTemp = [...attributes];
-															attributesTemp[index].key = e.target.value;
-															setAttributes(attributesTemp);
-														}}
-														disabled={isLoadingForm}
-													/>
-												</Form.Control>
-												<Form.Control>
-													<Form.Input
-														placeholder="Value"
-														value={attribute.value}
-														className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.value.length === 0 ? 'is-error' : ""}
-														onChange={(e) => {
-															const attributesTemp = [...attributes];
-															attributesTemp[index].value = e.target.value;
-															setAttributes(attributesTemp);
-														}}
-														disabled={isLoadingForm}
-													/>
-												</Form.Control>
-												<Form.Control>
-													<img
-														src="./img/trashbin.svg"
-														width={30}
-														height={30}
-														alt="delete"
-														style={{ cursor: 'pointer', margin: 4 }}
-														onClick={() => {
-															if (!isLoadingForm) {
-																let attributesTemp = [...attributes];
-																attributesTemp.splice(index, 1);
-																setAttributes(attributesTemp);
-															}
-														}}
-													/>
-												</Form.Control>
-											</Form.Field>
-										))}
-									</div>
-									<Button
-										color="primary"
-										size="small"
-										className={isLoadingForm ? "button_disabled" : ""}
-										onClick={() => {
-											let attributesTemp = [...attributes];
-											attributesTemp.push({
-												key: "",
-												value: "",
-											});
-											setAttributes(attributesTemp);
-										}}
-										style={{ display: 'flex', margin: '10px auto 0' }}
-									>
-										Add attribute
-									</Button>
-								</Form.Field>
-								{isError.active && (
-									<Notification className="error_message" style={{ margin: '20px 0' }}>
-										{isError.text}
-									</Notification>
+						<Form.Field>
+							<div className="input_block" style={{ marginTop: 30 }}>
+								{objectForm.loading ? (
+									<label htmlFor="upload">Loading...</label>
+								) : (
+									<label
+										htmlFor="upload"
+										className={isError.active && isError.type.indexOf('objectName') !== -1 ? 'is-error' : ""}
+										style={objectForm.name ? { background: '#f5f5f5', borderStyle: 'double' } : {}}
+									>{objectForm.name ? objectForm.name : 'Upload object'}</label>
 								)}
+								<input
+									id="upload"
+									type="file"
+									name="Upload"
+									onChange={onHandleObject}
+									onClick={isLoadingForm ? (e) => e.preventDefault() : () => {}}
+								/>
+							</div>
+						</Form.Field>
+						<Form.Field>
+							<Form.Label>Attributes</Form.Label>
+							<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
+								{attributes.map((attribute, index) => (
+									<Form.Field kind="group" key={index}>
+										<Form.Control>
+											<Form.Input
+												placeholder="Key"
+												value={attribute.key}
+												className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.key.length === 0 ? 'is-error' : ""}
+												onChange={(e) => {
+													const attributesTemp = [...attributes];
+													attributesTemp[index].key = e.target.value;
+													setAttributes(attributesTemp);
+												}}
+												disabled={isLoadingForm}
+											/>
+										</Form.Control>
+										<Form.Control>
+											<Form.Input
+												placeholder="Value"
+												value={attribute.value}
+												className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.value.length === 0 ? 'is-error' : ""}
+												onChange={(e) => {
+													const attributesTemp = [...attributes];
+													attributesTemp[index].value = e.target.value;
+													setAttributes(attributesTemp);
+												}}
+												disabled={isLoadingForm}
+											/>
+										</Form.Control>
+										<Form.Control>
+											<img
+												src="./img/trashbin.svg"
+												width={30}
+												height={30}
+												alt="delete"
+												style={{ cursor: 'pointer', margin: 4 }}
+												onClick={() => {
+													if (!isLoadingForm) {
+														let attributesTemp = [...attributes];
+														attributesTemp.splice(index, 1);
+														setAttributes(attributesTemp);
+													}
+												}}
+											/>
+										</Form.Control>
+									</Form.Field>
+								))}
+							</div>
+							<Button
+								color="primary"
+								size="small"
+								className={isLoadingForm ? "button_disabled" : ""}
+								onClick={() => {
+									let attributesTemp = [...attributes];
+									attributesTemp.push({
+										key: "",
+										value: "",
+									});
+									setAttributes(attributesTemp);
+								}}
+								style={{ display: 'flex', margin: '10px auto 0' }}
+							>
+								Add attribute
+							</Button>
+						</Form.Field>
+						{isError.active && (
+							<Notification className="error_message" style={{ margin: '20px 0' }}>
+								{isError.text}
+							</Notification>
+						)}
+						{!walletData.tokens.object.PUT ? (
+							<div className="token_status_panel" style={{ marginTop: '25px' }}>
+								<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock create&nbsp;operation</Heading>
 								<Button
 									color="primary"
-									onClick={() => onCreateObject(modal.text.containerId)}
-									style={isLoadingForm ? {
-										display: 'flex',
-										margin: '30px auto 0',
-										pointerEvents: 'none',
-										opacity: 0.8,
-									} : {
-										display: 'flex',
-										margin: '30px auto 0',
-									}}
+									size="small"
+									onClick={() => onAuth('object', 'PUT')}
 								>
-									{isLoadingForm ? (
-										<img
-											src="./img/spinner.svg"
-											className="spinner"
-											width={20}
-											height={20}
-											alt="spinner"
-										/>
-									) : "Create"}
+									Sign
 								</Button>
-							</>
+							</div>
+						) : (
+							<Button
+								color="primary"
+								onClick={() => onCreateObject(modal.text.containerId)}
+								style={isLoadingForm ? {
+									display: 'flex',
+									margin: '30px auto 0',
+									pointerEvents: 'none',
+									opacity: 0.8,
+								} : {
+									display: 'flex',
+									margin: '30px auto 0',
+								}}
+							>
+								{isLoadingForm ? (
+									<img
+										src="./img/spinner.svg"
+										className="spinner"
+										width={20}
+										height={20}
+										alt="spinner"
+									/>
+								) : "Create"}
+							</Button>
 						)}
 					</div>
 				</div>
@@ -1271,54 +1255,49 @@ export const App = () => {
 							/>
 						</div>
 						<Heading align="center" size={5}>Object Deletion</Heading>
+						<Heading align="center" size={6}>Are you sure you want to delete object?</Heading>
+						{isError.active && (
+							<Notification className="error_message" style={{ margin: '20px 0' }}>
+								{isError.text}
+							</Notification>
+						)}
 						{!walletData.tokens.object.DELETE ? (
-							<>
-								<Heading align="center" size={6} weight="normal">To use deletion function, you must use signed user token</Heading>
-								<div className="token_status_panel">
-									<div>For deletion operations</div>
-									<Button
-										color="primary"
-										size="small"
-										onClick={() => onAuth('object', 'DELETE')}
-									>
-										Sign
-									</Button>
-								</div>
-							</>
+							<div className="token_status_panel">
+								<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock delete&nbsp;operation</Heading>
+								<Button
+									color="primary"
+									size="small"
+									onClick={() => onAuth('object', 'DELETE')}
+								>
+									Sign
+								</Button>
+							</div>
 						) : (
-							<>
-								<Heading align="center" size={6}>Are you sure you want to delete object?</Heading>
-								{isError.active && (
-									<Notification className="error_message" style={{ margin: '20px 0' }}>
-										{isError.text}
-									</Notification>
-								)}
-								<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
-									{!isLoadingForm && (
-										<Button
-											color="gray"
-											onClick={onModal}
-											style={{ marginRight: 10 }}
-										>
-											No
-										</Button>
-									)}
+							<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
+								{!isLoadingForm && (
 									<Button
-										color="danger"
-										onClick={() => onDeleteObject(modal.text.containerId, modal.text.objectId)}
+										color="gray"
+										onClick={onModal}
+										style={{ marginRight: 10 }}
 									>
-										{isLoadingForm ? (
-											<img
-												src="./img/spinner.svg"
-												className="spinner"
-												width={20}
-												height={20}
-												alt="spinner"
-											/>
-										) : "Yes"}
+										No
 									</Button>
-								</div>
-							</>
+								)}
+								<Button
+									color="danger"
+									onClick={() => onDeleteObject(modal.text.containerId, modal.text.objectId)}
+								>
+									{isLoadingForm ? (
+										<img
+											src="./img/spinner.svg"
+											className="spinner"
+											width={20}
+											height={20}
+											alt="spinner"
+										/>
+									) : "Yes"}
+								</Button>
+							</div>
 						)}
 					</div>
 				</div>
@@ -1410,6 +1389,7 @@ export const App = () => {
 					element={<Profile
 						onAuth={onAuth}
 						walletData={walletData}
+						setWalletData={setWalletData}
 						walletConnectCtx={walletConnectCtx}
 						isLoadContainers={isLoadContainers}
 						setLoadContainers={setLoadContainers}
