@@ -185,7 +185,7 @@ export default function ContainerItem({
 										</Heading>
 										<Heading size={6} weight="light">
 											<span>{`Basic acl: `}</span>
-											{`0x${containerItem.basicAcl}${containerItem.cannedAcl ? ` (${containerItem.cannedAcl}` : ''})`}
+											{`0x${containerItem.basicAcl}${containerItem.cannedAcl ? ` (${containerItem.cannedAcl})` : ''}`}
 										</Heading>
 										{containerItem.attributes.map((attribute) => ( attribute.key === 'Timestamp' && (
 											<Heading size={6} weight="light" key={attribute.key}>
