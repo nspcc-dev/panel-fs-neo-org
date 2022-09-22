@@ -920,16 +920,9 @@ export const App = () => {
 							)}
 							{!(walletData.tokens.container.PUT && walletData.tokens.container.SETEACL) ? (
 								<>
-									<div className="token_status_panel" style={{ margin: '25px 0 10px', maxWidth: 'unset' }}>
-										<Heading size={6} style={{ margin: '0 10px 0 0', maxWidth: 300 }}>Sign token to unlock create&nbsp;operation</Heading>
-										{walletData.tokens.container.PUT ? (
-											<img
-												src="./img/success.svg"
-												height={25}
-												width={25}
-												alt="success"
-											/>
-										) : (
+									{!walletData.tokens.container.PUT && (
+										<div className="token_status_panel" style={{ margin: '25px 0 10px', maxWidth: 'unset' }}>
+											<Heading size={6} style={{ margin: '0 10px 0 0', maxWidth: 300 }}>Sign token to unlock create&nbsp;operation</Heading>
 											<Button
 												color="primary"
 												size="small"
@@ -937,18 +930,11 @@ export const App = () => {
 											>
 												Sign
 											</Button>
-										)}
-									</div>
-									<div className="token_status_panel" style={{ margin: '10px 0', maxWidth: 'unset' }}>
-										<Heading size={6} style={{ margin: '0 10px 0 0', maxWidth: 300 }}>Sign token to unlock eACL&nbsp;management</Heading>
-										{walletData.tokens.container.SETEACL ? (
-											<img
-												src="./img/success.svg"
-												height={25}
-												width={25}
-												alt="success"
-											/>
-										) : (
+										</div>
+									)}
+									{!walletData.tokens.container.SETEACL && (
+										<div className="token_status_panel" style={{ margin: '10px 0', maxWidth: 'unset' }}>
+											<Heading size={6} style={{ margin: '0 10px 0 0', maxWidth: 300 }}>Sign token to unlock eACL&nbsp;management</Heading>
 											<Button
 												color="primary"
 												size="small"
@@ -956,8 +942,8 @@ export const App = () => {
 											>
 												Sign
 											</Button>
-										)}
-									</div>
+										</div>
+									)}
 								</>
 							) : (
 								<Button
