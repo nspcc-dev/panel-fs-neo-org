@@ -19,8 +19,8 @@ NeoFS panel web application using React framework under the hood
 1. Set Contract variables in `.env` file
 ```
 REACT_APP_URL=http://localhost:3000
-REACT_APP_SERVER=http://localhost:8083/v1
-REACT_APP_NGINX=http://localhost:8082
+REACT_APP_RESTGW=https://rest.t5.fs.neo.org/v1
+REACT_APP_HTTPGW=https://http.t5.fs.neo.org
 
 # NeoFS t5 Contract
 REACT_APP_NEOFS_ACCOUNT=NZAUkYbJ1Cb2HrNmwZ1pg9xYHBhm2FgtKV
