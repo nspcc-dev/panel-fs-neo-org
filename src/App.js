@@ -918,7 +918,7 @@ export const App = () => {
 									{isError.text}
 								</Notification>
 							)}
-							{!(walletData.tokens.container.PUT && walletData.tokens.container.SETEACL) ? (
+							{(!walletData.tokens.container.PUT || (!walletData.tokens.container.SETEACL && containerForm.eACLParams.length > 0)) ? (
 								<>
 									{!walletData.tokens.container.PUT && (
 										<div className="token_status_panel" style={{ margin: '25px 0 10px', maxWidth: 'unset' }}>
@@ -932,7 +932,7 @@ export const App = () => {
 											</Button>
 										</div>
 									)}
-									{!walletData.tokens.container.SETEACL && (
+									{!walletData.tokens.container.SETEACL && containerForm.eACLParams.length > 0 && (
 										<div className="token_status_panel" style={{ margin: '10px 0', maxWidth: 'unset' }}>
 											<Heading size={6} style={{ margin: '0 10px 0 0', maxWidth: 300 }}>Sign token to unlock eACL&nbsp;management</Heading>
 											<Button
