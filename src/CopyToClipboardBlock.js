@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 export const CopyToClipboardBlock = ({ text, copy, className, onPopup }) => {
