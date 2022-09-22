@@ -156,7 +156,7 @@ const File = ({
 								<Heading size={6} weight="light">
 									<span>{`Object id: `}</span>
 									<a
-										href={`${process.env.REACT_APP_NGINX}/get/${containerItem.containerId}/${objectItem.address.objectId}`}
+										href={`${process.env.REACT_APP_HTTPGW}/get/${containerItem.containerId}/${objectItem.address.objectId}`}
 										target="_blank"
 										rel="noopener noreferrer"
 										style={{ textDecoration: 'underline' }}

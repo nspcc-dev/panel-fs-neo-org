@@ -1,4 +1,4 @@
-const server = process.env.REACT_APP_SERVER;
+const server = process.env.REACT_APP_RESTGW;
 
 async function serverRequest(method, url, params, headers) {
 	const json = {
