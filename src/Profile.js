@@ -85,6 +85,12 @@ const Profile = ({
 				onPopup('failed', e.message);
 			} else {
 				onPopup('success', 'Containers has been updated');
+				e.containers.sort((a, b) => {
+					const acontainerName = a.containerName.toLowerCase();
+					const bcontainerName = b.containerName.toLowerCase();
+					if(acontainerName < bcontainerName) return -1;
+					if(acontainerName > bcontainerName) return 1;
+				});
 				setContainers(e.containers);
 				setTimeout(() => {
 					setIsLoadingContainers(false);
