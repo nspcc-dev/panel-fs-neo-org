@@ -13,6 +13,7 @@ import {
 	Columns,
 	Form,
 	Tag,
+	Box,
 	Notification,
 } from 'react-bulma-components';
 import Home from './Home';
@@ -194,7 +195,7 @@ export const App = () => {
 								setLoadingForm(false);
 								setError({ active: true, type: [], text: e.message });
 							} else {
-								if (containerForm.eACLParams.length > 0) {
+								if (containerForm.eACLParams.length > 0 && !(containerForm.basicAcl.substr(0, 4) !== 'eacl' && containerForm.basicAcl.substr(0, 3) !== '0x1' && containerForm.basicAcl.substr(0, 3) !== '0x3' && containerForm.basicAcl.substr(0, 2) !== '1' && containerForm.basicAcl.substr(0, 2) !== '3')) {
 									api('PUT', `/containers/${e.containerId}/eacl?walletConnect=true`, {
 										"records": containerForm.eACLParams.filter((item) => delete item.isOpen),
 									}, {
@@ -855,14 +856,16 @@ export const App = () => {
 								}].map((basicPresetExample) => (
 									<Tag
 										key={basicPresetExample.preset}
-										className={isLoadingForm && basicPresetExample.preset !== containerForm.preset ? "tag_disabled" : ""}
+										className={isLoadingForm ? "tag_disabled" : ""}
 										onClick={() => {
-											setContainerForm({
-												...containerForm,
-												basicAcl: basicPresetExample.basicAcl,
-												eACLParams: basicPresetExample.eACLParams,
-												preset: basicPresetExample.preset,
-											})}
+											if (containerForm.preset !== basicPresetExample.preset) {
+												setContainerForm({
+													...containerForm,
+													basicAcl: basicPresetExample.basicAcl,
+													eACLParams: basicPresetExample.eACLParams,
+													preset: basicPresetExample.preset,
+												})}
+											}
 										}
 										style={basicPresetExample.preset === containerForm.preset ? {
 											margin: '5px 5px 0 0',
@@ -906,12 +909,24 @@ export const App = () => {
 									)))}
 								</Form.Control>
 								<Form.Label size="small" style={{ marginTop: 10 }}>Extended ACL</Form.Label>
-								<EACLPanel
-									isErrorParent={isError}
-									isEdit={!(containerForm.preset === 'personal' || containerForm.preset === 'shared' || isLoadingForm)}
-									eACLParams={containerForm.eACLParams}
-									setEACLParams={(e) => setContainerForm({ ...containerForm, eACLParams: e })}
-								/>
+								{containerForm.basicAcl.substr(0, 4) !== 'eacl' && containerForm.basicAcl.substr(0, 3) !== '0x1' && containerForm.basicAcl.substr(0, 3) !== '0x3' && containerForm.basicAcl.substr(0, 2) !== '1' && containerForm.basicAcl.substr(0, 2) !== '3' ? (
+									<Box
+										style={{
+											marginTop: 10,
+											border: '1px solid #dbdbdc',
+											boxShadow: '0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)',
+										}}
+									>
+										Current basic acl doesn't support eACL
+									</Box>
+								) : (
+									<EACLPanel
+										isErrorParent={isError}
+										isEdit={!(containerForm.preset === 'personal' || containerForm.preset === 'shared' || isLoadingForm)}
+										eACLParams={containerForm.eACLParams}
+										setEACLParams={(e) => setContainerForm({ ...containerForm, eACLParams: e })}
+									/>
+								)}
 							</Form.Field>
 							{isError.active && (
 								<Notification className="error_message" style={{ margin: '20px 0' }}>

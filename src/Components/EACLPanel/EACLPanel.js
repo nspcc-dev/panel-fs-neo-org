@@ -279,32 +279,29 @@ export default function ContainerItem({
 					)}
 				</Panel.Block>
 			))}
-			{isEdit && (
-				<Panel.Block>
-					<Button
-						fullwidth
-						outlined
-						onClick={() => {
-							if (!isLoadingForm) {
-								let aECLParamsTemp = [...eACLParams];
-								aECLParamsTemp.push({
-									operation: "",
-									action: "",
-									isOpen: true,
-									filters: [],
-									targets: [{
-										keys: [],
-										role: '',
-									}],
-								});
-								setEACLParams(aECLParamsTemp);
-							}
-						}}
-					>
-						Add rule
-					</Button>
-				</Panel.Block>
-			)}
+			<Panel.Block>
+				<Button
+					fullwidth
+					outlined
+					onClick={() => {
+						let aECLParamsTemp = [...eACLParams];
+						aECLParamsTemp.push({
+							operation: "",
+							action: "",
+							isOpen: true,
+							filters: [],
+							targets: [{
+								keys: [],
+								role: '',
+							}],
+						});
+						setEACLParams(aECLParamsTemp);
+					}}
+					disabled={!isEdit || isLoadingForm}
+				>
+					Add rule
+				</Button>
+			</Panel.Block>
 			{isError.active && !isErrorParent && (
 				<Notification className="error_message">
 					{isError.text}
