@@ -107,9 +107,9 @@ label.panel-block:hover {
     background: #fff;
 }
 
-.tag_disabled {
+.tag.tag_disabled {
     pointer-events: none !important;
-    background-color: #e9e9e9 !important;
+    background-color: #e9e9e9;
 }
 
 .button_disabled {
