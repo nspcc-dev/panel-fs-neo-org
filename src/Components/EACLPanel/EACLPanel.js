@@ -257,7 +257,8 @@ export default function ContainerItem({
 							))}
 							{isEdit && (
 								<Button
-									outlined
+									color="primary"
+									size="small"
 									onClick={() => {
 										if (!isLoadingForm) {
 											let aECLParamsTemp = [...eACLParams];
@@ -282,7 +283,8 @@ export default function ContainerItem({
 			<Panel.Block>
 				<Button
 					fullwidth
-					outlined
+					color="primary"
+					size="small"
 					onClick={() => {
 						let aECLParamsTemp = [...eACLParams];
 						aECLParamsTemp.push({
