@@ -195,7 +195,7 @@ export const App = () => {
 								setLoadingForm(false);
 								setError({ active: true, type: [], text: e.message });
 							} else {
-								if (containerForm.eACLParams.length > 0 && !(containerForm.basicAcl.substr(0, 4) !== 'eacl' && containerForm.basicAcl.substr(0, 3) !== '0x1' && containerForm.basicAcl.substr(0, 3) !== '0x3' && containerForm.basicAcl.substr(0, 2) !== '1' && containerForm.basicAcl.substr(0, 2) !== '3')) {
+								if (((!/\d/.test(containerForm.basicAcl) && containerForm.basicAcl.substr(0, 4) !== 'eacl') || (/\d/.test(containerForm.basicAcl) && (containerForm.basicAcl.substr(0, 3) === '0x1' || containerForm.basicAcl.substr(0, 3) === '0x3' || containerForm.basicAcl.substr(0, 1) === '1' || containerForm.basicAcl.substr(0, 1) === '3')))) {
 									api('PUT', `/containers/${e.containerId}/eacl?walletConnect=true`, {
 										"records": containerForm.eACLParams.filter((item) => delete item.isOpen),
 									}, {
@@ -909,7 +909,7 @@ export const App = () => {
 									)))}
 								</Form.Control>
 								<Form.Label size="small" style={{ marginTop: 10 }}>Extended ACL</Form.Label>
-								{containerForm.basicAcl.substr(0, 4) !== 'eacl' && containerForm.basicAcl.substr(0, 3) !== '0x1' && containerForm.basicAcl.substr(0, 3) !== '0x3' && containerForm.basicAcl.substr(0, 2) !== '1' && containerForm.basicAcl.substr(0, 2) !== '3' ? (
+								{((!/\d/.test(containerForm.basicAcl) && containerForm.basicAcl.substr(0, 4) !== 'eacl') || (/\d/.test(containerForm.basicAcl) && (containerForm.basicAcl.substr(0, 3) === '0x1' || containerForm.basicAcl.substr(0, 3) === '0x3' || containerForm.basicAcl.substr(0, 1) === '1' || containerForm.basicAcl.substr(0, 1) === '3'))) ? (
 									<Box
 										style={{
 											marginTop: 10,
