@@ -199,7 +199,13 @@ export default function ContainerItem({
 											size={6}
 											weight="bolder"
 											onClick={() => {
-												if (!walletData.tokens.container.SETEACL) {
+												if (containerItem.basicAcl.substr(0, 1) === '1' || containerItem.basicAcl.substr(0, 1) === '3') {
+													if (activePanel === 'eACL') {
+														setActivePanel('');
+													} else {
+														setActivePanel('eACL');
+													}
+												} else if (!walletData.tokens.container.SETEACL) {
 													onModal('signTokens', 'container.SETEACL', { containerId: containerItem.containerId });
 												} else if (activePanel === 'eACL') {
 													setActivePanel('');
@@ -222,18 +228,32 @@ export default function ContainerItem({
 										{activePanel === 'eACL' && (
 											<>
 												{!isLoadingEACL ? (
-													<EACLPanel
-														walletData={walletData}
-														containerItem={containerItem}
-														setLoadContainers={setLoadContainers}
-														eACLParams={eACLParams}
-														setEACLParams={setEACLParams}
-														ContentTypeHeader={ContentTypeHeader}
-														AuthorizationHeader={AuthorizationHeader}
-														BearerOwnerIdHeader={BearerOwnerIdHeader}
-														BearerSignatureHeader={BearerSignatureHeader}
-														BearerSignatureKeyHeader={BearerSignatureKeyHeader}
-													/>
+													<>
+														{(containerItem.basicAcl.substr(0, 1) === '1' || containerItem.basicAcl.substr(0, 1) === '3') ? (
+															<Box
+																style={{
+																	marginTop: 10,
+																	border: '1px solid #dbdbdc',
+																	boxShadow: '0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)',
+																}}
+															>
+																Current basic acl doesn't support eACL
+															</Box>
+														) : (
+															<EACLPanel
+																walletData={walletData}
+																containerItem={containerItem}
+																setLoadContainers={setLoadContainers}
+																eACLParams={eACLParams}
+																setEACLParams={setEACLParams}
+																ContentTypeHeader={ContentTypeHeader}
+																AuthorizationHeader={AuthorizationHeader}
+																BearerOwnerIdHeader={BearerOwnerIdHeader}
+																BearerSignatureHeader={BearerSignatureHeader}
+																BearerSignatureKeyHeader={BearerSignatureKeyHeader}
+															/>
+														)}
+													</>
 												) : (
 													<img
 														className="modal_loader"
