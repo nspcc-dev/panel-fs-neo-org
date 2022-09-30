@@ -199,7 +199,7 @@ export default function ContainerItem({
 											size={6}
 											weight="bolder"
 											onClick={() => {
-												if (containerItem.basicAcl.substr(0, 1) === '1' || containerItem.basicAcl.substr(0, 1) === '3') {
+												if (containerItem.basicAcl.length === 8 && (containerItem.basicAcl.substr(0, 1) === '1' || containerItem.basicAcl.substr(0, 1) === '3')) {
 													if (activePanel === 'eACL') {
 														setActivePanel('');
 													} else {
@@ -229,7 +229,7 @@ export default function ContainerItem({
 											<>
 												{!isLoadingEACL ? (
 													<>
-														{(containerItem.basicAcl.substr(0, 1) === '1' || containerItem.basicAcl.substr(0, 1) === '3') ? (
+														{(containerItem.basicAcl.length === 8 && (containerItem.basicAcl.substr(0, 1) === '1' || containerItem.basicAcl.substr(0, 1) === '3')) ? (
 															<Box
 																style={{
 																	marginTop: 10,
