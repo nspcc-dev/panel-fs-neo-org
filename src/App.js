@@ -142,7 +142,31 @@ export const App = () => {
 	const onSignMessage = async (msg = '', type, operation, params) => {
 		const response = await walletConnectCtx.signMessage(msg);
 		if (response.result.error) {
-			onModal('failed', response.result.error.message)
+			onModal('failed', response.result.error.message);
+		} else if (type === 'object' && operation === 'GET') {
+			api('GET', '/auth/bearer?walletConnect=true', {}, {
+				[ContentTypeHeader]: "application/json",
+				[AuthorizationHeader]: `Bearer ${msg}`,
+				[BearerSignatureHeader]: response.result.data + response.result.salt,
+				[BearerSignatureKeyHeader]: response.result.publicKey,
+			}).then((e) => {
+				setWalletData({
+					...walletData,
+					publicKey: response.result.publicKey,
+					tokens: {
+						...walletData.tokens,
+						[type]: {
+							...walletData.tokens[type],
+							[operation]: {
+								...params,
+								token: msg,
+								signature: response.result.data + response.result.salt,
+								bearer: e.token,
+							}
+						}
+					}
+				});
+			});
 		} else {
 			setWalletData({
 				...walletData,
