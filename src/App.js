@@ -32,6 +32,7 @@ export const App = () => {
 	const [ContentTypeHeader] = useState("Content-Type");
 	const [AuthorizationHeader] = useState("Authorization");
 	const [BearerOwnerIdHeader] = useState("X-Bearer-Owner-Id");
+	const [BearerForAllUsers] = useState("X-Bearer-For-All-Users");
 	const [BearerSignatureHeader] = useState("X-Bearer-Signature");
 	const [BearerSignatureKeyHeader] = useState("X-Bearer-Signature-Key");
 
@@ -128,11 +129,12 @@ export const App = () => {
 				}]
 			}]
 		}
-		const headers = {
+
+		api('POST', '/auth', body, {
 			[ContentTypeHeader]: "application/json",
 			[BearerOwnerIdHeader]: walletData.account,
-		}
-		api('POST', '/auth', body, headers).then((e) => {
+			[BearerForAllUsers]: true,
+		}).then((e) => {
 			onSignMessage(e[0].token, type, operation, params);
 		});
 	};
