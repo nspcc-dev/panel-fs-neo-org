@@ -38,6 +38,9 @@ const Profile = ({
 	const [containers, setContainers] = useState([]);
 	const [isLoadingContainers, setIsLoadingContainers] = useState(false);
 
+	const [neoBalance, setNeoBalance] = useState(false);
+	const [isLoadingNeoBalance, setIsLoadingNeoBalance] = useState(false);
+
 	const [neoFSBalance, setNeoFSBalance] = useState(0);
 	const [isLoadingNeoFSBalance, setIsLoadingNeoFSBalance] = useState(false);
 
@@ -56,6 +59,7 @@ const Profile = ({
 			document.location.href = "/";
 		}
 		if (walletData && walletData.account && !isLoading) {
+			onNeoBalance();
 			onNeoFSBalance();
 			onGetContainers();
 			setIsLoading(true);
@@ -75,6 +79,34 @@ const Profile = ({
 				}, 500);
 			}
 		});
+	};
+
+	const onNeoBalance = async () => {
+		setIsLoadingNeoBalance(true);
+		const targetAddress = walletConnectCtx.getAccountAddress(0);
+		const invocations = [{
+			scriptHash: '0xd2a4cff31913016155e38e474a2c06d08be276cf',
+			operation: 'balanceOf',
+			args: [
+				{ type: 'Address', value: targetAddress },
+			]
+		}];
+
+		const signers = [{
+			scopes: 1, // WitnessScope.CalledByEntry
+		}];
+
+		const response = await walletConnectCtx.testInvoke({ invocations, signers });
+		setIsLoadingNeoBalance(false);
+		if (!response.result.error && response.result.stack.length > 0) {
+			onPopup('success', 'Neo balance has been updated');
+			setNeoBalance(response.result.stack[0].value);
+			setTimeout(() => {
+				setIsLoadingNeoBalance(false);
+			}, 500);
+		} else if (response.result.exception) {
+			onPopup('failed', response.result.exception);
+		}
 	};
 
 	const onGetContainers = () => {
@@ -215,6 +247,37 @@ const Profile = ({
 												}}
 											>
 												<Heading size={6} weight="bold" style={{ display: 'flex' }}>
+													<span>{neoBalance ? `${(neoBalance * 0.00000001).toFixed(8)} GAS` : '-'}</span>
+													<img
+														src="./img/sync.svg"
+														width={20}
+														height={20}
+														alt="sync"
+														style={isLoadingNeoBalance ? {
+															marginLeft: 5,
+															cursor: 'pointer',
+															animation: 'spin 1.5s infinite linear',
+														} : {
+															marginLeft: 5,
+															cursor: 'pointer',
+														}}
+														onClick={onNeoBalance}
+													/>
+												</Heading>
+												<Heading size={6}>Neo Balance</Heading>
+											</Tile>
+										</Tile>
+										<Tile kind="parent">
+											<Tile
+												kind="child"
+												renderAs={Notification}
+												color="gray"
+												style={{
+													border: '1px solid #dbdbdc',
+													boxShadow: '0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)',
+												}}
+											>
+												<Heading size={6} weight="bold" style={{ display: 'flex' }}>
 													<span>{neoFSBalance ? `${(neoFSBalance * 0.000000000001).toFixed(12)} GAS` : '-'}</span>
 													<img
 														src="./img/sync.svg"
@@ -232,7 +295,7 @@ const Profile = ({
 														onClick={onNeoFSBalance}
 													/>
 												</Heading>
-												<Heading size={6} >NeoFS Balance</Heading>
+												<Heading size={6}>NeoFS Balance</Heading>
 											</Tile>
 										</Tile>
 									</Tile>
