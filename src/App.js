@@ -27,7 +27,8 @@ import './App.css';
 
 export const App = () => {
 	const location = useLocation();
-	const walletConnectCtx = useWalletConnect();
+	const wcSdk = useWalletConnect();
+	const [activeNet] = useState('neo3:testnet');
 
 	const [ContentTypeHeader] = useState("Content-Type");
 	const [AuthorizationHeader] = useState("Authorization");
@@ -80,25 +81,19 @@ export const App = () => {
 	};
 
 	useEffect(() => {
-		if (walletConnectCtx.uri.length) {
-			onModal('connectWallet', walletConnectCtx.uri);
-		}
-	}, [walletConnectCtx.uri]);
-
-	useEffect(() => {
 		if (localStorage['wc@2:client//session:settled'] === '[]') {
 			onDisconnectWallet();
 		}
-	}, [walletConnectCtx]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [wcSdk]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
-		if (walletConnectCtx.accounts.length !== 0) {
+		if (wcSdk.isConnected()) {
 			onPopup('success', 'Wallet connected');
 			setWalletData({
-				type: walletConnectCtx.accounts[0].split(':')[0],
-				net: walletConnectCtx.accounts[0].split(':')[1],
-				account: walletConnectCtx.accounts[0].split(':')[2],
-				data: walletConnectCtx.session.peer,
+				type: wcSdk.session.namespaces.neo3.accounts[0].split(':')[0],
+				net: wcSdk.session.namespaces.neo3.accounts[0].split(':')[1],
+				account: wcSdk.session.namespaces.neo3.accounts[0].split(':')[2],
+				data: wcSdk.session.peer,
 				tokens: {
 					container: {},
 					object: {}
@@ -106,7 +101,7 @@ export const App = () => {
 			});
 			onModal();
 		}
-	}, [walletConnectCtx.accounts]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [wcSdk.isConnected()]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	const onAuth = async (type, operation, params = {}) => {
 		let body = {};
@@ -140,19 +135,23 @@ export const App = () => {
 	};
 
 	const onSignMessage = async (msg = '', type, operation, params) => {
-		const response = await walletConnectCtx.signMessage(msg);
-		if (response.result.error) {
-			onModal('failed', response.result.error.message);
-		} else if (type === 'object' && operation === 'GET') {
+		const response = await wcSdk.signMessage({ message: msg, version: 2 }).catch((error) => {
+			if (error.message) {
+				onModal('failed', error.message);
+			} else {
+				onModal('failed', 'Something went wrong, try again');
+			}
+		});
+		if (type === 'object' && operation === 'GET') {
 			api('GET', '/auth/bearer?walletConnect=true', {}, {
 				[ContentTypeHeader]: "application/json",
 				[AuthorizationHeader]: `Bearer ${msg}`,
-				[BearerSignatureHeader]: response.result.data + response.result.salt,
-				[BearerSignatureKeyHeader]: response.result.publicKey,
+				[BearerSignatureHeader]: response.data + response.salt,
+				[BearerSignatureKeyHeader]: response.publicKey,
 			}).then((e) => {
 				setWalletData({
 					...walletData,
-					publicKey: response.result.publicKey,
+					publicKey: response.publicKey,
 					tokens: {
 						...walletData.tokens,
 						[type]: {
@@ -160,17 +159,17 @@ export const App = () => {
 							[operation]: {
 								...params,
 								token: msg,
-								signature: response.result.data + response.result.salt,
+								signature: response.data + response.salt,
 								bearer: e.token,
 							}
 						}
 					}
 				});
 			});
-		} else {
+		} else if (!response.error) {
 			setWalletData({
 				...walletData,
-				publicKey: response.result.publicKey,
+				publicKey: response.publicKey,
 				tokens: {
 					...walletData.tokens,
 					[type]: {
@@ -178,7 +177,7 @@ export const App = () => {
 						[operation]: {
 							...params,
 							token: msg,
-							signature: response.result.data + response.result.salt,
+							signature: response.data + response.salt,
 						}
 					}
 				}
@@ -405,25 +404,13 @@ export const App = () => {
 	};
 
 	const onConnectWallet = async () => {
-		localStorage.removeItem('wc@2:client//pairing:settled');
-		localStorage.removeItem('wc@2:client//session:pending');
-		localStorage.removeItem('wc@2:client//pairing:history');
-		localStorage.removeItem('wc@2:client//session:settled');
-		localStorage.removeItem('wc@2:client//pairing:pending');
-		localStorage.removeItem('wc@2:client//keychain');
-		await walletConnectCtx.connect();
+		await wcSdk.connect(activeNet, (uri) => onModal('connectWallet', uri));
 	}
 
-	const onDisconnectWallet = () => {
-		walletConnectCtx.disconnect();
+	const onDisconnectWallet = async () => {
+		await wcSdk.disconnect();
 		onPopup('success', 'Wallet disconnected');
 		setWalletData(null);
-		localStorage.removeItem('wc@2:client//pairing:settled');
-		localStorage.removeItem('wc@2:client//session:pending');
-		localStorage.removeItem('wc@2:client//pairing:history');
-		localStorage.removeItem('wc@2:client//session:settled');
-		localStorage.removeItem('wc@2:client//pairing:pending');
-		localStorage.removeItem('wc@2:client//keychain');
 	};
 
 	return (
@@ -1417,7 +1404,7 @@ export const App = () => {
 						onAuth={onAuth}
 						walletData={walletData}
 						setWalletData={setWalletData}
-						walletConnectCtx={walletConnectCtx}
+						wcSdk={wcSdk}
 						isLoadContainers={isLoadContainers}
 						setLoadContainers={setLoadContainers}
 						onDisconnectWallet={onDisconnectWallet}
