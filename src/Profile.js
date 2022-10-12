@@ -19,7 +19,7 @@ const Profile = ({
 		onDisconnectWallet,
 		onModal,
 		onPopup,
-		walletConnectCtx,
+		wcSdk,
 		isLoadContainers,
 		setLoadContainers,
 		ContentTypeHeader,
@@ -55,7 +55,7 @@ const Profile = ({
 	}, [isLoadContainers]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
-		if (!localStorage['wc@2:client//keychain']) {
+		if (!localStorage['wc@2:client:0.3//session'] || localStorage['wc@2:client:0.3//session'] === '[]') {
 			document.location.href = "/";
 		}
 		if (walletData && walletData.account && !isLoading) {
@@ -83,7 +83,7 @@ const Profile = ({
 
 	const onNeoBalance = async () => {
 		setIsLoadingNeoBalance(true);
-		const targetAddress = walletConnectCtx.getAccountAddress(0);
+		const targetAddress = wcSdk.getAccountAddress(0);
 		const invocations = [{
 			scriptHash: '0xd2a4cff31913016155e38e474a2c06d08be276cf',
 			operation: 'balanceOf',
@@ -96,16 +96,22 @@ const Profile = ({
 			scopes: 1, // WitnessScope.CalledByEntry
 		}];
 
-		const response = await walletConnectCtx.testInvoke({ invocations, signers });
+		const response = await wcSdk.testInvoke({ invocations, signers }).catch((error) => {
+			if (error.message) {
+				onModal('failed', error.message);
+			} else {
+				onModal('failed', 'Something went wrong, try again');
+			}
+		});
 		setIsLoadingNeoBalance(false);
-		if (!response.result.error && response.result.stack.length > 0) {
+		if (!response.error && response.stack.length > 0) {
 			onPopup('success', 'Neo balance has been updated');
-			setNeoBalance(response.result.stack[0].value);
+			setNeoBalance(response.stack[0].value);
 			setTimeout(() => {
 				setIsLoadingNeoBalance(false);
 			}, 500);
-		} else if (response.result.exception) {
-			onPopup('failed', response.result.exception);
+		} else if (response.exception) {
+			onPopup('failed', response.exception);
 		}
 	};
 
@@ -134,7 +140,7 @@ const Profile = ({
 	const onDeposit = async () => {
 		if (depositQuantity >= 0.00000001) {
 			onModal('approveRequest');
-			const senderAddress = walletConnectCtx.getAccountAddress(0);
+			const senderAddress = wcSdk.getAccountAddress(0);
 			const invocations = [{
 				scriptHash: NeoFSContract.gasToken,
 				operation: 'transfer',
@@ -150,15 +156,17 @@ const Profile = ({
 				scopes: 1, // WitnessScope.CalledByEntry
 			}];
 
-			const response = await walletConnectCtx.invokeFunction({ invocations, signers });
-			if (!response.result.error) {
-				onModal('success', response.result);
-			} else if (response.result.error.message === 'Failed or Rejected Request') {
-				onModal('failed', 'Failed or Rejected Request');
-			} else if (response.toString() === 'Error: intrinsic gas too low') {
-				onModal('failed', 'Transaction intrinsic gas too low');
-			} else {
-				onModal('failed', 'Something went wrong, try again');
+			const response = await wcSdk.invokeFunction({ invocations, signers }).catch((error) => {
+				if (error.message === 'Failed or Rejected Request') {
+					onModal('failed', 'Failed or Rejected Request');
+				} else if (error.message === 'Error: intrinsic gas too low') {
+					onModal('failed', 'Transaction intrinsic gas too low');
+				} else {
+					onModal('failed', 'Something went wrong, try again');
+				}
+			});
+			if (!response.error) {
+				onModal('success', response);
 			}
 		} else {
 			onPopup('failed', 'Incorrect quantity value');
@@ -168,7 +176,7 @@ const Profile = ({
 	const onWithdraw = async () => {
 		if (withdrawQuantity >= 0.00000001) {
 			onModal('approveRequest');
-			const senderAddress = walletConnectCtx.getAccountAddress(0);
+			const senderAddress = wcSdk.getAccountAddress(0);
 			const invocations = [{
 				scriptHash: NeoFSContract.scriptHash,
 				operation: 'withdraw',
@@ -182,15 +190,17 @@ const Profile = ({
 				scopes: 1, // WitnessScope.CalledByEntry
 			}];
 
-			const response = await walletConnectCtx.invokeFunction({ invocations, signers });
-			if (!response.result.error) {
-				onModal('success', response.result);
-			} else if (response.result.error.message === 'Failed or Rejected Request') {
-				onModal('failed', 'Failed or Rejected Request');
-			} else if (response.toString() === 'Error: intrinsic gas too low') {
-				onModal('failed', 'Transaction intrinsic gas too low');
-			} else {
-				onModal('failed', 'Something went wrong, try again');
+			const response = await wcSdk.invokeFunction({ invocations, signers }).catch((error) => {
+				if (error.message === 'Failed or Rejected Request') {
+					onModal('failed', 'Failed or Rejected Request');
+				} else if (error.message === 'Error: intrinsic gas too low') {
+					onModal('failed', 'Transaction intrinsic gas too low');
+				} else {
+					onModal('failed', 'Something went wrong, try again');
+				}
+			});
+			if (!response.message) {
+				onModal('success', response);
 			}
 		} else {
 			onPopup('failed', 'Incorrect quantity value');
