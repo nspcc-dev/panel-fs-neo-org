@@ -18,6 +18,8 @@ NeoFS panel web application using React framework under the hood
 ## Getting started
 1. Set Contract variables in `.env` file
 ```
+REACT_APP_WC_PROJECT_ID=<wallet-connect-project-id>
+
 REACT_APP_URL=http://localhost:3000
 REACT_APP_RESTGW=https://rest.t5.fs.neo.org/v1
 REACT_APP_HTTPGW=https://http.t5.fs.neo.org
