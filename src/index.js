@@ -1,14 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { App } from './App';
-import { WalletConnectContextProvider } from "@cityofzion/wallet-connect-sdk-react";
+import { WalletConnectProvider } from "@cityofzion/wallet-connect-sdk-react";
 import { BrowserRouter } from "react-router-dom";
 
 const wcOptions = {
-	chains: ["neo3:testnet", "neo3:mainnet", "neo3:private"],
-	logger: "error",
-	methods: ["invokeFunction", "testInvoke", "signMessage", "verifyMessage"],
-	relayServer: "wss://relay.walletconnect.org",
+	projectId: process.env.REACT_APP_WC_PROJECT_ID,
+	relayServer: "wss://relay.walletconnect.com",
 	appMetadata: {
 		name: "NeoFS Panel",
 		description: "NeoFS Panel",
@@ -19,11 +17,11 @@ const wcOptions = {
 
 ReactDOM.render(
 	<React.StrictMode>
-		<WalletConnectContextProvider options={wcOptions}>
+		<WalletConnectProvider autoManageSession={true} options={wcOptions}>
 			<BrowserRouter>
 				<App />
 			</BrowserRouter>
-		</WalletConnectContextProvider>
+		</WalletConnectProvider>
 	</React.StrictMode>,
 	document.getElementById('root')
 );
