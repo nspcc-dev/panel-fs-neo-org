@@ -18,6 +18,8 @@ NeoFS panel web application using React framework under the hood
 ## Getting started
 1. Set Contract variables in `.env` file
 ```
+REACT_APP_WC_PROJECT_ID=<wallet-connect-project-id>
+
 REACT_APP_URL=http://localhost:3000
 REACT_APP_RESTGW=https://rest.t5.fs.neo.org/v1
 REACT_APP_HTTPGW=https://http.t5.fs.neo.org
@@ -27,6 +29,7 @@ REACT_APP_NEOFS_ACCOUNT=NZAUkYbJ1Cb2HrNmwZ1pg9xYHBhm2FgtKV
 REACT_APP_NEOFS_SCRIPT_HASH=0x3c3f4b84773ef0141576e48c3ff60e5078235891
 REACT_APP_NEOFS_GAS_TOKEN=0xd2a4cff31913016155e38e474a2c06d08be276cf
 ```
+<wallet-connect-project-id> can be obtained on wallet connect website, see https://cloud.walletconnect.com/app
 
 ## Getting started with wallet
 ### [Neonwallet on Windows, Mac OS, and Linux](https://neon.coz.io/)
