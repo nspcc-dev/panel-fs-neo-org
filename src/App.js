@@ -135,7 +135,7 @@ export const App = () => {
 	};
 
 	const onSignMessage = async (msg = '', type, operation, params) => {
-		const response = await wcSdk.signMessage({ message: msg, version: 2 }).catch((error) => {
+		const response = await wcSdk.signMessage({ message: msg, version: 1 }).catch((error) => {
 			if (error.message) {
 				onModal('failed', error.message);
 			} else {
