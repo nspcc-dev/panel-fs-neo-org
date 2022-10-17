@@ -155,12 +155,35 @@ const File = ({
 								<Heading size={7} weight="bolder" style={{ color: '#828282' }}>Information</Heading>
 								<Heading size={6} weight="light">
 									<span>{`Object id: `}</span>
-									<a
-										href={`${process.env.REACT_APP_HTTPGW}/get/${containerItem.containerId}/${objectItem.address.objectId}`}
-										target="_blank"
-										rel="noopener noreferrer"
-										style={{ textDecoration: 'underline' }}
-									>{objectItem.address.objectId}</a>
+									<div
+										onClick={() => {
+											onModal('loading');
+											api('GET', `${process.env.REACT_APP_HTTPGW}/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
+												[ContentTypeHeader]: "application/json",
+												[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.bearer}`,
+											}).then((data) => {
+												if (data.header.indexOf("image/") !== -1 || data.header === 'text/plain; charset=utf-8') {
+													const fileURL = URL.createObjectURL(data.res);
+													window.open(fileURL, '_blank');
+													onModal();
+												} else {
+													const a = document.createElement('a');
+													document.body.appendChild(a);
+													const url = window.URL.createObjectURL(data.res);
+													a.href = url;
+													a.download = name;
+													a.target = '_blank';
+													a.click();
+													setTimeout(() => {
+														onModal();
+														window.URL.revokeObjectURL(url);
+														document.body.removeChild(a);
+													}, 0);
+												}
+											});
+										}}
+										style={{ textDecoration: 'underline', cursor: 'pointer' }}
+									>{objectItem.address.objectId}</div>
 								</Heading>
 								<Heading size={6} weight="light">
 									<span>{`Owner id: `}</span>
