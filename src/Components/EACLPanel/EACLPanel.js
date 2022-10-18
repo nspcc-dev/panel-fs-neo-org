@@ -9,8 +9,9 @@ import {
 } from 'react-bulma-components';
 import api from '../../api';
 
-export default function ContainerItem({
+export default function EACLPanel({
 	walletData,
+	onAuth,
 	containerItem,
 	setLoadContainers,
 	eACLParams,
@@ -63,14 +64,9 @@ export default function ContainerItem({
 
 	return (
 		<Box
-			style={walletData ? {
+			style={{
 				marginTop: 10,
-				padding: '0 0 1.25rem 0',
-				border: '1px solid #dbdbdc',
-				boxShadow: '0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)',
-			} : {
-				marginTop: 10,
-				padding: '0 0 0 0',
+				padding: 0,
 				border: '1px solid #dbdbdc',
 				boxShadow: '0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)',
 			}}
@@ -310,29 +306,44 @@ export default function ContainerItem({
 				</Notification>
 			)}
 			{walletData && (
-				<Button
-					color="primary"
-					onClick={() => onSetEACL(containerItem.containerId)}
-					style={isLoadingForm ? {
-						display: 'flex',
-						margin: '20px auto 0',
-						pointerEvents: 'none',
-						opacity: 0.8,
-					} : {
-						display: 'flex',
-						margin: '20px auto 0',
-					}}
-				>
-					{isLoadingForm ? (
-						<img
-							src="./img/spinner.svg"
-							className="spinner"
-							width={20}
-							height={20}
-							alt="spinner"
-						/>
-					) : "Update"}
-				</Button>
+				<>
+					{!walletData.tokens.container.SETEACL ? (
+						<div className="token_status_panel" style={{ margin: '15px auto' }}>
+							<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock eACL&nbsp;management</Heading>
+							<Button
+								color="primary"
+								size="small"
+								onClick={() => onAuth('container', 'SETEACL')}
+							>
+								Sign
+							</Button>
+						</div>
+					) : (
+						<Button
+							color="primary"
+							onClick={() => onSetEACL(containerItem.containerId)}
+							style={isLoadingForm ? {
+								display: 'flex',
+								margin: '20px auto',
+								pointerEvents: 'none',
+								opacity: 0.8,
+							} : {
+								display: 'flex',
+								margin: '20px auto',
+							}}
+						>
+							{isLoadingForm ? (
+								<img
+									src="./img/spinner.svg"
+									className="spinner"
+									width={20}
+									height={20}
+									alt="spinner"
+								/>
+							) : "Update"}
+						</Button>
+					)}
+				</>
 			)}
 		</Box>
 	);

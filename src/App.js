@@ -934,6 +934,7 @@ export const App = () => {
 									</Box>
 								) : (
 									<EACLPanel
+										onAuth={onAuth}
 										isErrorParent={isError}
 										isEdit={!(containerForm.preset === 'personal' || containerForm.preset === 'shared' || isLoadingForm)}
 										eACLParams={containerForm.eACLParams}

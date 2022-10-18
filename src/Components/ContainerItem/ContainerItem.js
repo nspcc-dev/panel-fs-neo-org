@@ -17,6 +17,7 @@ import api from '../../api';
 
 export default function ContainerItem({
 	containerItem,
+	onAuth,
 	walletData,
 	setWalletData,
 	onModal,
@@ -101,23 +102,16 @@ export default function ContainerItem({
 	};
 
 	const onGetEACL = (containerId) => {
-		if (walletData.tokens.container.SETEACL) {
-			setLoadingEACL(true);
-			api('GET', `/containers/${containerId}/eacl?walletConnect=true`, {}, {
-				[ContentTypeHeader]: "application/json",
-				[AuthorizationHeader]: `Bearer ${walletData.tokens.container.SETEACL.token}`,
-				[BearerOwnerIdHeader]: walletData.account,
-				[BearerSignatureHeader]: walletData.tokens.container.SETEACL.signature,
-				[BearerSignatureKeyHeader]: walletData.publicKey,
-			}).then((e) => {
-				setLoadingEACL(false);
-				if (e.records) {
-					setEACLParams(e.records);
-				}
-			});
-		} else {
-			onModal('signTokens', 'container.SETEACL', { containerId });
-		}
+		setLoadingEACL(true);
+		api('GET', `/containers/${containerId}/eacl?walletConnect=true`, {}, {
+			[ContentTypeHeader]: "application/json",
+			[BearerOwnerIdHeader]: walletData.account,
+		}).then((e) => {
+			setLoadingEACL(false);
+			if (e.records) {
+				setEACLParams(e.records);
+			}
+		});
 	};
 
 	return (
@@ -205,8 +199,6 @@ export default function ContainerItem({
 													} else {
 														setActivePanel('eACL');
 													}
-												} else if (!walletData.tokens.container.SETEACL) {
-													onModal('signTokens', 'container.SETEACL', { containerId: containerItem.containerId });
 												} else if (activePanel === 'eACL') {
 													setActivePanel('');
 												} else {
@@ -241,6 +233,7 @@ export default function ContainerItem({
 															</Box>
 														) : (
 															<EACLPanel
+																onAuth={onAuth}
 																walletData={walletData}
 																containerItem={containerItem}
 																setLoadContainers={setLoadContainers}
