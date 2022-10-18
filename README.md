@@ -31,8 +31,8 @@ $ git clone https://github.com/nspcc-dev/panel-fs-neo-org.git
 Set variables in `.env` file
 - `REACT_APP_WC_PROJECT_ID` - WalletConnect project id (Can be obtained on WalletConnect website, see https://cloud.walletconnect.com/app)
 - `REACT_APP_URL` - Web application url
-- `REACT_APP_RESTGW` - NeoFS REST Gateway
-- `REACT_APP_HTTPGW` - NeoFS HTTP Gateway
+- `REACT_APP_RESTGW` - [NeoFS REST Gateway](https://github.com/nspcc-dev/neofs-rest-gw), which we use to manage containers and object in neofs (control path)
+- `REACT_APP_HTTPGW` - [NeoFS HTTP Gateway](https://github.com/nspcc-dev/neofs-http-gw), which we use to get objects (data path)
 - `REACT_APP_NEOFS_ACCOUNT` - Neo3 address of the NeoFS contract
 - `REACT_APP_NEOFS_SCRIPT_HASH` - Script hash of the NeoFS contract
 - `REACT_APP_NEOFS_GAS_TOKEN` - Script hash of the Gas token contract
