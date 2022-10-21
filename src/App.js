@@ -220,7 +220,7 @@ export const App = () => {
 								setLoadingForm(false);
 								setError({ active: true, type: [], text: e.message });
 							} else {
-								if (((!/\d/.test(containerForm.basicAcl) && containerForm.basicAcl.substr(0, 4) !== 'eacl') || (/\d/.test(containerForm.basicAcl) && containerForm.basicAcl.replace('0x','').length === 8 && (containerForm.basicAcl.substr(0, 3) === '0x1' || containerForm.basicAcl.substr(0, 3) === '0x3' || containerForm.basicAcl.substr(0, 1) === '1' || containerForm.basicAcl.substr(0, 1) === '3')))) {
+								if (containerForm.eACLParams.length > 0) {
 									api('PUT', `/containers/${e.containerId}/eacl?walletConnect=true`, {
 										"records": containerForm.eACLParams.filter((item) => delete item.isOpen),
 									}, {
@@ -916,7 +916,11 @@ export const App = () => {
 										<Tag
 											key={basicAclExample}
 											className={isLoadingForm ? "tag_disabled" : ""}
-											onClick={() => setContainerForm({ ...containerForm , basicAcl: basicAclExample })}
+											onClick={() => setContainerForm({
+												...containerForm ,
+												basicAcl: basicAclExample,
+												eACLParams: [],
+											})}
 											style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
 										>{basicAclExample}</Tag>
 									)))}
