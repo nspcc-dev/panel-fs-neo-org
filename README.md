@@ -62,6 +62,14 @@ make start PORT=3000
 6. Approve connection in the wallet
 7. Now you can use your wallet on the NeoFS Panel
 
+# Contributing
+
+Feel free to contribute to this project after reading the [contributing
+guidelines](CONTRIBUTING.md).
+
+Before starting to work on a certain topic, create a new issue first, describing
+the feature/topic you are going to implement.
+
 # License
 
 - [GNU General Public License v3.0](LICENSE)
