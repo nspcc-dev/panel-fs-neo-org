@@ -12,6 +12,10 @@ body {
     -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 }
 
+body>iframe {
+    display: none;
+}
+
 a {
     text-decoration: none;
     color: #23b87f;
