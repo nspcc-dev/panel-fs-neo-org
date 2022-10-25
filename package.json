@@ -16,6 +16,7 @@
     "web-vitals": "^1.1.2"
   },
   "scripts": {
+    "resolutions": "npx npm-force-resolutions && npm install -D react-error-overlay@6.0.9",
     "start": "react-scripts start",
     "build": "BUILD_PATH='./output' react-scripts build",
     "test": "jest --updateSnapshot",
@@ -39,6 +40,10 @@
     "@walletconnect/client": "^1.7.8",
     "babel-jest": "^26.6.0",
     "jest": "^26.6.0",
+    "react-error-overlay": "^6.0.9",
     "react-test-renderer": "^18.2.0"
+  },
+  "resolutions": {
+    "react-error-overlay": "6.0.9"
   }
 }
