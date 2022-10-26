@@ -6,6 +6,9 @@
 </p>
 
 ---
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/nspcc-dev/panel-fs-neo-org?sort=semver)
+![License](https://img.shields.io/github/license/nspcc-dev/panel-fs-neo-org.svg?style=popout)
+
 ![Demo](./.github/demo.png)
 
 # Overview
