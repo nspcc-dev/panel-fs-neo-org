@@ -50,12 +50,70 @@ export const App = () => {
 		base64file: '',
 		loading: false,
 	});
+	const [presets] = useState([{
+		preset: 'personal',
+		basicAcl: 'eacl-public-read-write',
+		eACLParams: [{
+			"operation": "GET",
+			"action": "DENY",
+			"filters": [],
+			"targets": [{ "keys": [], "role": "OTHERS" }],
+		}, {
+			"operation": "HEAD",
+			"action": "DENY",
+			"filters": [],
+			"targets": [{ "keys": [], "role": "OTHERS" }],
+		}, {
+			"operation": "PUT",
+			"action": "DENY",
+			"filters": [],
+			"targets": [{ "keys": [], "role": "OTHERS" }],
+		}, {
+			"operation": "DELETE",
+			"action": "DENY",
+			"filters": [],
+			"targets": [{ "keys": [], "role": "OTHERS" }],
+		}, {
+			"operation": "SEARCH",
+			"action": "DENY",
+			"filters": [],
+			"targets": [{ "keys": [], "role": "OTHERS" }],
+		}, {
+			"operation": "RANGE",
+			"action": "DENY",
+			"filters": [],
+			"targets": [{ "keys": [], "role": "OTHERS" }],
+		}, {
+			"operation": "RANGEHASH",
+			"action": "DENY",
+			"filters": [],
+			"targets": [{ "keys": [], "role": "OTHERS" }],
+		}],
+	}, {
+		preset: 'shared',
+		basicAcl: 'eacl-public-read-write',
+		eACLParams: [{
+			"operation": "PUT",
+			"action": "DENY",
+			"filters": [],
+			"targets": [{ "keys": [], "role": "OTHERS" }],
+		}, {
+			"operation": "DELETE",
+			"action": "DENY",
+			"filters": [],
+			"targets": [{ "keys": [], "role": "OTHERS" }],
+		}],
+	}, {
+		preset: 'custom',
+		basicAcl: '',
+		eACLParams: [],
+	}]);
 	const [containerForm, setContainerForm] = useState({
 		containerName: '',
 		placementPolicy: '',
-		basicAcl: '',
-		eACLParams: [],
-		preset: 'custom',
+		basicAcl: 'eacl-public-read-write',
+		eACLParams: presets[0].eACLParams,
+		preset: 'personal',
 	});
 	const [walletData, setWalletData] = useState(null);
 
@@ -236,9 +294,9 @@ export const App = () => {
 										setContainerForm({
 											containerName: '',
 											placementPolicy: '',
-											basicAcl: '',
-											eACLParams: [],
-											preset: 'custom',
+											basicAcl: 'eacl-public-read-write',
+											eACLParams: presets[0].eACLParams,
+											preset: 'personal',
 										});
 										setAttributes([]);
 										onModal();
@@ -250,9 +308,9 @@ export const App = () => {
 									setContainerForm({
 										containerName: '',
 										placementPolicy: '',
-										basicAcl: '',
-										eACLParams: [],
-										preset: 'custom',
+										basicAcl: 'eacl-public-read-write',
+										eACLParams: presets[0].eACLParams,
+										preset: 'personal',
 									});
 									setAttributes([]);
 									onModal();
@@ -668,9 +726,9 @@ export const App = () => {
 							setContainerForm({
 								containerName: '',
 								placementPolicy: '',
-								basicAcl: '',
-								eACLParams: [],
-								preset: 'custom',
+								basicAcl: 'eacl-public-read-write',
+								eACLParams: presets[0].eACLParams,
+								preset: 'personal',
 							});
 						}}
 					/>
@@ -686,9 +744,9 @@ export const App = () => {
 									setContainerForm({
 										containerName: '',
 										placementPolicy: '',
-										basicAcl: '',
-										eACLParams: [],
-										preset: 'custom',
+										basicAcl: 'eacl-public-read-write',
+										eACLParams: presets[0].eACLParams,
+										preset: 'personal',
 									});
 								}}
 							>
@@ -809,64 +867,7 @@ export const App = () => {
 							</Form.Field>
 							<Form.Field>
 								<Form.Label>Access Control</Form.Label>
-								{[{
-										preset: 'personal',
-										basicAcl: 'eacl-public-read-write',
-										eACLParams: [{
-											"operation": "GET",
-											"action": "DENY",
-											"filters": [],
-											"targets": [{ "keys": [], "role": "OTHERS" }],
-										}, {
-											"operation": "HEAD",
-											"action": "DENY",
-											"filters": [],
-											"targets": [{ "keys": [], "role": "OTHERS" }],
-										}, {
-											"operation": "PUT",
-											"action": "DENY",
-											"filters": [],
-											"targets": [{ "keys": [], "role": "OTHERS" }],
-										}, {
-											"operation": "DELETE",
-											"action": "DENY",
-											"filters": [],
-											"targets": [{ "keys": [], "role": "OTHERS" }],
-										}, {
-											"operation": "SEARCH",
-											"action": "DENY",
-											"filters": [],
-											"targets": [{ "keys": [], "role": "OTHERS" }],
-										}, {
-											"operation": "RANGE",
-											"action": "DENY",
-											"filters": [],
-											"targets": [{ "keys": [], "role": "OTHERS" }],
-										}, {
-											"operation": "RANGEHASH",
-											"action": "DENY",
-											"filters": [],
-											"targets": [{ "keys": [], "role": "OTHERS" }],
-										}],
-									}, {
-										preset: 'shared',
-										basicAcl: 'eacl-public-read-write',
-										eACLParams: [{
-											"operation": "PUT",
-											"action": "DENY",
-											"filters": [],
-											"targets": [{ "keys": [], "role": "OTHERS" }],
-										}, {
-											"operation": "DELETE",
-											"action": "DENY",
-											"filters": [],
-											"targets": [{ "keys": [], "role": "OTHERS" }],
-										}],
-									}, {
-										preset: 'custom',
-										basicAcl: '',
-										eACLParams: [],
-								}].map((basicPresetExample) => (
+								{presets.map((basicPresetExample) => (
 									<Tag
 										key={basicPresetExample.preset}
 										className={isLoadingForm ? "tag_disabled" : ""}
