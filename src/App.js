@@ -164,6 +164,16 @@ export const App = () => {
 		}
 	}, [wcSdk.isConnected()]); // eslint-disable-line react-hooks/exhaustive-deps
 
+	const onResetContainerForm = () => {
+		setContainerForm({
+			containerName: '',
+			placementPolicy: '',
+			basicAcl: presets.personal.basicAcl,
+			eACLParams: presets.personal.eACLParams,
+			preset: 'personal',
+		});
+	}
+
 	const onAuth = async (type, operation, params = {}) => {
 		let body = {};
 		if (type === 'container') {
@@ -294,13 +304,7 @@ export const App = () => {
 										setLoadingForm(false);
 										onPopup('success', 'New container with EACL has been created');
 										setLoadContainers(true);
-										setContainerForm({
-											containerName: '',
-											placementPolicy: '',
-											basicAcl: presets.personal.basicAcl,
-											eACLParams: presets.personal.eACLParams,
-											preset: 'personal',
-										});
+										onResetContainerForm();
 										setAttributes([]);
 										onModal();
 									});
@@ -308,13 +312,7 @@ export const App = () => {
 									setLoadingForm(false);
 									onPopup('success', 'New container has been created');
 									setLoadContainers(true);
-									setContainerForm({
-										containerName: '',
-										placementPolicy: '',
-										basicAcl: presets.personal.basicAcl,
-										eACLParams: presets.personal.eACLParams,
-										preset: 'personal',
-									});
+									onResetContainerForm();
 									setAttributes([]);
 									onModal();
 								}
@@ -726,13 +724,7 @@ export const App = () => {
 							setLoadingForm(false);
 							setAttributes([]);
 							setError({ active: false, type: [], text: '' });
-							setContainerForm({
-								containerName: '',
-								placementPolicy: '',
-								basicAcl: presets.personal.basicAcl,
-								eACLParams: presets.personal.eACLParams,
-								preset: 'personal',
-							});
+							onResetContainerForm();
 						}}
 					/>
 					<div className="modal_scroll">
@@ -744,13 +736,7 @@ export const App = () => {
 									setLoadingForm(false);
 									setAttributes([]);
 									setError({ active: false, type: [], text: '' });
-									setContainerForm({
-										containerName: '',
-										placementPolicy: '',
-										basicAcl: presets.personal.basicAcl,
-										eACLParams: presets.personal.eACLParams,
-										preset: 'personal',
-									});
+									onResetContainerForm();
 								}}
 							>
 								<img
