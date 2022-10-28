@@ -50,69 +50,72 @@ export const App = () => {
 		base64file: '',
 		loading: false,
 	});
-	const [presets] = useState([{
-		preset: 'personal',
-		basicAcl: 'eacl-public-read-write',
-		eACLParams: [{
-			"operation": "GET",
-			"action": "DENY",
-			"filters": [],
-			"targets": [{ "keys": [], "role": "OTHERS" }],
-		}, {
-			"operation": "HEAD",
-			"action": "DENY",
-			"filters": [],
-			"targets": [{ "keys": [], "role": "OTHERS" }],
-		}, {
-			"operation": "PUT",
-			"action": "DENY",
-			"filters": [],
-			"targets": [{ "keys": [], "role": "OTHERS" }],
-		}, {
-			"operation": "DELETE",
-			"action": "DENY",
-			"filters": [],
-			"targets": [{ "keys": [], "role": "OTHERS" }],
-		}, {
-			"operation": "SEARCH",
-			"action": "DENY",
-			"filters": [],
-			"targets": [{ "keys": [], "role": "OTHERS" }],
-		}, {
-			"operation": "RANGE",
-			"action": "DENY",
-			"filters": [],
-			"targets": [{ "keys": [], "role": "OTHERS" }],
-		}, {
-			"operation": "RANGEHASH",
-			"action": "DENY",
-			"filters": [],
-			"targets": [{ "keys": [], "role": "OTHERS" }],
-		}],
-	}, {
-		preset: 'shared',
-		basicAcl: 'eacl-public-read-write',
-		eACLParams: [{
-			"operation": "PUT",
-			"action": "DENY",
-			"filters": [],
-			"targets": [{ "keys": [], "role": "OTHERS" }],
-		}, {
-			"operation": "DELETE",
-			"action": "DENY",
-			"filters": [],
-			"targets": [{ "keys": [], "role": "OTHERS" }],
-		}],
-	}, {
-		preset: 'custom',
-		basicAcl: '',
-		eACLParams: [],
-	}]);
+	const [presets] = useState({
+		personal: {
+			basicAcl: 'eacl-public-read-write',
+			eACLParams: [{
+				"operation": "GET",
+				"action": "DENY",
+				"filters": [],
+				"targets": [{ "keys": [], "role": "OTHERS" }],
+			}, {
+				"operation": "HEAD",
+				"action": "DENY",
+				"filters": [],
+				"targets": [{ "keys": [], "role": "OTHERS" }],
+			}, {
+				"operation": "PUT",
+				"action": "DENY",
+				"filters": [],
+				"targets": [{ "keys": [], "role": "OTHERS" }],
+			}, {
+				"operation": "DELETE",
+				"action": "DENY",
+				"filters": [],
+				"targets": [{ "keys": [], "role": "OTHERS" }],
+			}, {
+				"operation": "SEARCH",
+				"action": "DENY",
+				"filters": [],
+				"targets": [{ "keys": [], "role": "OTHERS" }],
+			}, {
+				"operation": "RANGE",
+				"action": "DENY",
+				"filters": [],
+				"targets": [{ "keys": [], "role": "OTHERS" }],
+			}, {
+				"operation": "RANGEHASH",
+				"action": "DENY",
+				"filters": [],
+				"targets": [{ "keys": [], "role": "OTHERS" }],
+			}],
+		},
+		shared: {
+			preset: 'shared',
+			basicAcl: 'eacl-public-read-write',
+			eACLParams: [{
+				"operation": "PUT",
+				"action": "DENY",
+				"filters": [],
+				"targets": [{ "keys": [], "role": "OTHERS" }],
+			}, {
+				"operation": "DELETE",
+				"action": "DENY",
+				"filters": [],
+				"targets": [{ "keys": [], "role": "OTHERS" }],
+			}],
+		},
+		custom: {
+			preset: 'custom',
+			basicAcl: '',
+			eACLParams: [],
+		}
+	});
 	const [containerForm, setContainerForm] = useState({
 		containerName: '',
 		placementPolicy: '',
-		basicAcl: 'eacl-public-read-write',
-		eACLParams: presets[0].eACLParams,
+		basicAcl: presets.personal.basicAcl,
+		eACLParams: presets.personal.eACLParams,
 		preset: 'personal',
 	});
 	const [walletData, setWalletData] = useState(null);
@@ -294,8 +297,8 @@ export const App = () => {
 										setContainerForm({
 											containerName: '',
 											placementPolicy: '',
-											basicAcl: 'eacl-public-read-write',
-											eACLParams: presets[0].eACLParams,
+											basicAcl: presets.personal.basicAcl,
+											eACLParams: presets.personal.eACLParams,
 											preset: 'personal',
 										});
 										setAttributes([]);
@@ -308,8 +311,8 @@ export const App = () => {
 									setContainerForm({
 										containerName: '',
 										placementPolicy: '',
-										basicAcl: 'eacl-public-read-write',
-										eACLParams: presets[0].eACLParams,
+										basicAcl: presets.personal.basicAcl,
+										eACLParams: presets.personal.eACLParams,
 										preset: 'personal',
 									});
 									setAttributes([]);
@@ -726,8 +729,8 @@ export const App = () => {
 							setContainerForm({
 								containerName: '',
 								placementPolicy: '',
-								basicAcl: 'eacl-public-read-write',
-								eACLParams: presets[0].eACLParams,
+								basicAcl: presets.personal.basicAcl,
+								eACLParams: presets.personal.eACLParams,
 								preset: 'personal',
 							});
 						}}
@@ -744,8 +747,8 @@ export const App = () => {
 									setContainerForm({
 										containerName: '',
 										placementPolicy: '',
-										basicAcl: 'eacl-public-read-write',
-										eACLParams: presets[0].eACLParams,
+										basicAcl: presets.personal.basicAcl,
+										eACLParams: presets.personal.eACLParams,
 										preset: 'personal',
 									});
 								}}
@@ -867,21 +870,21 @@ export const App = () => {
 							</Form.Field>
 							<Form.Field>
 								<Form.Label>Access Control</Form.Label>
-								{presets.map((basicPresetExample) => (
+								{Object.keys(presets).map((basicPresetExample) => (
 									<Tag
-										key={basicPresetExample.preset}
+										key={basicPresetExample}
 										className={isLoadingForm ? "tag_disabled" : ""}
 										onClick={() => {
-											if (containerForm.preset !== basicPresetExample.preset) {
+											if (containerForm.preset !== basicPresetExample) {
 												setContainerForm({
 													...containerForm,
-													basicAcl: basicPresetExample.basicAcl,
-													eACLParams: basicPresetExample.eACLParams,
-													preset: basicPresetExample.preset,
+													basicAcl: presets[basicPresetExample].basicAcl,
+													eACLParams: presets[basicPresetExample].eACLParams,
+													preset: basicPresetExample,
 												})}
 											}
 										}
-										style={basicPresetExample.preset === containerForm.preset ? {
+										style={basicPresetExample === containerForm.preset ? {
 											margin: '5px 5px 0 0',
 											cursor: 'pointer',
 											background: '#21b87e',
@@ -890,7 +893,7 @@ export const App = () => {
 											margin: '5px 5px 0 0',
 											cursor: 'pointer',
 										}}
-									>{basicPresetExample.preset}</Tag>
+									>{basicPresetExample}</Tag>
 								))}
 							</Form.Field>
 							<Form.Field>
