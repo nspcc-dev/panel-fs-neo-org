@@ -1,20 +1,23 @@
 #!/usr/bin/make -f
 PORT = 3000
 
-all:
-	@rm -rf output
+ifeq ($(shell uname), Linux)
+	STAT:=-u $(shell stat -c "%u:%g" .)
+endif
+
+all: clean
 	docker run \
-	-u `stat -c "%u:%g" .` \
+	$(STAT) \
 	-v `pwd`:/usr/src/app \
 	-w /usr/src/app node:14-alpine \
 	sh -c 'npm install --silent && npm run build'
 
-start:
+start: all
 	docker run \
 	-p $(PORT):3000 \
 	-v `pwd`:/usr/src/app \
 	-w /usr/src/app node:14-alpine \
-	sh -c 'npm install --silent && npm run build && npm install -g serve && serve -s output -p 3000'
+	sh -c 'npm install -g serve && serve -s output -p 3000'
 
 test:
 	npm run test
