@@ -17,7 +17,7 @@ const Home = ({
 
 	useEffect(() => {
 		if (walletData && !walletData.balance && walletData.account) {
-			if (location.pathname.indexOf('/profile') === -1) {
+			if (location.pathname.indexOf('/profile') === -1 && process.env.REACT_APP_WC_PROJECT_ID !== '') {
 				document.location.href = "/profile";
 			}
 		}

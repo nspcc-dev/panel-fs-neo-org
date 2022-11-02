@@ -55,7 +55,7 @@ const Profile = ({
 	}, [isLoadContainers]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
-		if (!localStorage['wc@2:client:0.3//session'] || localStorage['wc@2:client:0.3//session'] === '[]') {
+		if (!localStorage['wc@2:client:0.3//session'] || localStorage['wc@2:client:0.3//session'] === '[]' || process.env.REACT_APP_WC_PROJECT_ID === '') {
 			document.location.href = "/";
 		}
 		if (walletData && walletData.account && !isLoading) {
@@ -209,6 +209,7 @@ const Profile = ({
 
 	return (
 		<Container style={{ minHeight: 'calc(100vh - 212px)' }}>
+			<></>
 			{walletData ? (
 				<Section>
 					<Box
