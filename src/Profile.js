@@ -187,7 +187,8 @@ const Profile = ({
 			}];
 
 			const signers = [{
-				scopes: 1, // WitnessScope.CalledByEntry
+				scopes: 16, // WitnessScope.CustomContracts
+				allowedContracts: [NeoFSContract.gasToken, NeoFSContract.scriptHash]
 			}];
 
 			const response = await wcSdk.invokeFunction({ invocations, signers }).catch((error) => {
@@ -209,7 +210,6 @@ const Profile = ({
 
 	return (
 		<Container style={{ minHeight: 'calc(100vh - 212px)' }}>
-			<></>
 			{walletData ? (
 				<Section>
 					<Box
