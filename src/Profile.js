@@ -127,14 +127,14 @@ const Profile = ({
 				const containersNamed = e.containers.filter((container) => container.containerName).sort((a, b) => {
 					const acontainerName = a.containerName.toLowerCase();
 					const bcontainerName = b.containerName.toLowerCase();
-					if(acontainerName < bcontainerName) return -1;
+					if (acontainerName < bcontainerName) return -1;
 					return 1;
 				});
 
-				const containersUnnamed = e.containers.filter((container) => container.containerName === '').sort((a, b) => {
+				const containersUnnamed = e.containers.filter((container) => !container.containerName).sort((a, b) => {
 					const acontainerId = a.containerId.toLowerCase();
 					const bcontainerId = b.containerId.toLowerCase();
-					if(acontainerId < bcontainerId) return -1;
+					if (acontainerId < bcontainerId) return -1;
 					return 1;
 				});
 
