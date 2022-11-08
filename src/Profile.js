@@ -147,7 +147,7 @@ const Profile = ({
 	};
 
 	const onDeposit = async () => {
-		if (depositQuantity >= 0.00000001) {
+		if (depositQuantity >= 0.00000001 && depositQuantity <= (neoBalance * 0.00000001).toFixed(8)) {
 			onModal('approveRequest');
 			const senderAddress = wcSdk.getAccountAddress(0);
 			const invocations = [{
@@ -183,7 +183,7 @@ const Profile = ({
 	};
 
 	const onWithdraw = async () => {
-		if (withdrawQuantity >= 0.00000001) {
+		if (withdrawQuantity >= 0.00000001 && withdrawQuantity <= (neoFSBalance * 0.000000000001).toFixed(12)) {
 			onModal('approveRequest');
 			const senderAddress = wcSdk.getAccountAddress(0);
 			const invocations = [{
