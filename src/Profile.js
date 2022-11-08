@@ -363,6 +363,11 @@ const Profile = ({
 												type="number"
 												value={withdrawQuantity}
 												onChange={(e) => setWithdrawQuantity(e.target.value)}
+												onKeyPress={(event) => {
+													if (!/[0-9]/.test(event.key)) {
+														event.preventDefault();
+													}
+												}}
 											/>
 										</Form.Control>
 									</Form.Field>
