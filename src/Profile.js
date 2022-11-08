@@ -191,7 +191,7 @@ const Profile = ({
 				operation: 'withdraw',
 				args: [
 					{ type: 'Address', value: senderAddress },
-					{ type: 'Integer', value: withdrawQuantity * 100000000 },
+					{ type: 'Integer', value: withdrawQuantity },
 				]
 			}];
 
