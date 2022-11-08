@@ -138,7 +138,7 @@ const Profile = ({
 	};
 
 	const onDeposit = async () => {
-		if (depositQuantity >= 0.00000001 && depositQuantity <= (neoBalance * 0.00000001).toFixed(8)) {
+		if (depositQuantity * 1e8 >= 1 && depositQuantity * 1e8 <= neoBalance) {
 			onModal('approveRequest');
 			const senderAddress = wcSdk.getAccountAddress(0);
 			const invocations = [{
@@ -147,7 +147,7 @@ const Profile = ({
 				args: [
 					{ type: 'Address', value: senderAddress },
 					{ type: 'Address', value: NeoFSContract.account },
-					{ type: 'Integer', value: depositQuantity * 100000000 },
+					{ type: 'Integer', value: depositQuantity * 1e8 },
 					{ type: 'ByteArray', value: '' },
 				]
 			}];
@@ -174,7 +174,7 @@ const Profile = ({
 	};
 
 	const onWithdraw = async () => {
-		if (withdrawQuantity >= 0.00000001 && withdrawQuantity <= (neoFSBalance * 0.000000000001).toFixed(12)) {
+		if (withdrawQuantity >= 1 && withdrawQuantity * 1e12 <= neoFSBalance) {
 			onModal('approveRequest');
 			const senderAddress = wcSdk.getAccountAddress(0);
 			const invocations = [{
@@ -258,7 +258,7 @@ const Profile = ({
 												}}
 											>
 												<Heading size={6} weight="bold" style={{ display: 'flex' }}>
-													<span>{neoBalance ? `${(neoBalance * 0.00000001).toFixed(8)} GAS` : '-'}</span>
+													<span>{neoBalance ? `${neoBalance / 1e8} GAS` : '-'}</span>
 													<img
 														src="./img/sync.svg"
 														width={20}
@@ -289,7 +289,7 @@ const Profile = ({
 												}}
 											>
 												<Heading size={6} weight="bold" style={{ display: 'flex' }}>
-													<span>{neoFSBalance ? `${(neoFSBalance * 0.000000000001).toFixed(12)} GAS` : '-'}</span>
+													<span>{neoFSBalance ? `${neoFSBalance / 1e12} GAS` : '-'}</span>
 													<img
 														src="./img/sync.svg"
 														width={20}
