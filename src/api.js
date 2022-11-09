@@ -18,7 +18,7 @@ async function serverRequest(method, url, params, headers) {
 }
 
 export default function api(method, url, params = {}, headers = {}) {
-	return new Promise((resolve) => {
+	return new Promise((resolve, reject) => {
 		serverRequest(method, url, params, headers).then(async (response) => {
 			if (response && response.status === 204) {
 				resolve({
@@ -30,9 +30,11 @@ export default function api(method, url, params = {}, headers = {}) {
 					res = await response.blob();
 					const header = response.headers.get('Content-Type');
 					resolve({ header, res });
-				} else {
+				} else if (response) {
 					res = await response.json();
 					resolve(res);
+				} else {
+					reject(res);
 				}
 			}
 		});
