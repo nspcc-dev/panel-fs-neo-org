@@ -44,6 +44,8 @@ const Profile = ({
 	const [neoFSBalance, setNeoFSBalance] = useState(0);
 	const [isLoadingNeoFSBalance, setIsLoadingNeoFSBalance] = useState(false);
 
+	const [isNotAvailableNeoFS, setNotAvailableNeoFS] = useState(false);
+
 	const [depositQuantity, setDepositQuantity] = useState(0);
 	const [withdrawQuantity, setWithdrawQuantity] = useState(0);
 
@@ -78,6 +80,9 @@ const Profile = ({
 					setIsLoadingNeoFSBalance(false);
 				}, 500);
 			}
+		}).catch(() => {
+			setIsLoadingNeoFSBalance(false);
+			setNotAvailableNeoFS(true);
 		});
 	};
 
@@ -143,6 +148,9 @@ const Profile = ({
 					setIsLoadingContainers(false);
 				}, 1000);
 			}
+		}).catch(() => {
+			setIsLoadingContainers(false);
+			setNotAvailableNeoFS(true);
 		});
 	};
 
@@ -221,6 +229,12 @@ const Profile = ({
 		<Container style={{ minHeight: 'calc(100vh - 212px)' }}>
 			{walletData ? (
 				<Section>
+					{isNotAvailableNeoFS && (
+						<Box style={{ fontSize: 14, wordBreak: 'break-all', background: '#fece0f' }}>
+							<div style={{ fontSize: 20, fontWeight: 'bold' }}>NeoFS REST Gateway is not available</div>
+							<div>Check web app configuration or try later</div>
+						</Box>
+					)}
 					<Box
 						id="account"
 						style={{ marginTop: '1.5rem' }}
