@@ -56,8 +56,10 @@ make start PORT=3000
 - [Aero web wallet](https://melanke.github.io/aero-beta/)
 - [Neon wallet for Windows, Mac OS, Linux, Android and iOS](https://neon.coz.io/)
 
+(Wallet applications are [migrating](https://docs.walletconnect.com/2.0/advanced/migrating-from-v1.0) to WalletConnect v2 protocol. Neon wallet is considered unstable, use Aero web wallet for tests)
+
 ## Setup guide
-1. Download [Neon wallet](https://neon.coz.io/) or open [Aero web wallet](https://melanke.github.io/aero-beta/)
+1. Open [Aero web wallet](https://melanke.github.io/aero-beta/) or download [Neon wallet](https://neon.coz.io/)
 2. Import wallet or generate a new one
 3. Type wallet password
 4. Choose your network (use `Testnet` for the best experience)
