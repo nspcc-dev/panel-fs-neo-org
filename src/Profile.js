@@ -281,22 +281,24 @@ const Profile = ({
 												}}
 											>
 												<Heading size={6} weight="bold" style={{ display: 'flex' }}>
-													<span>{neoBalance ? `${neoBalance / 1e8} GAS` : '-'}</span>
-													<img
-														src="./img/sync.svg"
-														width={20}
-														height={20}
-														alt="sync"
-														style={isLoadingNeoBalance ? {
-															marginLeft: 5,
-															cursor: 'pointer',
-															animation: 'spin 1.5s infinite linear',
-														} : {
-															marginLeft: 5,
-															cursor: 'pointer',
-														}}
-														onClick={onNeoBalance}
-													/>
+													<span>{neoBalance ? `${(neoBalance * 0.00000001).toFixed(8)} GAS` : '-'}</span>
+													{!isNotAvailableNeoFS && (
+														<img
+															src="./img/sync.svg"
+															width={20}
+															height={20}
+															alt="sync"
+															style={isLoadingNeoBalance ? {
+																marginLeft: 5,
+																cursor: 'pointer',
+																animation: 'spin 1.5s infinite linear',
+															} : {
+																marginLeft: 5,
+																cursor: 'pointer',
+															}}
+															onClick={onNeoBalance}
+														/>
+													)}
 												</Heading>
 												<Heading size={6}>Neo Balance</Heading>
 											</Tile>
@@ -312,22 +314,24 @@ const Profile = ({
 												}}
 											>
 												<Heading size={6} weight="bold" style={{ display: 'flex' }}>
-													<span>{neoFSBalance ? `${neoFSBalance / 1e12} GAS` : '-'}</span>
-													<img
-														src="./img/sync.svg"
-														width={20}
-														height={20}
-														alt="sync"
-														style={isLoadingNeoFSBalance ? {
-															marginLeft: 5,
-															cursor: 'pointer',
-															animation: 'spin 1.5s infinite linear',
-														} : {
-															marginLeft: 5,
-															cursor: 'pointer',
-														}}
-														onClick={onNeoFSBalance}
-													/>
+													<span>{neoFSBalance ? `${(neoFSBalance * 0.000000000001).toFixed(12)} GAS` : '-'}</span>
+													{!isNotAvailableNeoFS && (
+														<img
+															src="./img/sync.svg"
+															width={20}
+															height={20}
+															alt="sync"
+															style={isLoadingNeoFSBalance ? {
+																marginLeft: 5,
+																cursor: 'pointer',
+																animation: 'spin 1.5s infinite linear',
+															} : {
+																marginLeft: 5,
+																cursor: 'pointer',
+															}}
+															onClick={onNeoFSBalance}
+														/>
+													)}
 												</Heading>
 												<Heading size={6}>NeoFS Balance</Heading>
 											</Tile>
@@ -357,7 +361,15 @@ const Profile = ({
 									<Button
 										color="primary"
 										onClick={onDeposit}
-										style={{ display: 'flex', margin: 'auto' }}
+										style={isNotAvailableNeoFS ? {
+											display: 'flex',
+											margin: 'auto',
+											pointerEvents: 'none',
+											opacity: 0.6,
+										} : {
+											display: 'flex',
+											margin: 'auto',
+										}}
 									>
 										Make a payment
 									</Button>
@@ -388,7 +400,15 @@ const Profile = ({
 									<Button
 										color="primary"
 										onClick={onWithdraw}
-										style={{ display: 'flex', margin: 'auto' }}
+										style={isNotAvailableNeoFS ? {
+											display: 'flex',
+											margin: 'auto',
+											pointerEvents: 'none',
+											opacity: 0.6,
+										} : {
+											display: 'flex',
+											margin: 'auto',
+										}}
 									>
 										Receive funds
 									</Button>
@@ -400,21 +420,23 @@ const Profile = ({
 						<Heading style={{ display: 'flex', justifyContent: 'space-between' }}>
 							<span>
 								{`Containers`}
-								<img
-									src="./img/sync.svg"
-									width={20}
-									height={20}
-									alt="sync"
-									style={isLoadingContainers ? {
-										marginLeft: 5,
-										cursor: 'pointer',
-										animation: 'spin 1.5s infinite linear',
-									} : {
-										marginLeft: 5,
-										cursor: 'pointer',
-									}}
-									onClick={onGetContainers}
-								/>
+								{!isNotAvailableNeoFS && (
+									<img
+										src="./img/sync.svg"
+										width={20}
+										height={20}
+										alt="sync"
+										style={isLoadingContainers ? {
+											marginLeft: 5,
+											cursor: 'pointer',
+											animation: 'spin 1.5s infinite linear',
+										} : {
+											marginLeft: 5,
+											cursor: 'pointer',
+										}}
+										onClick={onGetContainers}
+									/>
+								)}
 							</span>
 							{/* <img
 								src="./img/settings.svg"
@@ -428,6 +450,7 @@ const Profile = ({
 								color="primary"
 								size="small"
 								onClick={() => onModal('createContainer', { neoFSBalance })}
+								style={isNotAvailableNeoFS ? { pointerEvents: 'none', opacity: 0.6 } : {}}
 							>
 								New container
 							</Button>
