@@ -150,16 +150,24 @@ export const App = () => {
 	useEffect(() => {
 		if (wcSdk.isConnected()) {
 			onPopup('success', 'Wallet connected');
-			setWalletData({
-				type: wcSdk.session.namespaces.neo3.accounts[0].split(':')[0],
-				net: wcSdk.session.namespaces.neo3.accounts[0].split(':')[1],
-				account: wcSdk.session.namespaces.neo3.accounts[0].split(':')[2],
-				data: wcSdk.session.peer,
-				tokens: {
-					container: {},
-					object: {}
+			if (localStorage.walletData && JSON.parse(localStorage.walletData).expiry > new Date().getTime()) {
+				const walletDataTemp = JSON.parse(localStorage.walletData);
+				setWalletData(walletDataTemp);
+			} else {
+				if (localStorage.walletData) {
+					localStorage.removeItem('walletData');
 				}
-			});
+				setWalletData({
+					type: wcSdk.session.namespaces.neo3.accounts[0].split(':')[0],
+					net: wcSdk.session.namespaces.neo3.accounts[0].split(':')[1],
+					account: wcSdk.session.namespaces.neo3.accounts[0].split(':')[2],
+					data: wcSdk.session.peer,
+					tokens: {
+						container: {},
+						object: {}
+					}
+				});
+			}
 			onModal();
 		}
 	}, [wcSdk.isConnected()]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -172,6 +180,32 @@ export const App = () => {
 			eACLParams: presets.personal.eACLParams,
 			preset: 'personal',
 		});
+	}
+
+	const onUpdateWalletData = (response, params, operation, type, msg, bearer) => {
+		const walletDataTemp = {
+			...walletData,
+			publicKey: response.publicKey,
+			tokens: {
+				...walletData.tokens,
+				[type]: {
+					...walletData.tokens[type],
+					[operation]: {
+						...params,
+						token: msg,
+						signature: response.data + response.salt,
+					}
+				}
+			}
+		}
+		if (bearer) {
+			walletDataTemp.tokens[type][operation].bearer = bearer;
+		}
+		if (!walletDataTemp.expiry || walletDataTemp.expiry < new Date().getTime()) {
+			walletDataTemp.expiry = new Date().getTime() + 7200000;
+		}
+		localStorage.setItem('walletData', JSON.stringify(walletDataTemp));
+		setWalletData(walletDataTemp);
 	}
 
 	const onAuth = async (type, operation, params = {}) => {
@@ -220,39 +254,10 @@ export const App = () => {
 				[BearerSignatureHeader]: response.data + response.salt,
 				[BearerSignatureKeyHeader]: response.publicKey,
 			}).then((e) => {
-				setWalletData({
-					...walletData,
-					publicKey: response.publicKey,
-					tokens: {
-						...walletData.tokens,
-						[type]: {
-							...walletData.tokens[type],
-							[operation]: {
-								...params,
-								token: msg,
-								signature: response.data + response.salt,
-								bearer: e.token,
-							}
-						}
-					}
-				});
+				onUpdateWalletData(response, params, operation, type, msg, e.token);
 			});
 		} else if (!response.error) {
-			setWalletData({
-				...walletData,
-				publicKey: response.publicKey,
-				tokens: {
-					...walletData.tokens,
-					[type]: {
-						...walletData.tokens[type],
-						[operation]: {
-							...params,
-							token: msg,
-							signature: response.data + response.salt,
-						}
-					}
-				}
-			});
+			onUpdateWalletData(response, params, operation, type, msg);
 		}
 	};
 
@@ -469,6 +474,7 @@ export const App = () => {
 	const onDisconnectWallet = async () => {
 		await wcSdk.disconnect();
 		onPopup('success', 'Wallet disconnected');
+		localStorage.removeItem('walletData');
 		setWalletData(null);
 	};
 
