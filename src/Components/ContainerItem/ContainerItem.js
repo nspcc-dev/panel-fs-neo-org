@@ -33,6 +33,7 @@ export default function ContainerItem({
 }) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [objects, setObjects] = useState(null);
+	const [isLoadingObjects, setLoadingObjects] = useState(false);
 	const [isLoadingEACL, setLoadingEACL] = useState(false);
 	const [eACLParams, setEACLParams] = useState([]);
 	const [activePanel, setActivePanel] = useState('');
@@ -84,6 +85,7 @@ export default function ContainerItem({
 	}, [walletData]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	const onGetObjects = (containerId) => {
+		setLoadingObjects(true);
 		api('POST', `/objects/${containerId}/search?walletConnect=true`, {
 			"filters": [],
 		}, {
@@ -93,6 +95,7 @@ export default function ContainerItem({
 			[BearerSignatureHeader]: walletData.tokens.object.GET.signature,
 			[BearerSignatureKeyHeader]: walletData.publicKey,
 		}).then((e) => {
+			setLoadingObjects(false);
 			if (e.message) {
 				onPopup('failed', e.message);
 			} else {
@@ -315,18 +318,28 @@ export default function ContainerItem({
 													boxShadow: '0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)',
 												}}
 											>
-												<TreeView
-													walletData={walletData}
-													onModal={onModal}
-													containerIndex={index}
-													containerItem={containerItem}
-													objects={objects}
-													ContentTypeHeader={ContentTypeHeader}
-													AuthorizationHeader={AuthorizationHeader}
-													BearerOwnerIdHeader={BearerOwnerIdHeader}
-													BearerSignatureHeader={BearerSignatureHeader}
-													BearerSignatureKeyHeader={BearerSignatureKeyHeader}
-												/>
+												{!isLoadingObjects ? (
+													<TreeView
+														walletData={walletData}
+														onModal={onModal}
+														containerIndex={index}
+														containerItem={containerItem}
+														objects={objects}
+														ContentTypeHeader={ContentTypeHeader}
+														AuthorizationHeader={AuthorizationHeader}
+														BearerOwnerIdHeader={BearerOwnerIdHeader}
+														BearerSignatureHeader={BearerSignatureHeader}
+														BearerSignatureKeyHeader={BearerSignatureKeyHeader}
+													/>
+												) : (
+													<img
+														className="modal_loader"
+														src="./img/loader.svg"
+														height={30}
+														width={30}
+														alt="loader"
+													/>
+												)}
 												<Button
 													color="primary"
 													onClick={() => onModal('createObject', { containerId: containerItem.containerId })}
