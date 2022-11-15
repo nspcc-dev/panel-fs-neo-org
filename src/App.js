@@ -169,6 +169,8 @@ export const App = () => {
 				});
 			}
 			onModal();
+		} else if (walletData) {
+			onDisconnectWallet();
 		}
 	}, [wcSdk.isConnected()]); // eslint-disable-line react-hooks/exhaustive-deps
 
