@@ -14,6 +14,7 @@ import ContainerItem from './Components/ContainerItem/ContainerItem';
 import api from './api';
 
 const Profile = ({
+		params,
 		walletData,
 		setWalletData,
 		onDisconnectWallet,
@@ -31,9 +32,9 @@ const Profile = ({
 	}) => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [NeoFSContract] = useState({
-		scriptHash: process.env.REACT_APP_NEOFS_SCRIPT_HASH,
-		account: process.env.REACT_APP_NEOFS_ACCOUNT,
-		gasToken: process.env.REACT_APP_NEOFS_GAS_TOKEN,
+		scriptHash: process.env.REACT_APP_NEOFS_SCRIPT_HASH ? process.env.REACT_APP_NEOFS_SCRIPT_HASH : '0x3c3f4b84773ef0141576e48c3ff60e5078235891',
+		account: process.env.REACT_APP_NEOFS_ACCOUNT ? process.env.REACT_APP_NEOFS_ACCOUNT : 'NZAUkYbJ1Cb2HrNmwZ1pg9xYHBhm2FgtKV',
+		gasToken: process.env.REACT_APP_NEOFS_GAS_TOKEN ? process.env.REACT_APP_NEOFS_GAS_TOKEN : '0xd2a4cff31913016155e38e474a2c06d08be276cf',
 	});
 	const [containers, setContainers] = useState([]);
 	const [isLoadingContainers, setIsLoadingContainers] = useState(false);
@@ -57,7 +58,7 @@ const Profile = ({
 	}, [isLoadContainers]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
-		if (!localStorage['wc@2:client:0.3//session'] || localStorage['wc@2:client:0.3//session'] === '[]' || process.env.REACT_APP_WC_PROJECT_ID === '') {
+		if (!localStorage['wc@2:client:0.3//session'] || localStorage['wc@2:client:0.3//session'] === '[]' || !process.env.REACT_APP_WC_PROJECT_ID) {
 			document.location.href = "/";
 		}
 		if (walletData && walletData.account && !isLoading) {
@@ -458,6 +459,7 @@ const Profile = ({
 						{containers.map((containerItem, index) => (
 							<ContainerItem
 								key={containerItem.containerId}
+								params={params}
 								setWalletData={setWalletData}
 								walletData={walletData}
 								onModal={onModal}

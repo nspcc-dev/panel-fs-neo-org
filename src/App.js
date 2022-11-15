@@ -36,6 +36,11 @@ export const App = () => {
 	const [BearerForAllUsers] = useState("X-Bearer-For-All-Users");
 	const [BearerSignatureHeader] = useState("X-Bearer-Signature");
 	const [BearerSignatureKeyHeader] = useState("X-Bearer-Signature-Key");
+	
+	const [params] = useState({
+		rest_gw: process.env.REACT_APP_RESTGW ? process.env.REACT_APP_RESTGW : 'https://rest.t5.fs.neo.org/v1',
+		http_gw: process.env.REACT_APP_HTTPGW ? process.env.REACT_APP_HTTPGW : 'https://http.t5.fs.neo.org',
+	});
 
 	const [attributes, setAttributes] = useState([]);
 	const [isLoadContainers, setLoadContainers] = useState(false);
@@ -1402,6 +1407,7 @@ export const App = () => {
 				<Route
 					path="/profile"
 					element={<Profile
+						params={params}
 						onAuth={onAuth}
 						walletData={walletData}
 						setWalletData={setWalletData}

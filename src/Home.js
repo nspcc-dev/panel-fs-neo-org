@@ -17,7 +17,7 @@ const Home = ({
 
 	useEffect(() => {
 		if (walletData && !walletData.balance && walletData.account) {
-			if (location.pathname.indexOf('/profile') === -1 && process.env.REACT_APP_WC_PROJECT_ID !== '') {
+			if (location.pathname.indexOf('/profile') === -1 && process.env.REACT_APP_WC_PROJECT_ID && process.env.REACT_APP_WC_PROJECT_ID !== '') {
 				document.location.href = "/profile";
 			}
 		}
@@ -30,7 +30,7 @@ const Home = ({
 		>
 			<Section>
 				<Box style={{ maxWidth: 600, margin: 'auto' }}>
-					{process.env.REACT_APP_WC_PROJECT_ID === '' ? (
+					{!process.env.REACT_APP_WC_PROJECT_ID ? (
 						<Tile kind="parent">
 							<Tile
 								kind="child"

@@ -10,6 +10,7 @@ const Tree = ({ children }) => {
 };
 
 const Branch = ({
+		params,
 		objectPath,
 		containerItem,
 		containerChildren,
@@ -28,6 +29,7 @@ const Branch = ({
 			{Object.keys(containerChildren[objectPath]).length > 1 && Object.keys(containerChildren[objectPath]).map((objectPathNew) => ( objectPathNew !== '/' && (
 				<Tree.Branch
 					key={objectPathNew}
+					params={params}
 					objectPath={objectPathNew}
 					walletData={walletData}
 					onModal={onModal}
@@ -45,6 +47,7 @@ const Branch = ({
 			{containerChildren[objectPath]['/'] && containerChildren[objectPath]['/'].map((objectItem, objectIndex) => (
 				<Tree.File
 					key={`${objectItem.name}-${objectIndex}`}
+					params={params}
 					name={objectItem.name}
 					containerItem={containerItem}
 					objectItem={objectItem}
@@ -88,6 +91,7 @@ const Folder = ({ name, children }) => {
 };
 
 const File = ({
+		params,
 		name,
 		containerItem,
 		objectItem,
@@ -158,7 +162,7 @@ const File = ({
 									<div
 										onClick={() => {
 											onModal('loading');
-											api('GET', `${process.env.REACT_APP_HTTPGW}/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
+											api('GET', `${params.http_gw}/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
 												[ContentTypeHeader]: "application/json",
 												[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.bearer}`,
 											}).then((data) => {
@@ -224,6 +228,7 @@ Tree.Folder = Folder;
 Tree.Branch = Branch;
 
 export default function TreeView({
+	params,
 	containerItem,
 	walletData,
 	onModal,
@@ -242,6 +247,7 @@ export default function TreeView({
 				<div key={objectPath}>
 					{objectPath !== '/' && (
 						<Tree.Branch
+							params={params}
 							objectPath={objectPath}
 							walletData={walletData}
 							onModal={onModal}
@@ -259,6 +265,7 @@ export default function TreeView({
 					{Object.keys(objects).length === (index + 1) && objects['/'] && objects['/'].map((objectItem, objectIndex) => (
 						<Tree.File
 							key={`${objectItem.name}-${objectIndex}`}
+							params={params}
 							name={objectItem.name}
 							containerItem={containerItem}
 							objectItem={objectItem}
