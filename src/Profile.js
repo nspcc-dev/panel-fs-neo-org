@@ -51,6 +51,14 @@ const Profile = ({
 	const [withdrawQuantity, setWithdrawQuantity] = useState(0);
 
 	useEffect(() => {
+		if (params.rest_gw.indexOf('http://') !== 0 && params.rest_gw.indexOf('https://') !== 0) {
+			setIsLoadingContainers(false);
+			setIsLoadingNeoFSBalance(false);
+			setNotAvailableNeoFS(true);
+		}
+	}, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+	useEffect(() => {
 		if (isLoadContainers === true) {
 			onGetContainers();
 			setLoadContainers(false);
