@@ -475,7 +475,11 @@ export const App = () => {
 	};
 
 	const onConnectWallet = async () => {
-		await wcSdk.connect(activeNet, (uri) => onModal('connectWallet', uri));
+		try {
+			await wcSdk.connect(activeNet, (uri) => onModal('connectWallet', uri));
+		} catch (error) {
+			onModal('failed', 'Something went wrong, contact the application administrator');
+		}
 	}
 
 	const onDisconnectWallet = async () => {
