@@ -6,8 +6,8 @@ import { BrowserRouter } from "react-router-dom";
 
 const wcOptions = {
 	projectId: process.env.REACT_APP_WC_PROJECT_ID,
-	relayServer: "wss://relay.walletconnect.com",
-	appMetadata: {
+	relayUrl: "wss://relay.walletconnect.com",
+	metadata: {
 		name: "NeoFS Panel",
 		description: "NeoFS Panel",
 		url: process.env.REACT_APP_URL,
