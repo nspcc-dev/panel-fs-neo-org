@@ -36,6 +36,7 @@ export const App = () => {
 	const [BearerForAllUsers] = useState("X-Bearer-For-All-Users");
 	const [BearerSignatureHeader] = useState("X-Bearer-Signature");
 	const [BearerSignatureKeyHeader] = useState("X-Bearer-Signature-Key");
+	const [BearerLifetime] = useState("X-Bearer-Lifetime");
 	
 	const [params] = useState({
 		rest_gw: process.env.REACT_APP_RESTGW ? process.env.REACT_APP_RESTGW : 'https://rest.t5.fs.neo.org/v1',
@@ -240,6 +241,7 @@ export const App = () => {
 		api('POST', '/auth', body, {
 			[ContentTypeHeader]: "application/json",
 			[BearerOwnerIdHeader]: walletData.account,
+			[BearerLifetime]: 2,
 			[BearerForAllUsers]: true,
 		}).then((e) => {
 			onSignMessage(e[0].token, type, operation, params);
