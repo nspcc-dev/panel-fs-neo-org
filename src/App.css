@@ -29,8 +29,8 @@ html {
 body {
     margin: 0;
     padding: 0;
-    color: #29363b;
-    background: #fff;
+    color: #003;
+    background: #f0f5f6;
     font-family: WorkSans, sans-serif;
     min-width: 300px;
     -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
@@ -42,12 +42,12 @@ body>iframe {
 
 a {
     text-decoration: none;
-    color: #23b87f;
+    color: #00e599;
 }
 
 a:hover,
 a:focus {
-    color: #23b84f;
+    color: #00e599;
     text-decoration: underline;
 }
 
@@ -55,9 +55,56 @@ label {
     font-weight: 100 !important;
 }
 
+.button {
+    font-family: WorkSans, sans-serif;
+    text-transform: uppercase;
+    font-weight: 600;
+    border-radius: 0 !important;
+}
+
+.button.is-danger {
+    background-color: #f72b2b;
+}
+
+.notification .content,
+.notification .subtitle,
+.notification .title,
+.title {
+    color: #003;
+}
+
 select,
 .select {
     width: 100%;
+
+}
+
+.input,
+.select select,
+.textarea {
+    border-radius: 0 !important;
+}
+
+.input:focus,
+.input:hover,
+.select select:focus,
+.select select:hover,
+.textarea:focus,
+.textarea:hover,
+.select select[disabled]:hover,
+fieldset[disabled] .select select:hover {
+    box-shadow: none;
+    border-color: #dbdbdb;
+}
+
+.input[disabled],
+.select fieldset[disabled] select,
+.select select[disabled],
+.textarea[disabled],
+fieldset[disabled] .input,
+fieldset[disabled] .select select,
+fieldset[disabled] .textarea {
+    border-color: #dbdbdb;
 }
 
 .is-error select,
@@ -71,8 +118,9 @@ label.is-error {
     font-size: 14px;
     margin: 10px 12px;
     color: #fc5758;
-    background: #fbefeb;
+    background: #fbefeb !important;
     border: 1px solid #efd0c7;
+    font-weight: 600;
 }
 
 .title.is-6 {
@@ -83,12 +131,71 @@ ul {
     list-style: unset;
 }
 
+.notification {
+    background-color: #f0f5f6;
+    border-radius: 0;
+    padding: 1.25rem 1.5rem 1.25rem;
+}
+
+.tag,
+.tag:not(body) {
+    background-color: #f0f5f6;
+    border-radius: 0;
+    color: #003;
+}
+
+#containers .notification>h1::after {
+    display: inline-block;
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin: 27px;
+    margin-left: 0.255em;
+    vertical-align: 0.255em;
+    content: "";
+    border-top: 0.4em solid;
+    border-right: 0.4em solid transparent;
+    border-bottom: 0;
+    border-left: 0.4em solid transparent;
+}
+
+#containers .notification>h1.active::after {
+    display: none;
+}
+
+#containers .tile.is-parent>.notification {
+    padding: 0;
+}
+
+#containers .tile.is-parent>.notification>h1 {
+    padding: 1.25rem 1.5rem 1.25rem;
+}
+
+#containers .tile.is-parent>.notification:hover {
+    /* background: #00e599; */
+}
+
+.box {
+    border-radius: 0;
+}
+
+.navbar {
+    box-shadow: 0 1px rgb(12 13 14 / 10%), 0 1px 6px rgb(59 64 69 / 10%);
+    min-height: unset;
+    height: 56px;
+}
+
+.navbar img {
+    height: 34px;
+    max-width: unset;
+}
+
 .title .highlighted {
     display: inline-block;
     padding: 0.1rem 0.3rem;
     font-size: 87.5%;
     color: #fff;
-    background-color: #23b87f;
+    background-color: #00e599;
     border-radius: 0.2rem;
 }
 
@@ -101,7 +208,7 @@ ul {
 }
 
 .is-primary {
-    background-color: #23b87f !important;
+    background-color: #00e599 !important;
 }
 
 .panel-heading {
@@ -146,7 +253,7 @@ label.panel-block:hover {
 }
 
 .container_panel {
-    margin: 20px 0 10px;
+    padding: 0 1.5rem 1.25rem;
 }
 
 .container_panel .title span {
@@ -154,7 +261,9 @@ label.panel-block:hover {
 }
 
 .container_panel .section {
-    padding: 1rem 0rem;
+    background: #fff;
+    padding: 15px;
+    margin: 10px 0 0;
 }
 
 .notification a:not(.button):not(.dropdown-item) {
@@ -179,7 +288,7 @@ label.panel-block:hover {
 }
 
 .objects_tree_file {
-    padding-left: 20px;
+    padding: 0 20px;
 }
 
 .objects_tree_folder {
@@ -212,13 +321,9 @@ label.panel-block:hover {
 }
 
 .objects_tree_file_content {
+    border-left: 5px solid rgb(0, 229, 153);
     margin: 10px 0 20px;
-    background: #f5f5f5;
-    border-radius: 4px;
     position: relative;
-    padding: 1.25rem 2.5rem 1.25rem 1.5rem;
-    border: 1px solid rgb(219, 219, 220);
-    box-shadow: rgb(10 10 10 / 10%) 0px 0.5em 1em -0.125em, rgb(10 10 10 / 2%) 0px 0px 0px 1px;
 }
 
 .objects_tree_file_delete {
@@ -230,7 +335,7 @@ label.panel-block:hover {
 }
 
 .footer {
-    background-color: #293639;
+    background-color: #f0f5f6;
     padding: 40px 20px;
 }
 
@@ -262,10 +367,11 @@ label.panel-block:hover {
     justify-content: space-between;
     max-width: 350px;
     margin: 10px auto;
-    background: #fef8eb;
-    border: 1px solid #f6e0b9;
+    background: #f0f5f6;
+    border: 1px solid #dfe3e3;
+    border-left: 5px solid rgb(255, 215, 129);
     padding: 20px;
-    border-radius: 4px;
+    border-radius: 0;
 }
 
 .token_status_panel div {
@@ -350,8 +456,8 @@ label.panel-block:hover {
 
 .popup_content_success {
     color: #ffffff;
-    background: #25b87f;
-    border: 1px solid #25b87f99;
+    background: #00e599;
+    border: 1px solid #00e59999;
 }
 
 .popup_content_failed {
@@ -417,7 +523,7 @@ label.panel-block:hover {
 .modal_highlighted_copy {
     font-size: 12px;
     font-family: monospace;
-    background: #e2e2e2;
+    background: #f0f5f6;
     display: flex;
     padding: 10px;
     border-radius: 4px;
@@ -457,74 +563,6 @@ label.panel-block:hover {
     100% {
         transform: scale(1.2);
         opacity: 0;
-    }
-}
-
-@media (min-width: 1600px) {
-    .title {
-        font-size: 60px;
-    }
-
-    .title.is-5 {
-        font-size: 40px;
-    }
-
-    .title.is-6 {
-        font-size: 28px;
-        line-height: 36px;
-    }
-
-    .button {
-        font-size: 30px;
-    }
-
-    .section {
-        padding: 6rem;
-    }
-
-    .title:not(:last-child) {
-        margin-bottom: 3rem;
-    }
-
-    .navbar {
-        min-height: 5rem;
-    }
-
-    .navbar-item img {
-        width: 150px;
-    }
-
-    .navbar-item,
-    .navbar-link {
-        font-size: 20px;
-    }
-
-    table {
-        font-size: 24px;
-    }
-
-    .socials {
-        margin-bottom: 50px;
-    }
-
-    .socials img {
-        width: 50px;
-    }
-
-    .subtitle.is-6 {
-        font-size: 24px;
-    }
-
-    .footer {
-        padding: 60px 20px;
-    }
-
-    .neospcc img {
-        width: 70px;
-    }
-
-    .socials a {
-        margin: 0 20px;
     }
 }
 

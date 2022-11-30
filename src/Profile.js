@@ -244,21 +244,16 @@ const Profile = ({
 							<div>Check web app configuration or try later</div>
 						</Box>
 					)}
-					<Box
-						id="account"
-						style={{ marginTop: '1.5rem' }}
-					>
-						<Heading style={{ display: 'flex', justifyContent: 'space-between' }}>
+					<Box id="account">
+						<Heading style={{ display: 'flex', justifyContent: 'space-between' }} weight="bold">
 							<span>
 								Account
 								<Tag style={{ margin: '0 0px 0 15px' }}>{`«${walletData.data.metadata.name}»`}</Tag>
 							</span>
 							<img
-								src="./img/logout.svg"
-								width={25}
-								height={25}
+								src="/img/logout.svg"
 								alt="logout"
-								style={{ marginLeft: 5, cursor: 'pointer' }}
+								style={{ marginLeft: 5, cursor: 'pointer', width: 30, height: 30 }}
 								onClick={onDisconnectWallet}
 							/>
 						</Heading>
@@ -267,85 +262,81 @@ const Profile = ({
 								<div>{`You use ${walletData.net === 'private' ? 'private net' : walletData.net}. For a better experience, use testnet.`}</div>
 							</Box>
 						)}
+						<Heading size={6} style={{ marginBottom: 15 }}>
+							{`Address: `}
+							<span style={{ fontWeight: 400 }}>{walletData.account}</span>
+						</Heading>
 						<Tile kind="ancestor">
 							<Tile kind="parent">
 								<Tile
 									kind="child"
 									renderAs={Notification}
-									color="grey"
+									color="gray"
+									style={{
+										borderLeft: '5px solid #00e599',
+										borderRadius: 0,
+									}}
 								>
-									<Heading size={6} style={{ marginBottom: 15 }}>
-										{`Address: `}
-										<span>{walletData.account}</span>
+									<Heading size={6} weight="light" style={{ display: 'flex' }}>
+										<span>{neoBalance ? `${(neoBalance * 0.00000001).toFixed(8)} GAS` : '-'}</span>
+										{!isNotAvailableNeoFS && (
+											<img
+												src="/img/sync.svg"
+												alt="sync"
+												style={isLoadingNeoBalance ? {
+													margin: '2px 0 0 5px',
+													cursor: 'pointer',
+													animation: 'spin 1.5s infinite linear',
+													width: 15,
+													height: 15,
+												} : {
+													margin: '2px 0 0 5px',
+													cursor: 'pointer',
+													width: 15,
+													height: 15,
+												}}
+												onClick={onNeoBalance}
+											/>
+										)}
 									</Heading>
-									<Tile kind="ancestor">
-										<Tile kind="parent">
-											<Tile
-												kind="child"
-												renderAs={Notification}
-												color="gray"
-												style={{
-													border: '1px solid #dbdbdc',
-													boxShadow: '0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)',
+									<Heading size={6} weight="bold">Neo Balance</Heading>
+								</Tile>
+							</Tile>
+							<Tile kind="parent">
+								<Tile
+									kind="child"
+									renderAs={Notification}
+									color="gray"
+									style={{
+										borderLeft: '5px solid #00e599',
+										borderRadius: 0,
+									}}
+								>
+									<Heading size={6} weight="light" style={{ display: 'flex' }}>
+										<span>{neoFSBalance ? `${(neoFSBalance * 0.000000000001).toFixed(12)} GAS` : '-'}</span>
+										{!isNotAvailableNeoFS && (
+											<img
+												src="/img/sync.svg"
+												width={20}
+												height={20}
+												alt="sync"
+												style={isLoadingNeoFSBalance ? {
+													margin: '2px 0 0 5px',
+													cursor: 'pointer',
+													animation: 'spin 1.5s infinite linear',
+													width: 15,
+													height: 15,
+												} : {
+													margin: '2px 0 0 5px',
+													cursor: 'pointer',
+													width: 15,
+													height: 15,
 												}}
-											>
-												<Heading size={6} weight="bold" style={{ display: 'flex' }}>
-													<span>{neoBalance ? `${(neoBalance * 0.00000001).toFixed(8)} GAS` : '-'}</span>
-													{!isNotAvailableNeoFS && (
-														<img
-															src="./img/sync.svg"
-															width={20}
-															height={20}
-															alt="sync"
-															style={isLoadingNeoBalance ? {
-																marginLeft: 5,
-																cursor: 'pointer',
-																animation: 'spin 1.5s infinite linear',
-															} : {
-																marginLeft: 5,
-																cursor: 'pointer',
-															}}
-															onClick={onNeoBalance}
-														/>
-													)}
-												</Heading>
-												<Heading size={6}>Neo Balance</Heading>
-											</Tile>
-										</Tile>
-										<Tile kind="parent">
-											<Tile
-												kind="child"
-												renderAs={Notification}
-												color="gray"
-												style={{
-													border: '1px solid #dbdbdc',
-													boxShadow: '0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)',
-												}}
-											>
-												<Heading size={6} weight="bold" style={{ display: 'flex' }}>
-													<span>{neoFSBalance ? `${(neoFSBalance * 0.000000000001).toFixed(12)} GAS` : '-'}</span>
-													{!isNotAvailableNeoFS && (
-														<img
-															src="./img/sync.svg"
-															width={20}
-															height={20}
-															alt="sync"
-															style={isLoadingNeoFSBalance ? {
-																marginLeft: 5,
-																cursor: 'pointer',
-																animation: 'spin 1.5s infinite linear',
-															} : {
-																marginLeft: 5,
-																cursor: 'pointer',
-															}}
-															onClick={onNeoFSBalance}
-														/>
-													)}
-												</Heading>
-												<Heading size={6}>NeoFS Balance</Heading>
-											</Tile>
-										</Tile>
-									</Tile>
+												onClick={onNeoFSBalance}
+											/>
+										)}
+									</Heading>
+									<Heading size={6} weight="bold">NeoFS Balance</Heading>
 								</Tile>
 							</Tile>
 						</Tile>
@@ -358,7 +349,7 @@ const Profile = ({
 								>
 									<Heading size={5}>Deposit NeoFS</Heading>
 									<Form.Field>
-										<Form.Label size="small">Quantity (GAS)</Form.Label>
+										<Form.Label size="small" weight="light">Quantity (GAS)</Form.Label>
 										<Form.Control>
 											<Form.Input
 												type="number"
@@ -425,22 +416,22 @@ const Profile = ({
 							</Tile>
 						</Tile>
 					</Box>
-					<Box>
-						<Heading style={{ display: 'flex', justifyContent: 'space-between' }}>
+					<Box id="containers">
+						<Heading style={{ display: 'flex', justifyContent: 'space-between' }} weight="bold">
 							<span>
 								{`Containers`}
 								{!isNotAvailableNeoFS && (
 									<img
-										src="./img/sync.svg"
+										src="/img/sync.svg"
 										width={20}
 										height={20}
 										alt="sync"
 										style={isLoadingContainers ? {
-											marginLeft: 5,
+											marginLeft: 10,
 											cursor: 'pointer',
 											animation: 'spin 1.5s infinite linear',
 										} : {
-											marginLeft: 5,
+											marginLeft: 10,
 											cursor: 'pointer',
 										}}
 										onClick={onGetContainers}
@@ -448,7 +439,7 @@ const Profile = ({
 								)}
 							</span>
 							{/* <img
-								src="./img/settings.svg"
+								src="/img/settings.svg"
 								width={22}
 								height={22}
 								alt="settings"
@@ -492,7 +483,7 @@ const Profile = ({
 						<Heading align="center" size={5}>Loading</Heading>
 						<img
 							className="modal_loader"
-							src="./img/loader.svg"
+							src="/img/loader.svg"
 							height={30}
 							width={30}
 							alt="loader"

@@ -520,7 +520,7 @@ export const App = () => {
 								alt="loader"
 							/>
 						</div>
-						<Heading align="center" size={5}>{modal.current === 'success' ? 'Success' : 'Failed'}</Heading>
+						<Heading align="center" size={5} weight="bold">{modal.current === 'success' ? 'Success' : 'Failed'}</Heading>
 						<Heading align="center" size={6} weight="normal">{modal.text}</Heading>
 					</div>
 				</div>
@@ -537,13 +537,13 @@ export const App = () => {
 							onClick={onModal}
 						>
 							<img
-								src="./img/close.svg"
+								src="/img/close.svg"
 								height={30}
 								width={30}
 								alt="loader"
 							/>
 						</div>
-						<Heading align="center" size={5}>Please select an option</Heading>
+						<Heading align="center" size={5} weight="bold">Please select an option</Heading>
 						<Heading align="center" size={6}>Connection URL</Heading>
 						<Heading align="center" size={6} weight="normal">Copy and paste the connection URL into the Add connection page in your wallet</Heading>
 						<div>
@@ -578,13 +578,13 @@ export const App = () => {
 							onClick={onModal}
 						>
 							<img
-								src="./img/close.svg"
+								src="/img/close.svg"
 								height={30}
 								width={30}
 								alt="loader"
 							/>
 						</div>
-						<Heading align="center" size={5}>Token signing</Heading>
+						<Heading align="center" size={5} weight="bold">Token signing</Heading>
 						<Columns>
 							{(modal.text === '' || modal.text === 'container.PUT' || modal.text === 'container.DELETE' || modal.text === 'container.SETEACL') && (
 								<Columns.Column>
@@ -593,7 +593,7 @@ export const App = () => {
 											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock create&nbsp;operation</Heading>
 											{walletData && walletData.tokens.container.PUT ? (
 												<img
-													src="./img/success.svg"
+													src="/img/success.svg"
 													height={25}
 													width={25}
 													alt="success"
@@ -614,7 +614,7 @@ export const App = () => {
 											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock delete&nbsp;operation</Heading>
 											{walletData && walletData.tokens.container.DELETE ? (
 												<img
-													src="./img/success.svg"
+													src="/img/success.svg"
 													height={25}
 													width={25}
 													alt="success"
@@ -635,7 +635,7 @@ export const App = () => {
 											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock eACL&nbsp;management</Heading>
 											{walletData && walletData.tokens.container.SETEACL ? (
 												<img
-													src="./img/success.svg"
+													src="/img/success.svg"
 													height={25}
 													width={25}
 													alt="success"
@@ -660,7 +660,7 @@ export const App = () => {
 											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock create&nbsp;operation</Heading>
 											{walletData && walletData.tokens.object.PUT ? (
 												<img
-													src="./img/success.svg"
+													src="/img/success.svg"
 													height={25}
 													width={25}
 													alt="success"
@@ -681,7 +681,7 @@ export const App = () => {
 											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock delete&nbsp;operation</Heading>
 											{walletData && walletData.tokens.object.DELETE ? (
 												<img
-													src="./img/success.svg"
+													src="/img/success.svg"
 													height={25}
 													width={25}
 													alt="success"
@@ -702,7 +702,7 @@ export const App = () => {
 											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock get&nbsp;operation</Heading>
 											{walletData && walletData.tokens.object.GET ? (
 												<img
-													src="./img/success.svg"
+													src="/img/success.svg"
 													height={25}
 													width={25}
 													alt="success"
@@ -759,13 +759,13 @@ export const App = () => {
 								}}
 							>
 								<img
-									src="./img/close.svg"
+									src="/img/close.svg"
 									height={30}
 									width={30}
 									alt="loader"
 								/>
 							</div>
-							<Heading align="center" size={5}>New container</Heading>
+							<Heading align="center" size={5} weight="bold">New container</Heading>
 							{modal.text.neoFSBalance === 0 && (
 								<Notification className="error_message" style={{ margin: '20px 0' }}>
 									Container creation is a paid operation, make sure you have sufficient NeoFS balance
@@ -839,11 +839,11 @@ export const App = () => {
 											</Form.Control>
 											<Form.Control>
 												<img
-													src="./img/trashbin.svg"
-													width={30}
-													height={30}
+													src="/img/trashbin.svg"
+													width={20}
+													height={20}
 													alt="delete"
-													style={{ cursor: 'pointer', margin: 4 }}
+													style={{ cursor: 'pointer', margin: '9px 4px 4px' }}
 													onClick={() => {
 														if (!isLoadingForm) {
 															let attributesTemp = [...attributes];
@@ -892,7 +892,7 @@ export const App = () => {
 										style={basicPresetExample === containerForm.preset ? {
 											margin: '5px 5px 0 0',
 											cursor: 'pointer',
-											background: '#21b87e',
+											background: '#00e599',
 											color: '#fff',
 										} : {
 											margin: '5px 5px 0 0',
@@ -939,8 +939,8 @@ export const App = () => {
 									<Box
 										style={{
 											marginTop: 10,
-											border: '1px solid #dbdbdc',
-											boxShadow: '0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)',
+											border: '1px solid #dfe3e3',
+											boxShadow: 'unset',
 										}}
 									>
 										Current basic acl doesn't support eACL
@@ -964,7 +964,7 @@ export const App = () => {
 								<>
 									{!walletData.tokens.container.PUT && (
 										<div className="token_status_panel" style={{ margin: '25px 0 10px', maxWidth: 'unset' }}>
-											<Heading size={6} style={{ margin: '0 10px 0 0', maxWidth: 300 }}>Sign token to unlock create&nbsp;operation</Heading>
+											<Heading size={6} style={{ margin: '0 10px 0 0', maxWidth: 290 }}>Sign token to unlock create&nbsp;operation</Heading>
 											<Button
 												color="primary"
 												size="small"
@@ -1003,7 +1003,7 @@ export const App = () => {
 								>
 									{isLoadingForm ? (
 										<img
-											src="./img/spinner.svg"
+											src="/img/spinner.svg"
 											className="spinner"
 											width={20}
 											height={20}
@@ -1034,13 +1034,13 @@ export const App = () => {
 							}}
 						>
 							<img
-								src="./img/close.svg"
+								src="/img/close.svg"
 								height={30}
 								width={30}
 								alt="loader"
 							/>
 						</div>
-						<Heading align="center" size={5}>Container Deletion</Heading>
+						<Heading align="center" size={5} weight="bold">Container Deletion</Heading>
 						<Heading align="center" size={6}>Are you sure you want to delete container?</Heading>
 						{isError.active && (
 							<Notification className="error_message" style={{ margin: '20px 0' }}>
@@ -1075,7 +1075,7 @@ export const App = () => {
 								>
 									{isLoadingForm ? (
 									<img
-										src="./img/spinner.svg"
+										src="/img/spinner.svg"
 										className="spinner"
 										width={20}
 										height={20}
@@ -1120,13 +1120,13 @@ export const App = () => {
 							}}
 						>
 							<img
-								src="./img/close.svg"
+								src="/img/close.svg"
 								height={30}
 								width={30}
 								alt="loader"
 							/>
 						</div>
-						<Heading align="center" size={5}>New object</Heading>
+						<Heading align="center" size={5} weight="bold">New object</Heading>
 						<Form.Field>
 							<div className="input_block" style={{ marginTop: 30 }}>
 								{objectForm.loading ? (
@@ -1135,7 +1135,7 @@ export const App = () => {
 									<label
 										htmlFor="upload"
 										className={isError.active && isError.type.indexOf('objectName') !== -1 ? 'is-error' : ""}
-										style={objectForm.name ? { background: '#f5f5f5', borderStyle: 'double' } : {}}
+										style={objectForm.name ? { background: '#f0f5f6', borderStyle: 'double' } : {}}
 									>{objectForm.name ? objectForm.name : 'Upload object'}</label>
 								)}
 								<input
@@ -1180,11 +1180,11 @@ export const App = () => {
 										</Form.Control>
 										<Form.Control>
 											<img
-												src="./img/trashbin.svg"
-												width={30}
-												height={30}
+												src="/img/trashbin.svg"
+												width={20}
+												height={20}
 												alt="delete"
-												style={{ cursor: 'pointer', margin: 4 }}
+												style={{ cursor: 'pointer', margin: '9px 4px 4px' }}
 												onClick={() => {
 													if (!isLoadingForm) {
 														let attributesTemp = [...attributes];
@@ -1246,7 +1246,7 @@ export const App = () => {
 							>
 								{isLoadingForm ? (
 									<img
-										src="./img/spinner.svg"
+										src="/img/spinner.svg"
 										className="spinner"
 										width={20}
 										height={20}
@@ -1276,13 +1276,13 @@ export const App = () => {
 							}}
 						>
 							<img
-								src="./img/close.svg"
+								src="/img/close.svg"
 								height={30}
 								width={30}
 								alt="loader"
 							/>
 						</div>
-						<Heading align="center" size={5}>Object Deletion</Heading>
+						<Heading align="center" size={5} weight="bold">Object Deletion</Heading>
 						<Heading align="center" size={6}>Are you sure you want to delete object?</Heading>
 						{isError.active && (
 							<Notification className="error_message" style={{ margin: '20px 0' }}>
@@ -1317,7 +1317,7 @@ export const App = () => {
 								>
 									{isLoadingForm ? (
 										<img
-											src="./img/spinner.svg"
+											src="/img/spinner.svg"
 											className="spinner"
 											width={20}
 											height={20}
@@ -1342,16 +1342,16 @@ export const App = () => {
 							onClick={onModal}
 						>
 							<img
-								src="./img/close.svg"
+								src="/img/close.svg"
 								height={30}
 								width={30}
 								alt="loader"
 							/>
 						</div>
-						<Heading align="center" size={5}>Loading</Heading>
+						<Heading align="center" size={5} weight="bold">Loading</Heading>
 						<img
 							className="modal_loader"
-							src="./img/loader.svg"
+							src="/img/loader.svg"
 							height={30}
 							width={30}
 							alt="loader"
@@ -1371,16 +1371,16 @@ export const App = () => {
 							onClick={onModal}
 						>
 							<img
-								src="./img/close.svg"
+								src="/img/close.svg"
 								height={30}
 								width={30}
 								alt="loader"
 							/>
 						</div>
-						<Heading align="center" size={5}>Pending Call Request</Heading>
+						<Heading align="center" size={5} weight="bold">Pending Call Request</Heading>
 						<img
 							className="modal_loader"
-							src="./img/loader.svg"
+							src="/img/loader.svg"
 							height={30}
 							width={30}
 							alt="loader"
@@ -1389,14 +1389,12 @@ export const App = () => {
 					</div>
 				</div>
 			)}
-			<Navbar style={{ background: "#29363a" }}>
+			<Navbar>
 				<Navbar.Brand>
 					<Navbar.Item renderAs="div">
 						<Link to="/" style={{ lineHeight: 0 }}>
 							<img
 								src="/img/logo.svg"
-								height={28}
-								width={75}
 								alt="logo"
 							/>
 						</Link>
@@ -1440,15 +1438,15 @@ export const App = () => {
 							src="/img/socials/neo.svg"
 							width={26}
 							height={26}
+							style={{ filter: 'invert(1)' }}
 							alt="neo logo"
 						/>
 					</a>
-					<a className="neospcc" href="https://nspcc.ru/en" target="_blank" rel="noopener noreferrer" style={{ borderRight: '2px solid #fff', paddingRight: 20 }}>
+					<a className="neospcc" href="https://nspcc.ru/en" target="_blank" rel="noopener noreferrer" style={{ borderRight: '2px solid #003', paddingRight: 20 }}>
 						<img
 							src="/img/socials/neo_spcc.svg"
 							width={37}
 							height={37}
-							style={{ filter: 'invert(1)' }}
 							alt="neo spcc logo"
 						/>
 					</a>
@@ -1457,7 +1455,6 @@ export const App = () => {
 							src="/img/socials/github.svg"
 							width={30}
 							height={30}
-							style={{ filter: 'invert(1)' }}
 							alt="github logo"
 						/>
 					</a>
@@ -1466,7 +1463,6 @@ export const App = () => {
 							src="/img/socials/twitter.svg"
 							width={30}
 							height={30}
-							style={{ filter: 'invert(1)' }}
 							alt="twitter logo"
 						/>
 					</a>
@@ -1475,7 +1471,6 @@ export const App = () => {
 							src="/img/socials/youtube.svg"
 							width={30}
 							height={30}
-							style={{ filter: 'invert(1)' }}
 							alt="youtube logo"
 						/>
 					</a>
@@ -1485,7 +1480,6 @@ export const App = () => {
 					weight="light"
 					subtitle
 					align="center"
-					style={{ color: '#fff' }}
 				>
 					NeoFS Panel
 				</Heading>

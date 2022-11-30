@@ -76,7 +76,7 @@ const Folder = ({ name, children }) => {
 		<div className="objects_tree_folder">
 			<div className="folder--label" onClick={handleToggle}>
 				<img
-					src="./img/folder.svg"
+					src="/img/folder.svg"
 					width={15}
 					alt="folder"
 				/>
@@ -129,7 +129,7 @@ const File = ({
 				onClick={handleToggle}
 			>
 				<img
-					src="./img/file.svg"
+					src="/img/file.svg"
 					width={10}
 					alt="file"
 					style={{ display: 'block' }}
@@ -144,9 +144,9 @@ const File = ({
 					{objectDate ? (
 						<>
 							<img
-								src="./img/trashbin.svg"
-								width={22}
-								height={22}
+								src="/img/trashbin.svg"
+								width={20}
+								height={20}
 								fill="#f14668"
 								alt="delete"
 								className="objects_tree_file_delete"
@@ -155,10 +155,10 @@ const File = ({
 									e.stopPropagation();
 								}}
 							/>
-							<Section style={{ paddingTop: 0 }}>
-								<Heading size={7} weight="bolder" style={{ color: '#828282' }}>Information</Heading>
-								<Heading size={6} weight="light">
-									<span>{`Object id: `}</span>
+							<Section>
+								<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Information</Heading>
+								<Heading size={6} weight="light" style={{ display: 'flex' }}>
+									<span style={{ marginRight: 5 }}>{`Object id:`}</span>
 									<div
 										onClick={() => {
 											onModal('loading');
@@ -198,8 +198,8 @@ const File = ({
 									{objectDate.objectSize}
 								</Heading>
 							</Section>
-							<Section style={{ paddingBottom: 0 }}>
-								<Heading size={7} weight="bolder" style={{ color: '#828282' }}>Attributes</Heading>
+							<Section style={{ paddingTop: 0 }}>
+								<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Attributes</Heading>
 								{objectDate.attributes.map((attribute) => (
 									<Heading size={6} weight="light" key={attribute.key}>
 										<span>{`${attribute.key}: `}</span>
@@ -211,7 +211,7 @@ const File = ({
 					) : (
 						<img
 							className="modal_loader"
-							src="./img/loader.svg"
+							src="/img/loader.svg"
 							height={30}
 							width={30}
 							alt="loader"
