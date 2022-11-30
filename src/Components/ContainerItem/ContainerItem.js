@@ -4,7 +4,6 @@ import {
 	Section,
 	Button,
 	Tile,
-	Box,
 	Notification,
 } from 'react-bulma-components';
 import TreeView from '../TreeView/TreeView';
@@ -146,9 +145,9 @@ export default function ContainerItem({
 						{formatForContainerName(containerItem.attributes, containerItem.containerId)}
 						{isOpen && (
 							<img
-								src="./img/trashbin.svg"
-								width={30}
-								height={30}
+								src="/img/trashbin.svg"
+								width={20}
+								height={20}
 								fill="#f14668"
 								alt="delete"
 								style={{ cursor: 'pointer' }}
@@ -164,7 +163,6 @@ export default function ContainerItem({
 							{containerItem.ownerId ? (
 								<div>
 									<Section>
-										<Heading size={7} weight="bolder" style={{ color: '#828282' }}>Information</Heading>
 										<Heading size={6} weight="light">
 											<span>{`Container id: `}</span>
 											{containerItem.containerId}
@@ -210,13 +208,13 @@ export default function ContainerItem({
 													setActivePanel('eACL');
 												}
 											}}
-											style={{ cursor: 'pointer' }}
+											style={{ cursor: 'pointer', display: 'flex' }}
 										>
 											<img
-												src={activePanel === 'eACL' ? './img/chevron_down.svg' : './img/chevron_right.svg'}
+												src={activePanel === 'eACL' ? '/img/chevron_down.svg' : '/img/chevron_right.svg'}
 												style={{ marginRight: 10 }}
-												width={12}
-												height={12}
+												width={22}
+												height={22}
 												alt="chevron"
 											/>
 											eACL
@@ -226,15 +224,9 @@ export default function ContainerItem({
 												{!isLoadingEACL ? (
 													<>
 														{(containerItem.basicAcl.length === 8 && (containerItem.basicAcl.substr(0, 1) === '1' || containerItem.basicAcl.substr(0, 1) === '3')) ? (
-															<Box
-																style={{
-																	marginTop: 10,
-																	border: '1px solid #dbdbdc',
-																	boxShadow: '0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)',
-																}}
-															>
+															<Heading size={6} weight="light">
 																Current basic acl doesn't support eACL
-															</Box>
+															</Heading>
 														) : (
 															<EACLPanel
 																onAuth={onAuth}
@@ -254,7 +246,7 @@ export default function ContainerItem({
 												) : (
 													<img
 														className="modal_loader"
-														src="./img/loader.svg"
+														src="/img/loader.svg"
 														height={30}
 														width={30}
 														alt="loader"
@@ -268,13 +260,13 @@ export default function ContainerItem({
 											size={6}
 											weight="bolder"
 											onClick={() => activePanel === 'attributes' ? setActivePanel('') : setActivePanel('attributes')}
-											style={{ cursor: 'pointer' }}
+											style={{ cursor: 'pointer', display: 'flex' }}
 										>
 											<img
-												src={activePanel === 'attributes' ? './img/chevron_down.svg' : './img/chevron_right.svg'}
+												src={activePanel === 'attributes' ? '/img/chevron_down.svg' : '/img/chevron_right.svg'}
 												style={{ marginRight: 10 }}
-												width={12}
-												height={12}
+												width={22}
+												height={22}
 												alt="chevron"
 											/>
 											Attributes
@@ -300,63 +292,64 @@ export default function ContainerItem({
 													setActivePanel('objects');
 												}
 											}}
-											style={{ cursor: 'pointer' }}
+											style={{ cursor: 'pointer', display: 'flex' }}
 										>
 											<img
-												src={activePanel === 'objects' ? './img/chevron_down.svg' : './img/chevron_right.svg'}
+												src={activePanel === 'objects' ? '/img/chevron_down.svg' : '/img/chevron_right.svg'}
 												style={{ marginRight: 10 }}
-												width={12}
-												height={12}
+												width={22}
+												height={22}
 												alt="chevron"
 											/>
 											Objects
 										</Heading>
 										{activePanel === 'objects' && (
-											<Box
-												style={{
-													marginTop: 15,
-													border: '1px solid #dbdbdc',
-													boxShadow: '0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)',
-												}}
-											>
+											<>
 												{!isLoadingObjects ? (
-													<TreeView
-														params={params}
-														walletData={walletData}
-														onModal={onModal}
-														containerIndex={index}
-														containerItem={containerItem}
-														objects={objects}
-														ContentTypeHeader={ContentTypeHeader}
-														AuthorizationHeader={AuthorizationHeader}
-														BearerOwnerIdHeader={BearerOwnerIdHeader}
-														BearerSignatureHeader={BearerSignatureHeader}
-														BearerSignatureKeyHeader={BearerSignatureKeyHeader}
-													/>
+													<>
+														{objects && objects.length === 0 && (
+															<Heading size={6} weight="light" align="center">Objects not found</Heading>
+														)}
+														<TreeView
+															params={params}
+															walletData={walletData}
+															onModal={onModal}
+															containerIndex={index}
+															containerItem={containerItem}
+															objects={objects}
+															ContentTypeHeader={ContentTypeHeader}
+															AuthorizationHeader={AuthorizationHeader}
+															BearerOwnerIdHeader={BearerOwnerIdHeader}
+															BearerSignatureHeader={BearerSignatureHeader}
+															BearerSignatureKeyHeader={BearerSignatureKeyHeader}
+														/>
+													</>
 												) : (
 													<img
 														className="modal_loader"
-														src="./img/loader.svg"
+														src="/img/loader.svg"
 														height={30}
 														width={30}
 														alt="loader"
 													/>
 												)}
-												<Button
-													color="primary"
-													onClick={() => onModal('createObject', { containerId: containerItem.containerId })}
-													style={{ display: 'flex', margin: '20px auto 0' }}
-												>
-													New object
-												</Button>
-											</Box>
+												{!isLoadingObjects && (
+													<Button
+														color="primary"
+														onClick={() => onModal('createObject', { containerId: containerItem.containerId })}
+														style={{ display: 'flex', margin: '20px auto 0' }}
+													>
+														New object
+													</Button>
+												)}
+											</>
 										)}
 									</Section>
 								</div>
 							) : (
 								<img
 									className="modal_loader"
-									src="./img/loader.svg"
+									src="/img/loader.svg"
 									height={30}
 									width={30}
 									alt="loader"
