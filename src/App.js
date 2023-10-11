@@ -1442,7 +1442,7 @@ export const App = () => {
 							alt="neo logo"
 						/>
 					</a>
-					<a className="neospcc" href="https://nspcc.ru/en" target="_blank" rel="noopener noreferrer" style={{ borderRight: '2px solid #003', paddingRight: 20 }}>
+					<a className="neospcc" href="https://nspcc.io/" target="_blank" rel="noopener noreferrer" style={{ borderRight: '2px solid #003', paddingRight: 20 }}>
 						<img
 							src="/img/socials/neo_spcc.svg"
 							width={37}
@@ -1466,12 +1466,20 @@ export const App = () => {
 							alt="twitter logo"
 						/>
 					</a>
-					<a href="https://www.youtube.com/channel/UCAC6lR1bJFv0-O07Nol_p8w" target="_blank" rel="noopener noreferrer">
+					<a href="https://www.youtube.com/@NeoSPCC" target="_blank" rel="noopener noreferrer">
 						<img
 							src="/img/socials/youtube.svg"
 							width={30}
 							height={30}
 							alt="youtube logo"
+						/>
+					</a>
+					<a href="https://neospcc.medium.com/" target="_blank" rel="noopener noreferrer">
+						<img
+							src="/img/socials/medium.svg"
+							width={30}
+							height={30}
+							alt="medium logo"
 						/>
 					</a>
 				</div>
