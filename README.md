@@ -64,12 +64,10 @@ Optionally you can specify `PORT=3000`.
 
 # Make instructions
 
-* Compile the build using `make` (will be generated in `output` dir)
-* Start app using `make start PORT=3000` (PORT=3000 by default)
+* Compile the build using `make` (will be generated in `panel.fs.neo.org` dir)
+* Start app using `make start` (PORT=3000 by default)
 * Clean up cache directories using `make clean`
 * Get release dir with tar.gz using `make release`
-
-Also, you can run all targets in docker (`make docker/*`):
 
 ```shell
 $ make docker/start

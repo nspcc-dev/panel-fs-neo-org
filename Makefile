@@ -1,66 +1,53 @@
 #!/usr/bin/make -f
 
-PORT = 3000
-NODE_VERSION ?= 14
+SHELL = bash
+
 VERSION ?= "$(shell git describe --tags --match "v*" --abbrev=8 2>/dev/null | sed -r 's,^v([0-9]+\.[0-9]+)\.([0-9]+)(-.*)?$$,\1 \2 \3,' | while read mm patch suffix; do if [ -z "$$suffix" ]; then echo $$mm.$$patch; else patch=`expr $$patch + 1`; echo $$mm.$${patch}-pre$$suffix; fi; done)"
+SITE_DIR ?= panel.fs.neo.org
+RELEASE_DIR ?= $(SITE_DIR)-$(VERSION)
+RELEASE_PATH ?= $(SITE_DIR)-$(VERSION).tar.gz
+CURRENT_UID ?=  $(shell id -u $$USER)
 
-ifeq ($(shell uname), Linux)
-	STAT:=-u $(shell stat -c "%u:%g" .)
-endif
+PORT = 3000
 
-# Build and run optimized server.
-.PHONY: all
-all: build
-	@npm install --location=local serve
-	@./node_modules/.bin/serve -s output -p $(PORT)
+$(SITE_DIR):
+	docker run \
+	-v $$(pwd)/src:/usr/src/app/src \
+	-v $$(pwd)/public:/usr/src/app/public \
+	-v $$(pwd)/package.json:/usr/src/app/package.json \
+	-v $$(pwd)/.env:/usr/src/app/.env \
+	-v $$(pwd)/$(SITE_DIR):/usr/src/app/$(SITE_DIR) \
+	-e CURRENT_UID=$(CURRENT_UID) \
+	-w /usr/src/app node:14-alpine \
+	sh -c 'npm install && REACT_APP_VERSION=$(VERSION) npm run build && chown -R $$CURRENT_UID: $(SITE_DIR)'
 
-# Run npm build.
-.PHONY: build
-build: clean install
-	@npm run build
-
-# Run npm install.
-.PHONY: install
-install:
-	@npm install
-
-# Run npm start.
 .PHONY: start
-start: install
-	@npm start
+start:
+	docker run \
+	-p $(PORT):3000 \
+	-v `pwd`:/usr/src/app \
+	-w /usr/src/app node:14-alpine \
+	sh -c 'npm install --silent && npm run build && npm install -g serve && serve -s $(SITE_DIR) -p 3000'
 
-# Run npm test.
+.PHONY: release
+release: $(SITE_DIR)
+	cp $(SITE_DIR)/index.html $(SITE_DIR)/agreement
+	@ln -sf $(SITE_DIR) $(RELEASE_DIR)
+	@tar cfvhz $(RELEASE_PATH) $(RELEASE_DIR)
+
+.PHONY: clean
+clean:
+	@echo "Cleaning up ..."
+	@rm -rf $(SITE_DIR) $(RELEASE_DIR) $(RELEASE_PATH)
+
+.PHONY: release_name
+release_name:
+	@echo $(RELEASE_PATH)
+
+.PHONY: version
+version:
+	@echo $(VERSION)
+
 .PHONY: test
 test:
 	@npm run test
-
-# Create archive with build output.
-.PHONY: release
-release: build
-	@rm -rf release
-	@mkdir release
-	@tar -czvf release/neofs-panel.tar.gz -C output .
-
-# Remove all produced artifacts.
-.PHONY: clean
-clean:
-	@rm -rf release
-	@rm -rf output
-	@rm -rf node_modules
-
-# Run `make %` in Golang container, for more information run `make help.docker/%`
-.PHONY: docker/%
-docker/%:
-	@echo "=> Running 'make $*' in clean Docker environment"
-	@docker run --rm -it \
-		--name panel_fs_neo_org \
-		-v `pwd`:/usr/src/app \
-		-p $(PORT):$(PORT) \
-		-w /usr/src/app \
-		$(STAT) \
-		node:$(NODE_VERSION) sh -c 'make $*'
-
-include help.mk
-
-version:
-	@echo $(VERSION)
