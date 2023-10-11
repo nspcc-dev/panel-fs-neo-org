@@ -2,6 +2,7 @@
 
 PORT = 3000
 NODE_VERSION ?= 14
+VERSION ?= "$(shell git describe --tags --match "v*" --abbrev=8 2>/dev/null | sed -r 's,^v([0-9]+\.[0-9]+)\.([0-9]+)(-.*)?$$,\1 \2 \3,' | while read mm patch suffix; do if [ -z "$$suffix" ]; then echo $$mm.$$patch; else patch=`expr $$patch + 1`; echo $$mm.$${patch}-pre$$suffix; fi; done)"
 
 ifeq ($(shell uname), Linux)
 	STAT:=-u $(shell stat -c "%u:%g" .)
@@ -60,3 +61,6 @@ docker/%:
 		node:$(NODE_VERSION) sh -c 'make $*'
 
 include help.mk
+
+version:
+	@echo $(VERSION)

@@ -1480,8 +1480,17 @@ export const App = () => {
 					weight="light"
 					subtitle
 					align="center"
+					style={{ marginBottom: 0 }}
 				>
 					NeoFS Panel
+				</Heading>
+				<Heading
+					size={7}
+					weight="light"
+					subtitle
+					align="center"
+				>
+					{process.env.REACT_APP_VERSION}
 				</Heading>
 			</Footer>
 		</>
