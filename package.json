@@ -17,8 +17,8 @@
   },
   "scripts": {
     "resolutions": "npx npm-force-resolutions && npm install -D react-error-overlay@6.0.9",
-    "start": "REACT_APP_VERSION=$(make version) react-scripts start",
-    "build": "BUILD_PATH='./panel.fs.neo.org' react-scripts build",
+    "start": "REACT_APP_VERSION=$(make version) GENERATE_SOURCEMAP=false react-scripts start",
+    "build": "GENERATE_SOURCEMAP=false BUILD_PATH='./panel.fs.neo.org' react-scripts build",
     "test": "jest --updateSnapshot",
     "eject": "react-scripts eject"
   },
