@@ -478,7 +478,10 @@ export const App = () => {
 
 	const onConnectWallet = async () => {
 		try {
-			await wcSdk.connect(activeNet, (uri) => onModal('connectWallet', uri));
+			const { uri, approval } = await wcSdk.createConnection(activeNet, ['invokeFunction', 'testInvoke', 'signMessage', 'verifyMessage']);
+			onModal('connectWallet', uri);
+			const session = await approval();
+			wcSdk.setSession(session);
 		} catch (error) {
 			onModal('failed', 'Something went wrong, contact the application administrator');
 		}

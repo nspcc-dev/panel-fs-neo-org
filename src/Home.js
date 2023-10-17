@@ -26,7 +26,7 @@ const Home = ({
 	return (
 		<Container
 			id="login"
-			style={{ minHeight: 'calc(100vh - 212px)' }}
+			style={{ minHeight: 'calc(100vh - 231px)' }}
 		>
 			<Section>
 				<Box style={{ maxWidth: 600, margin: 'auto' }}>
