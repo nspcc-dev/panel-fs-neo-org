@@ -235,7 +235,7 @@ const Profile = ({
 	};
 
 	return (
-		<Container style={{ minHeight: 'calc(100vh - 231px)' }}>
+		<Container style={{ minHeight: 'calc(100vh - 221px)' }}>
 			{walletData ? (
 				<Section>
 					{isNotAvailableNeoFS && (
