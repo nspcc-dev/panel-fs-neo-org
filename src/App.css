@@ -399,6 +399,7 @@ label.panel-block:hover {
     color: #363636;
     cursor: pointer;
     min-width: 300px;
+    word-break: break-word;
 }
 
 .input_block:hover label {
