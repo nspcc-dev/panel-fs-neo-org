@@ -4,6 +4,24 @@ Changelog for NeoFS Panel
 
 ## [Unreleased]
 
+## [0.2.1] - 2023-10-18
+
+## Fixed
+- Improve Makefile (#84, #96)
+- Replace WorkSans font (#89)
+- Break long file names in label (#91)
+- Remove vulnerabilities from package.json (#95)
+- Implement social_pipe for socials list (#98)
+- Hide webpack source map (#100)
+
+## Added
+- Website version to the page (#63)
+
+## Changed
+- Implement neo design (#89)
+- Social links for new format (#97)
+- WC sdk react lib for node 18 version (#103)
+
 ## [0.2.0] - 2022-11-23
 
 ## Fixed
@@ -27,4 +45,5 @@ First public review release.
 
 [0.1.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.1.0
 [0.2.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.2.0
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.2.0...master
+[0.2.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.2.1
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.2.1...master
