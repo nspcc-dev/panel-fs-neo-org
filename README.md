@@ -62,6 +62,17 @@ $ make start
 
 Optionally you can specify `PORT=3000`.
 
+## Locally
+
+You can easily run the node locally in a docker container using [@nspcc-dev/neofs-aio](https://github.com/nspcc-dev/neofs-aio).
+
+You need to update the parameters in the `.env` file to make it work:
+
+```env
+REACT_APP_RESTGW=http://localhost:8090/v1
+REACT_APP_HTTPGW=http://localhost:8081
+```
+
 # Make instructions
 
 * Compile the build using `make` (will be generated in `panel.fs.neo.org` dir)
