@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
 	Container,
 	Section,
@@ -11,17 +11,7 @@ import {
 
 const Home = ({
 		onConnectWallet,
-		walletData,
-		location,
 	}) => {
-
-	useEffect(() => {
-		if (walletData && !walletData.balance && walletData.account) {
-			if (location.pathname.indexOf('/profile') === -1 && process.env.REACT_APP_WC_PROJECT_ID && process.env.REACT_APP_WC_PROJECT_ID !== '') {
-				document.location.href = "/profile";
-			}
-		}
-	}, [walletData]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	return (
 		<Container
