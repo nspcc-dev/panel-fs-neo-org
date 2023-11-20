@@ -148,21 +148,8 @@ export const App = () => {
 	};
 
 	useEffect(() => {
-		if (localStorage['wc@2:client//session:settled'] === '[]') {
-			onDisconnectWallet();
-		}
-	}, [wcSdk]); // eslint-disable-line react-hooks/exhaustive-deps
-
-	useEffect(() => {
-		if (wcSdk.isConnected()) {
-			onPopup('success', 'Wallet connected');
-			if (localStorage.walletData && JSON.parse(localStorage.walletData).expiry > new Date().getTime()) {
-				const walletDataTemp = JSON.parse(localStorage.walletData);
-				setWalletData(walletDataTemp);
-			} else {
-				if (localStorage.walletData) {
-					localStorage.removeItem('walletData');
-				}
+		if (process.env.REACT_APP_WC_PROJECT_ID && process.env.REACT_APP_WC_PROJECT_ID !== '') {
+			if (wcSdk.isConnected()) {
 				setWalletData({
 					type: wcSdk.session.namespaces.neo3.accounts[0].split(':')[0],
 					net: wcSdk.session.namespaces.neo3.accounts[0].split(':')[1],
@@ -173,12 +160,22 @@ export const App = () => {
 						object: {}
 					}
 				});
+				onPopup('success', 'Wallet connected');
+				onModal();
+
+				if (location.pathname.indexOf('/profile') === -1) {
+					document.location.href = "/profile";
+				}
+			} else if (walletData) {
+				onDisconnectWallet();
+				if (location.pathname !== '/') {
+					document.location.href = "/";
+				}
 			}
-			onModal();
-		} else if (walletData) {
-			onDisconnectWallet();
+		} else {
+			onModal('failed', 'Error: Global variable REACT_APP_WC_PROJECT_ID is not set.');
 		}
-	}, [wcSdk.isConnected()]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [wcSdk]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	const onResetContainerForm = () => {
 		setContainerForm({
@@ -212,7 +209,6 @@ export const App = () => {
 		if (!walletDataTemp.expiry || walletDataTemp.expiry < new Date().getTime()) {
 			walletDataTemp.expiry = new Date().getTime() + 7200000;
 		}
-		localStorage.setItem('walletData', JSON.stringify(walletDataTemp));
 		setWalletData(walletDataTemp);
 	}
 
@@ -490,7 +486,6 @@ export const App = () => {
 	const onDisconnectWallet = async () => {
 		await wcSdk.disconnect();
 		onPopup('success', 'Wallet disconnected');
-		localStorage.removeItem('walletData');
 		setWalletData(null);
 	};
 
@@ -1395,7 +1390,10 @@ export const App = () => {
 			<Navbar>
 				<Navbar.Brand>
 					<Navbar.Item renderAs="div">
-						<Link to="/" style={{ lineHeight: 0 }}>
+						<Link
+							to={walletData ? "/profile" : "/"}
+							style={{ lineHeight: 0 }}
+						>
 							<img
 								src="/img/logo.svg"
 								alt="logo"
@@ -1409,8 +1407,6 @@ export const App = () => {
 					path="/"
 					element={<Home
 						onConnectWallet={onConnectWallet}
-						walletData={walletData}
-						location={location}
 					/>}
 				/>
 				<Route
