@@ -1445,7 +1445,7 @@ export const App = () => {
 							alt="neo logo"
 						/>
 					</a>
-					<span class="social_pipe">
+					<span className="social_pipe">
 						<a className="neospcc" href="https://nspcc.io/" target="_blank" rel="noopener noreferrer">
 							<img
 								src="/img/socials/neo_spcc.svg"
