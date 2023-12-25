@@ -3,6 +3,14 @@
 Changelog for NeoFS Panel
 
 ## [Unreleased]
+	
+## [0.3.0] - 2023-12-25
+
+## Fixed
+- Incompatibility with new WC version (#112)
+
+## Changed
+- Use mainnet by default (#116)
 
 ## [0.2.1] - 2023-10-18
 
@@ -46,4 +54,5 @@ First public review release.
 [0.1.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.1.0
 [0.2.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.2.0
 [0.2.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.2.1
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.2.1...master
+[0.3.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.3.0
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.3.0...master
