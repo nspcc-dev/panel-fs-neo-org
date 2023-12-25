@@ -3,7 +3,12 @@
 Changelog for NeoFS Panel
 
 ## [Unreleased]
-	
+
+## [0.3.1] - 2023-12-25
+
+## Fixed
+- Add profile.html in Makefile (#119)
+
 ## [0.3.0] - 2023-12-25
 
 ## Fixed
@@ -55,4 +60,5 @@ First public review release.
 [0.2.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.2.0
 [0.2.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.2.1
 [0.3.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.3.0
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.3.0...master
+[0.3.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.3.1
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.3.1...master
