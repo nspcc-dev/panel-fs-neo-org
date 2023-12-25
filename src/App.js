@@ -28,7 +28,7 @@ import './App.css';
 export const App = () => {
 	const location = useLocation();
 	const wcSdk = useWalletConnect();
-	const [activeNet] = useState('neo3:testnet');
+	const [activeNet] = useState('neo3:mainnet');
 
 	const [ContentTypeHeader] = useState("Content-Type");
 	const [AuthorizationHeader] = useState("Authorization");
