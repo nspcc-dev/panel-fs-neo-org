@@ -254,11 +254,6 @@ const Profile = ({
 								onClick={onDisconnectWallet}
 							/>
 						</Heading>
-						{walletData.net !== 'testnet' && (
-							<Box style={{ fontSize: 14, wordBreak: 'break-all', background: '#f14668', color: '#fff' }}>
-								<div>{`You use ${walletData.net === 'private' ? 'private net' : walletData.net}. For a better experience, use testnet.`}</div>
-							</Box>
-						)}
 						<Heading size={6} style={{ marginBottom: 15 }}>
 							{`Address: `}
 							<span style={{ fontWeight: 400 }}>{walletData.account}</span>
