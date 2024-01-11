@@ -766,7 +766,7 @@ export const App = () => {
 							<Heading align="center" size={5} weight="bold">New container</Heading>
 							{modal.text.neoFSBalance === 0 && (
 								<Notification className="error_message" style={{ margin: '20px 0' }}>
-									Container creation is a paid operation, make sure you have sufficient NeoFS balance
+									Container creation is a paid operation, make sure you have sufficient NeoFS chain balance
 								</Notification>
 							)}
 							<Form.Field>
