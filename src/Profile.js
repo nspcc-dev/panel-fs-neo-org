@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Neon from "@cityofzion/neon-js";
 import {
 	Container,
 	Section,
@@ -34,6 +35,7 @@ const Profile = ({
 	const [NeoFSContract] = useState({
 		gasToken: '0xd2a4cff31913016155e38e474a2c06d08be276cf',
 		account: process.env.REACT_APP_NEOFS_ACCOUNT ? process.env.REACT_APP_NEOFS_ACCOUNT : 'NZAUkYbJ1Cb2HrNmwZ1pg9xYHBhm2FgtKV',
+		scriptHash: Neon.create.account(process.env.REACT_APP_NEOFS_ACCOUNT).scriptHash,
 	});
 	const [containers, setContainers] = useState([]);
 	const [isLoadingContainers, setIsLoadingContainers] = useState(false);
