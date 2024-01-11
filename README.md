@@ -44,6 +44,7 @@ Set variables in `.env` file
   containers and object in neofs (control path)
 - `REACT_APP_HTTPGW` - [NeoFS HTTP Gateway](https://github.com/nspcc-dev/neofs-http-gw), which we use to get objects (
   data path)
+- `REACT_APP_NETWORK` - Network of the Neo (might be `mainnet`, `testnet`)
 - `REACT_APP_NEOFS_ACCOUNT` - Neo3 address of the NeoFS contract
 - `REACT_APP_NEOFS_SCRIPT_HASH` - Script hash of the NeoFS contract
 
