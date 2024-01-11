@@ -32,9 +32,8 @@ const Profile = ({
 	}) => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [NeoFSContract] = useState({
-		scriptHash: process.env.REACT_APP_NEOFS_SCRIPT_HASH ? process.env.REACT_APP_NEOFS_SCRIPT_HASH : '0x3c3f4b84773ef0141576e48c3ff60e5078235891',
+		gasToken: '0xd2a4cff31913016155e38e474a2c06d08be276cf',
 		account: process.env.REACT_APP_NEOFS_ACCOUNT ? process.env.REACT_APP_NEOFS_ACCOUNT : 'NZAUkYbJ1Cb2HrNmwZ1pg9xYHBhm2FgtKV',
-		gasToken: process.env.REACT_APP_NEOFS_GAS_TOKEN ? process.env.REACT_APP_NEOFS_GAS_TOKEN : '0xd2a4cff31913016155e38e474a2c06d08be276cf',
 	});
 	const [containers, setContainers] = useState([]);
 	const [isLoadingContainers, setIsLoadingContainers] = useState(false);
@@ -96,7 +95,7 @@ const Profile = ({
 		setIsLoadingNeoBalance(true);
 		const targetAddress = wcSdk.getAccountAddress(0);
 		const invocations = [{
-			scriptHash: '0xd2a4cff31913016155e38e474a2c06d08be276cf',
+			scriptHash: NeoFSContract.gasToken,
 			operation: 'balanceOf',
 			args: [
 				{ type: 'Address', value: targetAddress },
