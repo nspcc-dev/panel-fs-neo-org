@@ -28,7 +28,7 @@ import './App.css';
 export const App = () => {
 	const location = useLocation();
 	const wcSdk = useWalletConnect();
-	const [activeNet] = useState('neo3:mainnet');
+	const [activeNet] = useState(process.env.REACT_APP_NETWORK ? process.env.REACT_APP_NETWORK : 'mainnet');
 
 	const [ContentTypeHeader] = useState("Content-Type");
 	const [AuthorizationHeader] = useState("Authorization");
@@ -474,7 +474,7 @@ export const App = () => {
 
 	const onConnectWallet = async () => {
 		try {
-			const { uri, approval } = await wcSdk.createConnection(activeNet, ['invokeFunction', 'testInvoke', 'signMessage', 'verifyMessage']);
+			const { uri, approval } = await wcSdk.createConnection(`neo3:${activeNet}`, ['invokeFunction', 'testInvoke', 'signMessage', 'verifyMessage']);
 			onModal('connectWallet', uri);
 			const session = await approval();
 			wcSdk.setSession(session);
