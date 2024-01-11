@@ -46,7 +46,6 @@ Set variables in `.env` file
   data path)
 - `REACT_APP_NEOFS_ACCOUNT` - Neo3 address of the NeoFS contract
 - `REACT_APP_NEOFS_SCRIPT_HASH` - Script hash of the NeoFS contract
-- `REACT_APP_NEOFS_GAS_TOKEN` - Script hash of the Gas token contract
 
 Run next commands from project's root:
 
