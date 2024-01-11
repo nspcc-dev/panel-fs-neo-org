@@ -15,7 +15,7 @@ describe('testTreeView', () => {
     }, {
       "address": { "containerId": "123", "objectId": "456" }
     }];
-  
+
     const tree = {
       "/": [{
         "address": { "containerId": "123", "objectId": "456" },
@@ -54,7 +54,7 @@ describe('testTreeView', () => {
       "address": { "containerId": "789", "objectId": "012" },
       "filePath": "345/ё\\ferkln/kmper/\\\\v////4345fk/-~s\\%<dp>20q\]%r",
     }];
-  
+
     const tree = {
       "345": {
         "/": [],
@@ -121,7 +121,7 @@ describe('testTreeView', () => {
       "name": "cat.jpg",
       "filePath": "/root/obj.txt",
     }];
-  
+
     const tree = {
       "/": [{
           "address": {

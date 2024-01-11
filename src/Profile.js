@@ -79,7 +79,7 @@ const Profile = ({
 			if (e.message) {
 				onPopup('failed', e.message);
 			} else {
-				onPopup('success', 'NeoFS balance has been updated');
+				onPopup('success', 'NeoFS chain balance has been updated');
 				setNeoFSBalance(e.value);
 				setTimeout(() => {
 					setIsLoadingNeoFSBalance(false);
@@ -115,7 +115,7 @@ const Profile = ({
 		});
 		setIsLoadingNeoBalance(false);
 		if (!response.error && response.stack.length > 0) {
-			onPopup('success', 'Neo balance has been updated');
+			onPopup('success', 'Mainnet balance has been updated');
 			setNeoBalance(response.stack[0].value);
 			setTimeout(() => {
 				setIsLoadingNeoBalance(false);
@@ -290,7 +290,7 @@ const Profile = ({
 											/>
 										)}
 									</Heading>
-									<Heading size={6} weight="bold">Neo Balance</Heading>
+									<Heading size={6} weight="bold">Mainnet balance</Heading>
 								</Tile>
 							</Tile>
 							<Tile kind="parent">
@@ -327,7 +327,7 @@ const Profile = ({
 											/>
 										)}
 									</Heading>
-									<Heading size={6} weight="bold">NeoFS Balance</Heading>
+									<Heading size={6} weight="bold">NeoFS chain balance</Heading>
 								</Tile>
 							</Tile>
 						</Tile>
@@ -338,7 +338,7 @@ const Profile = ({
 									renderAs={Notification}
 									color="grey"
 								>
-									<Heading size={5}>Deposit NeoFS</Heading>
+									<Heading size={5}>Deposit to NeoFS contract</Heading>
 									<Form.Field>
 										<Form.Label size="small" weight="light">Quantity (GAS)</Form.Label>
 										<Form.Control>
@@ -372,7 +372,7 @@ const Profile = ({
 									renderAs={Notification}
 									color="grey"
 								>
-									<Heading size={5}>Withdraw NeoFS</Heading>
+									<Heading size={5}>Withdraw from NeoFS contract</Heading>
 									<Form.Field>
 										<Form.Label size="small">Quantity (GAS)</Form.Label>
 										<Form.Control>

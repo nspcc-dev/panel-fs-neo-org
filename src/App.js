@@ -37,7 +37,7 @@ export const App = () => {
 	const [BearerSignatureHeader] = useState("X-Bearer-Signature");
 	const [BearerSignatureKeyHeader] = useState("X-Bearer-Signature-Key");
 	const [BearerLifetime] = useState("X-Bearer-Lifetime");
-	
+
 	const [params] = useState({
 		rest_gw: process.env.REACT_APP_RESTGW ? process.env.REACT_APP_RESTGW : 'https://rest.t5.fs.neo.org/v1',
 		http_gw: process.env.REACT_APP_HTTPGW ? process.env.REACT_APP_HTTPGW : 'https://http.t5.fs.neo.org',
@@ -766,7 +766,7 @@ export const App = () => {
 							<Heading align="center" size={5} weight="bold">New container</Heading>
 							{modal.text.neoFSBalance === 0 && (
 								<Notification className="error_message" style={{ margin: '20px 0' }}>
-									Container creation is a paid operation, make sure you have sufficient NeoFS balance
+									Container creation is a paid operation, make sure you have sufficient NeoFS chain balance
 								</Notification>
 							)}
 							<Form.Field>

@@ -41,7 +41,7 @@ const Home = ({
 								Connect wallet
 							</Button>
 							<Heading align="center" size={6} weight="normal">
-								We support <a href="https://melanke.github.io/aero-beta/" target="_blank" rel="noopener noreferrer">Aero web wallet</a>, <a href="https://neonwallet.com/" target="_blank" rel="noopener noreferrer">NEON wallet</a>
+								Tested with <a href="https://melanke.github.io/aero-beta/" target="_blank" rel="noopener noreferrer">Aero web wallet</a>, <a href="https://neonwallet.com/" target="_blank" rel="noopener noreferrer">NEON wallet</a>
 							</Heading>
 						</>
 					)}

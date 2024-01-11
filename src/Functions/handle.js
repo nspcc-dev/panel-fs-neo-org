@@ -49,7 +49,7 @@ export function formatForTreeView(objects) {
 
 		objects[i].fullName = `${objects[i].filePath ? `${objects[i].filePath.trim()}/` : ''}${objects[i].name.trim()}`;
 	}
-	
+
 	objects.sort((a, b) => {
 		if (a.fullName < b.fullName) {
 			return -1;
