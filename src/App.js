@@ -792,8 +792,8 @@ export const App = () => {
 										disabled={isLoadingForm}
 									/>
 									{[
+										'REP 1',
 										'REP 2 IN X CBF 3 SELECT 2 FROM * AS X',
-										'REP 3',
 									].map((placementPolicyExample) => (
 										<Tag
 											key={placementPolicyExample}
