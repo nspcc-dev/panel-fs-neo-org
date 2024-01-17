@@ -144,6 +144,33 @@ const File = ({
 					{objectDate ? (
 						<>
 							<img
+								src="/img/download.svg"
+								width={20}
+								height={20}
+								alt="download"
+								className="objects_tree_file_download"
+								onClick={() => {
+									onModal('loading');
+									api('GET', `${params.http_gw}/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
+										[ContentTypeHeader]: "application/json",
+										[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.bearer}`,
+									}).then((data) => {
+										const a = document.createElement('a');
+										document.body.appendChild(a);
+										const url = window.URL.createObjectURL(data.res);
+										a.href = url;
+										a.download = name;
+										a.target = '_blank';
+										a.click();
+										setTimeout(() => {
+											onModal();
+											window.URL.revokeObjectURL(url);
+											document.body.removeChild(a);
+										}, 0);
+									});
+								}}
+							/>
+							<img
 								src="/img/trashbin.svg"
 								width={20}
 								height={20}

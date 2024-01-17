@@ -334,6 +334,14 @@ label.panel-block:hover {
     margin: 10px;
 }
 
+.objects_tree_file_download {
+    cursor: pointer;
+    position: absolute;
+    right: 40px;
+    top: 0;
+    margin: 10px;
+}
+
 .footer {
     background-color: #f0f5f6;
     padding: 40px 20px;
