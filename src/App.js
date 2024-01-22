@@ -439,6 +439,8 @@ export const App = () => {
 							loading: false,
 						});
 					}
+				}).catch((err) => {
+					onModal('failed', `Something went wrong: ${err}`);
 				});
 			} else {
 				setError({ active: true, type: ['attributes'], text: 'Attributes should not be empty.' });
