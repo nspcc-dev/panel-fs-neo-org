@@ -313,6 +313,7 @@ label.panel-block:hover {
 .objects_tree_file .file--label span {
     margin-left: 5px;
     cursor: pointer;
+    word-break: break-word;
 }
 
 .objects_tree_folder .folder_collapsible,

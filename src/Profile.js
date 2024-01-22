@@ -116,14 +116,16 @@ const Profile = ({
 			}
 		});
 		setIsLoadingNeoBalance(false);
-		if (!response.error && response.stack.length > 0) {
+		if (response && !response.error && response.stack.length > 0) {
 			onPopup('success', 'Mainnet balance has been updated');
 			setNeoBalance(response.stack[0].value);
 			setTimeout(() => {
 				setIsLoadingNeoBalance(false);
 			}, 500);
-		} else if (response.exception) {
+		} else if (response && response.exception) {
 			onPopup('failed', response.exception);
+		} else {
+			onPopup('failed', 'Something went wrong');
 		}
 	};
 

@@ -31,6 +31,8 @@ export default function api(method, url, params = {}, headers = {}) {
 					res = await response.blob();
 					const header = response.headers.get('Content-Type');
 					resolve({ header, res });
+				} else if (response.status === 413) {
+					reject('413 Request Entity Too Large');
 				} else if (response) {
 					res = await response.json();
 					resolve(res);
