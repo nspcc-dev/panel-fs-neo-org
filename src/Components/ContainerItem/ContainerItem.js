@@ -145,9 +145,9 @@ export default function ContainerItem({
 						{formatForContainerName(containerItem.attributes, containerItem.containerId)}
 						{isOpen && (
 							<img
-								src="/img/trashbin.svg"
-								width={20}
-								height={20}
+								src="/img/icons/trashbin.svg"
+								width={18}
+								height={18}
 								fill="#f14668"
 								alt="delete"
 								style={{ cursor: 'pointer' }}
@@ -211,7 +211,7 @@ export default function ContainerItem({
 											style={{ cursor: 'pointer', display: 'flex' }}
 										>
 											<img
-												src={activePanel === 'eACL' ? '/img/chevron_down.svg' : '/img/chevron_right.svg'}
+												src={activePanel === 'eACL' ? '/img/icons/chevron_down.svg' : '/img/icons/chevron_right.svg'}
 												style={{ marginRight: 10 }}
 												width={22}
 												height={22}
@@ -246,7 +246,7 @@ export default function ContainerItem({
 												) : (
 													<img
 														className="modal_loader"
-														src="/img/loader.svg"
+														src="/img/icons/loader.svg"
 														height={30}
 														width={30}
 														alt="loader"
@@ -263,7 +263,7 @@ export default function ContainerItem({
 											style={{ cursor: 'pointer', display: 'flex' }}
 										>
 											<img
-												src={activePanel === 'attributes' ? '/img/chevron_down.svg' : '/img/chevron_right.svg'}
+												src={activePanel === 'attributes' ? '/img/icons/chevron_down.svg' : '/img/icons/chevron_right.svg'}
 												style={{ marginRight: 10 }}
 												width={22}
 												height={22}
@@ -295,7 +295,7 @@ export default function ContainerItem({
 											style={{ cursor: 'pointer', display: 'flex' }}
 										>
 											<img
-												src={activePanel === 'objects' ? '/img/chevron_down.svg' : '/img/chevron_right.svg'}
+												src={activePanel === 'objects' ? '/img/icons/chevron_down.svg' : '/img/icons/chevron_right.svg'}
 												style={{ marginRight: 10 }}
 												width={22}
 												height={22}
@@ -327,7 +327,7 @@ export default function ContainerItem({
 												) : (
 													<img
 														className="modal_loader"
-														src="/img/loader.svg"
+														src="/img/icons/loader.svg"
 														height={30}
 														width={30}
 														alt="loader"
@@ -349,7 +349,7 @@ export default function ContainerItem({
 							) : (
 								<img
 									className="modal_loader"
-									src="/img/loader.svg"
+									src="/img/icons/loader.svg"
 									height={30}
 									width={30}
 									alt="loader"

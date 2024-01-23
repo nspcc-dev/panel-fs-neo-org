@@ -76,7 +76,7 @@ const Folder = ({ name, children }) => {
 		<div className="objects_tree_folder">
 			<div className="folder--label" onClick={handleToggle}>
 				<img
-					src="/img/folder.svg"
+					src="/img/icons/folder.svg"
 					width={15}
 					alt="folder"
 				/>
@@ -129,7 +129,7 @@ const File = ({
 				onClick={handleToggle}
 			>
 				<img
-					src="/img/file.svg"
+					src="/img/icons/file.svg"
 					width={10}
 					alt="file"
 					style={{ display: 'block' }}
@@ -238,7 +238,7 @@ const File = ({
 					) : (
 						<img
 							className="modal_loader"
-							src="/img/loader.svg"
+							src="/img/icons/loader.svg"
 							height={30}
 							width={30}
 							alt="loader"
