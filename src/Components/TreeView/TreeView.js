@@ -76,7 +76,7 @@ const Folder = ({ name, children }) => {
 		<div className="objects_tree_folder">
 			<div className="folder--label" onClick={handleToggle}>
 				<img
-					src="/img/folder.svg"
+					src="/img/icons/folder.svg"
 					width={15}
 					alt="folder"
 				/>
@@ -129,7 +129,7 @@ const File = ({
 				onClick={handleToggle}
 			>
 				<img
-					src="/img/file.svg"
+					src="/img/icons/file.svg"
 					width={10}
 					alt="file"
 					style={{ display: 'block' }}
@@ -143,78 +143,11 @@ const File = ({
 				<div className="objects_tree_file_content">
 					{objectDate ? (
 						<>
-							<img
-								src="/img/download.svg"
-								width={20}
-								height={20}
-								alt="download"
-								className="objects_tree_file_download"
-								onClick={() => {
-									onModal('loading');
-									api('GET', `${params.http_gw}/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
-										[ContentTypeHeader]: "application/json",
-										[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.bearer}`,
-									}).then((data) => {
-										const a = document.createElement('a');
-										document.body.appendChild(a);
-										const url = window.URL.createObjectURL(data.res);
-										a.href = url;
-										a.download = name;
-										a.target = '_blank';
-										a.click();
-										setTimeout(() => {
-											onModal();
-											window.URL.revokeObjectURL(url);
-											document.body.removeChild(a);
-										}, 0);
-									});
-								}}
-							/>
-							<img
-								src="/img/trashbin.svg"
-								width={20}
-								height={20}
-								fill="#f14668"
-								alt="delete"
-								className="objects_tree_file_delete"
-								onClick={(e) => {
-									onModal('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.address.objectId });
-									e.stopPropagation();
-								}}
-							/>
 							<Section>
 								<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Information</Heading>
 								<Heading size={6} weight="light" style={{ display: 'flex' }}>
 									<span style={{ marginRight: 5 }}>{`Object id:`}</span>
-									<div
-										onClick={() => {
-											onModal('loading');
-											api('GET', `${params.http_gw}/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
-												[ContentTypeHeader]: "application/json",
-												[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.bearer}`,
-											}).then((data) => {
-												if (data.header.indexOf("image/") !== -1 || data.header === 'text/plain; charset=utf-8') {
-													const fileURL = URL.createObjectURL(data.res);
-													window.open(fileURL, '_blank');
-													onModal();
-												} else {
-													const a = document.createElement('a');
-													document.body.appendChild(a);
-													const url = window.URL.createObjectURL(data.res);
-													a.href = url;
-													a.download = name;
-													a.target = '_blank';
-													a.click();
-													setTimeout(() => {
-														onModal();
-														window.URL.revokeObjectURL(url);
-														document.body.removeChild(a);
-													}, 0);
-												}
-											});
-										}}
-										style={{ textDecoration: 'underline', cursor: 'pointer' }}
-									>{objectItem.address.objectId}</div>
+									<div>{objectItem.address.objectId}</div>
 								</Heading>
 								<Heading size={6} weight="light">
 									<span>{`Owner id: `}</span>
@@ -234,11 +167,85 @@ const File = ({
 									</Heading>
 								))}
 							</Section>
+							<Section style={{ paddingTop: 0 }}>
+								<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Manage</Heading>
+								<img
+									src="/img/icons/manage/open.png"
+									className="manage_icon"
+									onClick={() => {
+										onModal('loading');
+										api('GET', `${params.http_gw}/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
+											[ContentTypeHeader]: "application/json",
+											[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.bearer}`,
+										}).then((data) => {
+											if (data.header.indexOf("image/") !== -1 || data.header === 'text/plain; charset=utf-8') {
+												const fileURL = URL.createObjectURL(data.res);
+												window.open(fileURL, '_blank');
+												onModal();
+											} else {
+												const a = document.createElement('a');
+												document.body.appendChild(a);
+												const url = window.URL.createObjectURL(data.res);
+												a.href = url;
+												a.download = name;
+												a.target = '_blank';
+												a.click();
+												setTimeout(() => {
+													onModal();
+													window.URL.revokeObjectURL(url);
+													document.body.removeChild(a);
+												}, 0);
+											}
+										});
+									}}
+									width={40}
+									height={40}
+									alt="get an object by link"
+								/>
+								<img
+									src="/img/icons/manage/download.png"
+									className="manage_icon"
+									onClick={() => {
+										onModal('loading');
+										api('GET', `${params.http_gw}/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
+											[ContentTypeHeader]: "application/json",
+											[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.bearer}`,
+										}).then((data) => {
+											const a = document.createElement('a');
+											document.body.appendChild(a);
+											const url = window.URL.createObjectURL(data.res);
+											a.href = url;
+											a.download = name;
+											a.target = '_blank';
+											a.click();
+											setTimeout(() => {
+												onModal();
+												window.URL.revokeObjectURL(url);
+												document.body.removeChild(a);
+											}, 0);
+										});
+									}}
+									width={40}
+									height={40}
+									alt="download an object"
+								/>
+								<img
+									src="/img/icons/manage/delete.png"
+									className="manage_icon"
+									onClick={(e) => {
+										onModal('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.address.objectId });
+										e.stopPropagation();
+									}}
+									width={40}
+									height={40}
+									alt="delete an object"
+								/>
+							</Section>
 						</>
 					) : (
 						<img
 							className="modal_loader"
-							src="/img/loader.svg"
+							src="/img/icons/loader.svg"
 							height={30}
 							width={30}
 							alt="loader"

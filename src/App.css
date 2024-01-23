@@ -327,20 +327,9 @@ label.panel-block:hover {
     position: relative;
 }
 
-.objects_tree_file_delete {
+.manage_icon {
     cursor: pointer;
-    position: absolute;
-    right: 0;
-    top: 0;
-    margin: 10px;
-}
-
-.objects_tree_file_download {
-    cursor: pointer;
-    position: absolute;
-    right: 40px;
-    top: 0;
-    margin: 10px;
+    margin: 5px 15px 0 0;
 }
 
 .footer {

@@ -87,7 +87,7 @@ export default function EACLPanel({
 					>
 						<Panel.Icon>
 							<img
-								src={eACLItem.isOpen ? '/img/chevron_down.svg' : '/img/chevron_right.svg'}
+								src={eACLItem.isOpen ? '/img/icons/chevron_down.svg' : '/img/icons/chevron_right.svg'}
 								style={{ marginRight: 10 }}
 								width={22}
 								height={22}
@@ -98,9 +98,9 @@ export default function EACLPanel({
 						{eACLItem.isOpen && isEdit && (
 							<Panel.Icon>
 								<img
-									src="/img/trashbin.svg"
-									width={20}
-									height={20}
+									src="/img/icons/trashbin.svg"
+									width={18}
+									height={18}
 									alt="delete"
 									style={{ cursor: 'pointer', position: 'absolute', right: 0, top: 0 }}
 									onClick={(e) => {
@@ -235,9 +235,9 @@ export default function EACLPanel({
 									</Form.Control>
 									{isEdit && (
 										<img
-											src="/img/trashbin.svg"
-											width={20}
-											height={20}
+											src="/img/icons/trashbin.svg"
+											width={18}
+											height={18}
 											alt="delete"
 											style={{ cursor: 'pointer', right: 0, top: 0 }}
 											onClick={() => {
@@ -334,7 +334,7 @@ export default function EACLPanel({
 						>
 							{isLoadingForm ? (
 								<img
-									src="/img/spinner.svg"
+									src="/img/icons/spinner.svg"
 									className="spinner"
 									width={20}
 									height={20}

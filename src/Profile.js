@@ -245,15 +245,15 @@ const Profile = ({
 						</Box>
 					)}
 					<Box id="account">
-						<Heading style={{ display: 'flex', justifyContent: 'space-between' }} weight="bold">
+						<Heading style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} weight="bold">
 							<span>
 								Account
 								<Tag style={{ margin: '0 0px 0 15px' }}>{`«${walletData.data.metadata.name}»`}</Tag>
 							</span>
 							<img
-								src="/img/logout.svg"
+								src="/img/icons/logout.svg"
 								alt="logout"
-								style={{ marginLeft: 5, cursor: 'pointer', width: 30, height: 30 }}
+								style={{ marginLeft: 5, cursor: 'pointer', width: 25, height: 25 }}
 								onClick={onDisconnectWallet}
 							/>
 						</Heading>
@@ -276,7 +276,7 @@ const Profile = ({
 										<span>{neoBalance ? `${(neoBalance * 0.00000001).toFixed(8)} GAS` : '-'}</span>
 										{!isNotAvailableNeoFS && (
 											<img
-												src="/img/sync.svg"
+												src="/img/icons/sync.svg"
 												alt="sync"
 												style={isLoadingNeoBalance ? {
 													margin: '2px 0 0 5px',
@@ -311,7 +311,7 @@ const Profile = ({
 										<span>{neoFSBalance ? `${(neoFSBalance * 0.000000000001).toFixed(12)} GAS` : '-'}</span>
 										{!isNotAvailableNeoFS && (
 											<img
-												src="/img/sync.svg"
+												src="/img/icons/sync.svg"
 												width={20}
 												height={20}
 												alt="sync"
@@ -417,7 +417,7 @@ const Profile = ({
 								{`Containers`}
 								{!isNotAvailableNeoFS && (
 									<img
-										src="/img/sync.svg"
+										src="/img/icons/sync.svg"
 										width={20}
 										height={20}
 										alt="sync"
@@ -434,7 +434,7 @@ const Profile = ({
 								)}
 							</span>
 							{/* <img
-								src="/img/settings.svg"
+								src="/img/icons/settings.svg"
 								width={22}
 								height={22}
 								alt="settings"
@@ -478,7 +478,7 @@ const Profile = ({
 						<Heading align="center" size={5}>Loading</Heading>
 						<img
 							className="modal_loader"
-							src="/img/loader.svg"
+							src="/img/icons/loader.svg"
 							height={30}
 							width={30}
 							alt="loader"

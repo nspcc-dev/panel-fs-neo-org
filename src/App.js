@@ -514,7 +514,7 @@ export const App = () => {
 							onClick={onModal}
 						>
 							<img
-								src="/img/close.svg"
+								src="/img/icons/close.svg"
 								height={30}
 								width={30}
 								alt="loader"
@@ -537,7 +537,7 @@ export const App = () => {
 							onClick={onModal}
 						>
 							<img
-								src="/img/close.svg"
+								src="/img/icons/close.svg"
 								height={30}
 								width={30}
 								alt="loader"
@@ -578,7 +578,7 @@ export const App = () => {
 							onClick={onModal}
 						>
 							<img
-								src="/img/close.svg"
+								src="/img/icons/close.svg"
 								height={30}
 								width={30}
 								alt="loader"
@@ -593,7 +593,7 @@ export const App = () => {
 											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock create&nbsp;operation</Heading>
 											{walletData && walletData.tokens.container.PUT ? (
 												<img
-													src="/img/success.svg"
+													src="/img/icons/success.svg"
 													height={25}
 													width={25}
 													alt="success"
@@ -614,7 +614,7 @@ export const App = () => {
 											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock delete&nbsp;operation</Heading>
 											{walletData && walletData.tokens.container.DELETE ? (
 												<img
-													src="/img/success.svg"
+													src="/img/icons/success.svg"
 													height={25}
 													width={25}
 													alt="success"
@@ -635,7 +635,7 @@ export const App = () => {
 											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock eACL&nbsp;management</Heading>
 											{walletData && walletData.tokens.container.SETEACL ? (
 												<img
-													src="/img/success.svg"
+													src="/img/icons/success.svg"
 													height={25}
 													width={25}
 													alt="success"
@@ -660,7 +660,7 @@ export const App = () => {
 											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock create&nbsp;operation</Heading>
 											{walletData && walletData.tokens.object.PUT ? (
 												<img
-													src="/img/success.svg"
+													src="/img/icons/success.svg"
 													height={25}
 													width={25}
 													alt="success"
@@ -681,7 +681,7 @@ export const App = () => {
 											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock delete&nbsp;operation</Heading>
 											{walletData && walletData.tokens.object.DELETE ? (
 												<img
-													src="/img/success.svg"
+													src="/img/icons/success.svg"
 													height={25}
 													width={25}
 													alt="success"
@@ -702,7 +702,7 @@ export const App = () => {
 											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock get&nbsp;operation</Heading>
 											{walletData && walletData.tokens.object.GET ? (
 												<img
-													src="/img/success.svg"
+													src="/img/icons/success.svg"
 													height={25}
 													width={25}
 													alt="success"
@@ -759,7 +759,7 @@ export const App = () => {
 								}}
 							>
 								<img
-									src="/img/close.svg"
+									src="/img/icons/close.svg"
 									height={30}
 									width={30}
 									alt="loader"
@@ -839,9 +839,9 @@ export const App = () => {
 											</Form.Control>
 											<Form.Control>
 												<img
-													src="/img/trashbin.svg"
-													width={20}
-													height={20}
+													src="/img/icons/trashbin.svg"
+													width={18}
+													height={18}
 													alt="delete"
 													style={{ cursor: 'pointer', margin: '9px 4px 4px' }}
 													onClick={() => {
@@ -1003,7 +1003,7 @@ export const App = () => {
 								>
 									{isLoadingForm ? (
 										<img
-											src="/img/spinner.svg"
+											src="/img/icons/spinner.svg"
 											className="spinner"
 											width={20}
 											height={20}
@@ -1034,7 +1034,7 @@ export const App = () => {
 							}}
 						>
 							<img
-								src="/img/close.svg"
+								src="/img/icons/close.svg"
 								height={30}
 								width={30}
 								alt="loader"
@@ -1075,7 +1075,7 @@ export const App = () => {
 								>
 									{isLoadingForm ? (
 									<img
-										src="/img/spinner.svg"
+										src="/img/icons/spinner.svg"
 										className="spinner"
 										width={20}
 										height={20}
@@ -1120,7 +1120,7 @@ export const App = () => {
 							}}
 						>
 							<img
-								src="/img/close.svg"
+								src="/img/icons/close.svg"
 								height={30}
 								width={30}
 								alt="loader"
@@ -1180,9 +1180,9 @@ export const App = () => {
 										</Form.Control>
 										<Form.Control>
 											<img
-												src="/img/trashbin.svg"
-												width={20}
-												height={20}
+												src="/img/icons/trashbin.svg"
+												width={18}
+												height={18}
 												alt="delete"
 												style={{ cursor: 'pointer', margin: '9px 4px 4px' }}
 												onClick={() => {
@@ -1246,7 +1246,7 @@ export const App = () => {
 							>
 								{isLoadingForm ? (
 									<img
-										src="/img/spinner.svg"
+										src="/img/icons/spinner.svg"
 										className="spinner"
 										width={20}
 										height={20}
@@ -1276,7 +1276,7 @@ export const App = () => {
 							}}
 						>
 							<img
-								src="/img/close.svg"
+								src="/img/icons/close.svg"
 								height={30}
 								width={30}
 								alt="loader"
@@ -1317,7 +1317,7 @@ export const App = () => {
 								>
 									{isLoadingForm ? (
 										<img
-											src="/img/spinner.svg"
+											src="/img/icons/spinner.svg"
 											className="spinner"
 											width={20}
 											height={20}
@@ -1342,7 +1342,7 @@ export const App = () => {
 							onClick={onModal}
 						>
 							<img
-								src="/img/close.svg"
+								src="/img/icons/close.svg"
 								height={30}
 								width={30}
 								alt="loader"
@@ -1351,7 +1351,7 @@ export const App = () => {
 						<Heading align="center" size={5} weight="bold">Loading</Heading>
 						<img
 							className="modal_loader"
-							src="/img/loader.svg"
+							src="/img/icons/loader.svg"
 							height={30}
 							width={30}
 							alt="loader"
@@ -1371,7 +1371,7 @@ export const App = () => {
 							onClick={onModal}
 						>
 							<img
-								src="/img/close.svg"
+								src="/img/icons/close.svg"
 								height={30}
 								width={30}
 								alt="loader"
@@ -1380,7 +1380,7 @@ export const App = () => {
 						<Heading align="center" size={5} weight="bold">Pending Call Request</Heading>
 						<img
 							className="modal_loader"
-							src="/img/loader.svg"
+							src="/img/icons/loader.svg"
 							height={30}
 							width={30}
 							alt="loader"
