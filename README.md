@@ -87,19 +87,18 @@ $ make docker/start
 
 ## Wallets
 
-- [Aero web wallet](https://melanke.github.io/aero-beta/)
-- [Neon wallet for Windows, Mac OS, Linux, Android and iOS](https://neon.coz.io/)
+Any wallet that supports WalletConnect 2.0 should work. Specifically, we've tested:
 
-(Wallet applications are [migrating](https://docs.walletconnect.com/2.0/advanced/migrating-from-v1.0) to WalletConnect
-v2 protocol. Neon wallet is considered unstable, use Aero web wallet for tests)
+- [Neon wallet for Windows, Mac OS, Linux, Android and iOS](https://neon.coz.io/)
+- [Aero web wallet](https://melanke.github.io/aero-beta/) (testnet only, see #133)
 
 ## Setup guide
 
-1. Open [Aero web wallet](https://melanke.github.io/aero-beta/) or download [Neon wallet](https://neon.coz.io/)
-2. Import wallet or generate a new one
+1. Open [Neon wallet](https://neon.coz.io/)
+2. Import a key or generate a new one
 3. Type wallet password
-4. Choose your network (use `Testnet` for the best experience)
-5. Make a new connection with Panel web page using Connect wallet button
+4. Choose your network (depending on how Panel is configured)
+5. Make a new connection with Panel web page using "Connect wallet" button
 6. Approve connection in the wallet
 7. Now you can use your wallet on the NeoFS Panel
 
