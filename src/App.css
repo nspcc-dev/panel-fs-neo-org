@@ -127,6 +127,15 @@ label.is-error {
     line-height: 1.3rem;
 }
 
+.input_caption {
+    font-size: .75rem;
+    font-weight: 400;
+    border-left: 2px solid #ffd781;
+    margin-top: 1em;
+    margin-bottom: 1rem;
+    padding-left: 7px;
+}
+
 ul {
     list-style: unset;
 }
