@@ -13,7 +13,6 @@ import {
 	Columns,
 	Form,
 	Tag,
-	Box,
 	Notification,
 } from 'react-bulma-components';
 import Home from './Home';
@@ -57,8 +56,9 @@ export const App = () => {
 		loading: false,
 	});
 	const [presets] = useState({
-		personal: {
-			basicAcl: 'eacl-public-read-write',
+		forbid: {
+			name: 'forbid everything',
+			preset: 'forbid',
 			eACLParams: [{
 				"operation": "GET",
 				"action": "DENY",
@@ -97,32 +97,27 @@ export const App = () => {
 			}],
 		},
 		shared: {
+			name: 'allow reads for others',
 			preset: 'shared',
-			basicAcl: 'eacl-public-read-write',
 			eACLParams: [{
-				"operation": "PUT",
-				"action": "DENY",
+				"operation": "GET",
+				"action": "ALLOW",
 				"filters": [],
 				"targets": [{ "keys": [], "role": "OTHERS" }],
 			}, {
-				"operation": "DELETE",
-				"action": "DENY",
+				"operation": "HEAD",
+				"action": "ALLOW",
 				"filters": [],
 				"targets": [{ "keys": [], "role": "OTHERS" }],
 			}],
-		},
-		custom: {
-			preset: 'custom',
-			basicAcl: '',
-			eACLParams: [],
 		}
 	});
 	const [containerForm, setContainerForm] = useState({
 		containerName: '',
 		placementPolicy: '',
-		basicAcl: presets.personal.basicAcl,
-		eACLParams: presets.personal.eACLParams,
-		preset: 'personal',
+		basicAcl: 'eacl-public-read-write',
+		eACLParams: presets.forbid.eACLParams,
+		preset: 'forbid',
 	});
 	const [walletData, setWalletData] = useState(null);
 
@@ -181,9 +176,9 @@ export const App = () => {
 		setContainerForm({
 			containerName: '',
 			placementPolicy: '',
-			basicAcl: presets.personal.basicAcl,
-			eACLParams: presets.personal.eACLParams,
-			preset: 'personal',
+			basicAcl: 'eacl-public-read-write',
+			eACLParams: presets.forbid.eACLParams,
+			preset: 'forbid',
 		});
 	}
 
@@ -875,6 +870,20 @@ export const App = () => {
 							</Form.Field>
 							<Form.Field>
 								<Form.Label>Access Control</Form.Label>
+							</Form.Field>
+							<Form.Field>
+								<Form.Label size="small">Basic ACL</Form.Label>
+								<Form.Control>
+									<Form.Input
+										type="text"
+										value={containerForm.basicAcl}
+										className={isError.active && isError.type.indexOf('basicAcl') !== -1 ? 'is-error' : ""}
+										onChange={(e) => setContainerForm({ ...containerForm , basicAcl: e.target.value })}
+										disabled={true}
+									/>
+									<Heading className="input_caption">NeoFS Panel is incompatible with basic ACLs that disable Bearer tokens or use Final bit. Therefore, basic ACL can't be changed here, but you can set any EACL rules you need. If you need a container with some different basic ACL, please use the <a href="https://github.com/nspcc-dev/neofs-node" target="_blank" rel="noopener noreferrer" alt="neofs-node">CLI</a>.</Heading>
+								</Form.Control>
+								<Form.Label size="small" style={{ marginTop: 10 }}>Extended ACL</Form.Label>
 								{Object.keys(presets).map((basicPresetExample) => (
 									<Tag
 										key={basicPresetExample}
@@ -883,7 +892,6 @@ export const App = () => {
 											if (containerForm.preset !== basicPresetExample) {
 												setContainerForm({
 													...containerForm,
-													basicAcl: presets[basicPresetExample].basicAcl,
 													eACLParams: presets[basicPresetExample].eACLParams,
 													preset: basicPresetExample,
 												})}
@@ -898,62 +906,15 @@ export const App = () => {
 											margin: '5px 5px 0 0',
 											cursor: 'pointer',
 										}}
-									>{basicPresetExample}</Tag>
+									>{presets[basicPresetExample].name}</Tag>
 								))}
-							</Form.Field>
-							<Form.Field>
-								<Form.Label size="small">Basic ACL</Form.Label>
-								<Form.Control>
-									<Form.Input
-										type="text"
-										value={containerForm.basicAcl}
-										className={isError.active && isError.type.indexOf('basicAcl') !== -1 ? 'is-error' : ""}
-										onChange={(e) => setContainerForm({ ...containerForm , basicAcl: e.target.value })}
-										disabled={containerForm.preset !== 'custom' || isLoadingForm}
-									/>
-									{containerForm.preset === 'custom' && ([
-										'private',
-										'eacl-private',
-										'public-read',
-										'eacl-public-read',
-										'public-read-write',
-										'eacl-public-read-write',
-										'public-append',
-										'eacl-public-append',
-										'0x1C8C8CCC',
-									].map((basicAclExample) => (
-										<Tag
-											key={basicAclExample}
-											className={isLoadingForm ? "tag_disabled" : ""}
-											onClick={() => setContainerForm({
-												...containerForm ,
-												basicAcl: basicAclExample,
-												eACLParams: [],
-											})}
-											style={{ margin: '5px 5px 0 0', cursor: 'pointer' }}
-										>{basicAclExample}</Tag>
-									)))}
-								</Form.Control>
-								<Form.Label size="small" style={{ marginTop: 10 }}>Extended ACL</Form.Label>
-								{((!/\d/.test(containerForm.basicAcl) && containerForm.basicAcl.substr(0, 4) !== 'eacl') || (/\d/.test(containerForm.basicAcl) && containerForm.basicAcl.replace('0x','').length === 8 && (containerForm.basicAcl.substr(0, 3) === '0x1' || containerForm.basicAcl.substr(0, 3) === '0x3' || containerForm.basicAcl.substr(0, 1) === '1' || containerForm.basicAcl.substr(0, 1) === '3'))) ? (
-									<Box
-										style={{
-											marginTop: 10,
-											border: '1px solid #dfe3e3',
-											boxShadow: 'unset',
-										}}
-									>
-										Current basic acl doesn't support eACL
-									</Box>
-								) : (
-									<EACLPanel
-										onAuth={onAuth}
-										isErrorParent={isError}
-										isEdit={!(containerForm.preset === 'personal' || containerForm.preset === 'shared' || isLoadingForm)}
-										eACLParams={containerForm.eACLParams}
-										setEACLParams={(e) => setContainerForm({ ...containerForm, eACLParams: e })}
-									/>
-								)}
+								<EACLPanel
+									onAuth={onAuth}
+									isErrorParent={isError}
+									isEdit={!(containerForm.preset === 'forbid' || containerForm.preset === 'shared' || isLoadingForm)}
+									eACLParams={containerForm.eACLParams}
+									setEACLParams={(e) => setContainerForm({ ...containerForm, eACLParams: e })}
+								/>
 							</Form.Field>
 							{isError.active && (
 								<Notification className="error_message" style={{ margin: '20px 0' }}>

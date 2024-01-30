@@ -170,7 +170,9 @@ export default function EACLPanel({
 									</Form.Select>
 								</Form.Control>
 							</Form.Field>
-							<Heading align="center" weight="normal" size={6} style={{ marginBottom: 10 }}>Filters</Heading>
+							{isEdit && (
+								<Heading align="center" weight="normal" size={6} style={{ marginBottom: 10 }}>Filters</Heading>
+							)}
 							{eACLItem.filters.map((filterItem, filterIndex) => (
 								<Form.Field className="panel-block-content" kind="group" key={filterIndex}>
 									<Form.Control>
@@ -276,30 +278,32 @@ export default function EACLPanel({
 					)}
 				</Panel.Block>
 			))}
-			<Panel.Block>
-				<Button
-					fullwidth
-					color="primary"
-					size="small"
-					onClick={() => {
-						let aECLParamsTemp = [...eACLParams];
-						aECLParamsTemp.push({
-							operation: "",
-							action: "",
-							isOpen: true,
-							filters: [],
-							targets: [{
-								keys: [],
-								role: '',
-							}],
-						});
-						setEACLParams(aECLParamsTemp);
-					}}
-					disabled={!isEdit || isLoadingForm}
-				>
-					Add rule
-				</Button>
-			</Panel.Block>
+			{isEdit && (
+				<Panel.Block>
+					<Button
+						fullwidth
+						color="primary"
+						size="small"
+						onClick={() => {
+							let aECLParamsTemp = [...eACLParams];
+							aECLParamsTemp.push({
+								operation: "",
+								action: "",
+								isOpen: true,
+								filters: [],
+								targets: [{
+									keys: [],
+									role: '',
+								}],
+							});
+							setEACLParams(aECLParamsTemp);
+						}}
+						disabled={!isEdit || isLoadingForm}
+					>
+						Add rule
+					</Button>
+				</Panel.Block>
+			)}
 			{isError.active && !isErrorParent && (
 				<Notification className="error_message">
 					{isError.text}
