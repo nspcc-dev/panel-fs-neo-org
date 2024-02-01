@@ -52,7 +52,7 @@ export const App = () => {
 	});
 	const [objectForm, setObjectForm] = useState({
 		name: '',
-		base64file: '',
+		file: '',
 		loading: false,
 	});
 	const [presets] = useState({
@@ -247,7 +247,7 @@ export const App = () => {
 				onModal('failed', 'Something went wrong, try again');
 			}
 		});
-		if (type === 'object' && operation === 'GET') {
+		if (type === 'object') {
 			api('GET', '/auth/bearer?walletConnect=true', {}, {
 				[ContentTypeHeader]: "application/json",
 				[AuthorizationHeader]: `Bearer ${msg}`,
@@ -372,31 +372,18 @@ export const App = () => {
 	};
 
 	const onHandleObject = (e) => {
-		setObjectForm({
-			name: '',
-			base64file: '',
-			loading: true,
-		});
 		const file = e.target.files;
-			if (file.length > 0) {
-			const reader = new FileReader();
-			reader.readAsDataURL(file[0]);
-			reader.onload = () => {
-				const base64file = reader.result;
-				setObjectForm({
-					name: file[0].name,
-					base64file,
-					loading: false,
-				});
-			};
-			reader.onerror = (error) => {
-				onModal('failed', error);
-				document.getElementById('upload').value = '';
-			};
+		if (file.length > 0) {
+			setObjectForm({
+				name: file[0].name,
+				file: e.target.files[0],
+				loading: false,
+			});
 		} else {
+			document.getElementById('upload').value = '';
 			setObjectForm({
 				name: '',
-				base64file: '',
+				file: '',
 				loading: false,
 			});
 		}
@@ -407,17 +394,17 @@ export const App = () => {
 			if (attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0)) {
 				setError({ active: false, type: [], text: '' });
 				setLoadingForm(true);
-				api('PUT', '/objects?walletConnect=true', {
-					"containerId": containerId,
-					"fileName": objectForm.name,
-					"payload": objectForm.base64file.split('base64,')[1],
-					"attributes": attributes,
-				}, {
-					[ContentTypeHeader]: "application/json",
-					[AuthorizationHeader]: `Bearer ${walletData.tokens.object.PUT.token}`,
-					[BearerOwnerIdHeader]: walletData.account,
-					[BearerSignatureHeader]: walletData.tokens.object.PUT.signature,
-					[BearerSignatureKeyHeader]: walletData.publicKey,
+
+				let formdata = new FormData();
+				formdata.append('data', objectForm.file);
+				formdata.append('name', objectForm.name);
+
+				const attributesHeaders = {};
+				attributes.map((attribute) => attributesHeaders[`X-Attribute-${attribute.key}`] = attribute.value);
+				api('POST', `/upload/${containerId}`, formdata, {
+					'Content-Type': "multipart/form-data",
+					[AuthorizationHeader]: `Bearer ${walletData.tokens.object.PUT.bearer}`,
+					...attributesHeaders,
 				}).then((e) => {
 					setLoadingForm(false);
 					if (e.message && e.message.indexOf('access to object operation denied') !== -1) {
@@ -430,7 +417,7 @@ export const App = () => {
 						setAttributes([]);
 						setObjectForm({
 							name: '',
-							base64file: '',
+							file: '',
 							loading: false,
 						});
 					}
@@ -1060,7 +1047,7 @@ export const App = () => {
 							setError({ active: false, type: [], text: '' });
 							setObjectForm({
 								name: '',
-								base64file: '',
+								file: '',
 								loading: false,
 							});
 						}}
@@ -1075,7 +1062,7 @@ export const App = () => {
 								setError({ active: false, type: [], text: '' });
 								setObjectForm({
 									name: '',
-									base64file: '',
+									file: '',
 									loading: false,
 								});
 							}}
