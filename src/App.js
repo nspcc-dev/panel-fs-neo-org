@@ -247,7 +247,7 @@ export const App = () => {
 				onModal('failed', 'Something went wrong, try again');
 			}
 		});
-		if (type === 'object' && operation === 'GET') {
+		if (type === 'object') {
 			api('GET', '/auth/bearer?walletConnect=true', {}, {
 				[ContentTypeHeader]: "application/json",
 				[AuthorizationHeader]: `Bearer ${msg}`,
