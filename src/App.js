@@ -39,7 +39,6 @@ export const App = () => {
 
 	const [params] = useState({
 		rest_gw: process.env.REACT_APP_RESTGW ? process.env.REACT_APP_RESTGW : 'https://rest.t5.fs.neo.org/v1',
-		http_gw: process.env.REACT_APP_HTTPGW ? process.env.REACT_APP_HTTPGW : 'https://http.t5.fs.neo.org',
 	});
 
 	const [attributes, setAttributes] = useState([]);

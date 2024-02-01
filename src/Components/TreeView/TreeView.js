@@ -174,7 +174,7 @@ const File = ({
 									className="manage_icon"
 									onClick={() => {
 										onModal('loading');
-										api('GET', `${params.http_gw}/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
+										api('GET', `/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
 											[ContentTypeHeader]: "application/json",
 											[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.bearer}`,
 										}).then((data) => {
@@ -207,7 +207,7 @@ const File = ({
 									className="manage_icon"
 									onClick={() => {
 										onModal('loading');
-										api('GET', `${params.http_gw}/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
+										api('GET', `/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
 											[ContentTypeHeader]: "application/json",
 											[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.bearer}`,
 										}).then((data) => {
