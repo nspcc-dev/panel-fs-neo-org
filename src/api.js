@@ -6,8 +6,12 @@ async function serverRequest(method, url, params, headers) {
 		method,
 		headers,
 	}
-	if (Object.keys(params).length > 0) {
+	if (json['headers']['Content-Type'] === 'multipart/form-data') {
+		json['body'] = params;
+		delete json['headers']['Content-Type'];
+	} else if (Object.keys(params).length > 0) {
 		json['body'] = JSON.stringify(params);
+		json['headers']['Content-Type'] = 'application/json';
 	}
 	let activeUrl = `${rest_gw}${url}`;
 	if (url.indexOf('http') !== -1) {
