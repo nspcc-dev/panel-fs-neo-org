@@ -128,7 +128,7 @@ label.is-error {
 }
 
 .input_caption {
-    font-size: .75rem;
+    font-size: .75rem !important;
     font-weight: 400;
     border-left: 2px solid #ffd781;
     margin-top: 1em;
