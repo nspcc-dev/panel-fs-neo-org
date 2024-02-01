@@ -33,7 +33,7 @@ export default function api(method, url, params = {}, headers = {}) {
 				if (method === 'GET' && url.indexOf(`/get/`) !== -1) {
 					res = await response.blob();
 					const header = response.headers.get('Content-Type');
-					resolve({ header, res });
+					resolve({ header, res, status: response.status });
 				} else if (response.status === 413) {
 					reject('413 Request Entity Too Large');
 				} else if (response) {
