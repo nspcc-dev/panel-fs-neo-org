@@ -174,11 +174,16 @@ const File = ({
 									className="manage_icon"
 									onClick={() => {
 										onModal('loading');
-										api('GET', `${params.http_gw}/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
+										api('GET', `/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
 											[ContentTypeHeader]: "application/json",
-											[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.bearer}`,
+											[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.token}`,
+											[BearerOwnerIdHeader]: walletData.account,
+											[BearerSignatureHeader]: walletData.tokens.object.GET.signature,
+											[BearerSignatureKeyHeader]: walletData.publicKey,
 										}).then((data) => {
-											if (data.header.indexOf("image/") !== -1 || data.header === 'text/plain; charset=utf-8') {
+										  if (data.status !== 200) {
+												onModal('failed', 'Object is not accessible without a token');
+											} else if (data.header.indexOf("image/") !== -1 || data.header === 'text/plain; charset=utf-8') {
 												const fileURL = URL.createObjectURL(data.res);
 												window.open(fileURL, '_blank');
 												onModal();
@@ -203,11 +208,46 @@ const File = ({
 									alt="get an object by link"
 								/>
 								<img
+									src="/img/icons/manage/unlock.png"
+									className="manage_icon"
+									onClick={() => {
+										onModal('loading');
+										api('GET', `/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
+											[ContentTypeHeader]: "application/json",
+											[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.bearer}`,
+										}).then((data) => {
+											if (data.status !== 200) {
+												onModal('failed', 'Something went wrong, try again');
+											} else if (data.header.indexOf("image/") !== -1 || data.header === 'text/plain; charset=utf-8') {
+												const fileURL = URL.createObjectURL(data.res);
+												window.open(fileURL, '_blank');
+												onModal();
+											} else {
+												const a = document.createElement('a');
+												document.body.appendChild(a);
+												const url = window.URL.createObjectURL(data.res);
+												a.href = url;
+												a.download = name;
+												a.target = '_blank';
+												a.click();
+												setTimeout(() => {
+													onModal();
+													window.URL.revokeObjectURL(url);
+													document.body.removeChild(a);
+												}, 0);
+											}
+										});
+									}}
+									width={40}
+									height={40}
+									alt="get an object by bearer"
+								/>
+								<img
 									src="/img/icons/manage/download.png"
 									className="manage_icon"
 									onClick={() => {
 										onModal('loading');
-										api('GET', `${params.http_gw}/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
+										api('GET', `/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
 											[ContentTypeHeader]: "application/json",
 											[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.bearer}`,
 										}).then((data) => {

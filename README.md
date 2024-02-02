@@ -42,8 +42,6 @@ Set variables in `.env` file
 - `REACT_APP_URL` - Web application url
 - `REACT_APP_RESTGW` - [NeoFS REST Gateway](https://github.com/nspcc-dev/neofs-rest-gw), which we use to manage
   containers and object in neofs (control path)
-- `REACT_APP_HTTPGW` - [NeoFS HTTP Gateway](https://github.com/nspcc-dev/neofs-http-gw), which we use to get objects (
-  data path)
 - `REACT_APP_NETWORK` - Network of the Neo (might be `mainnet`, `testnet`)
 - `REACT_APP_NEOFS_ACCOUNT` - Neo3 address of the NeoFS contract
 
@@ -69,7 +67,6 @@ You need to update the parameters in the `.env` file to make it work:
 
 ```env
 REACT_APP_RESTGW=http://localhost:8090/v1
-REACT_APP_HTTPGW=http://localhost:8081
 ```
 
 # Make instructions

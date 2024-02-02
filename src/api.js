@@ -1,5 +1,4 @@
 const rest_gw = process.env.REACT_APP_RESTGW ? process.env.REACT_APP_RESTGW : 'https://rest.t5.fs.neo.org/v1';
-const http_gw = process.env.REACT_APP_HTTPGW ? process.env.REACT_APP_HTTPGW : 'https://http.t5.fs.neo.org';
 
 async function serverRequest(method, url, params, headers) {
 	const json = {
@@ -31,10 +30,10 @@ export default function api(method, url, params = {}, headers = {}) {
 				});
 			} else {
 				let res = response;
-				if (method === 'GET' && url.indexOf(`${http_gw}/get/`) !== -1) {
+				if (method === 'GET' && url.indexOf(`/get/`) !== -1) {
 					res = await response.blob();
 					const header = response.headers.get('Content-Type');
-					resolve({ header, res });
+					resolve({ header, res, status: response.status });
 				} else if (response.status === 413) {
 					reject('413 Request Entity Too Large');
 				} else if (response) {
