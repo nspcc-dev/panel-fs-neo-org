@@ -90,6 +90,15 @@ const Folder = ({ name, children }) => {
 	);
 };
 
+function formatBytes(bytes) {
+	const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+	let i = 0
+	for (i; bytes >= 1024; i += 1) {
+		bytes /= 1024;
+	}
+	return `${bytes === 0 ? bytes : bytes.toFixed(1)} ${units[i]}`;
+}
+
 const File = ({
 		params,
 		name,
@@ -155,7 +164,7 @@ const File = ({
 								</Heading>
 								<Heading size={6} weight="light">
 									<span>{`Object size: `}</span>
-									{objectDate.objectSize}
+									{formatBytes(objectDate.objectSize)}
 								</Heading>
 							</Section>
 							<Section style={{ paddingTop: 0 }}>
