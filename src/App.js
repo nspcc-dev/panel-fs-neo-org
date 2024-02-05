@@ -1010,7 +1010,10 @@ export const App = () => {
 								{!isLoadingForm && (
 									<Button
 										color="gray"
-										onClick={onModal}
+										onClick={() => {
+											onModal();
+											setError({ active: false, type: [], text: '' });
+										}}
 										style={{ marginRight: 10 }}
 									>
 										No
@@ -1252,7 +1255,10 @@ export const App = () => {
 								{!isLoadingForm && (
 									<Button
 										color="gray"
-										onClick={onModal}
+										onClick={() => {
+											onModal();
+											setError({ active: false, type: [], text: '' });
+										}}
 										style={{ marginRight: 10 }}
 									>
 										No
