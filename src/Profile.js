@@ -108,6 +108,10 @@ const Profile = ({
 			scopes: 1, // WitnessScope.CalledByEntry
 		}];
 
+		if (wcSdk.session.expiry * 1000 < new Date().getTime()) {
+			onModal('failed', 'Session expired, re-login to continue');
+		}
+
 		const response = await wcSdk.testInvoke({ invocations, signers }).catch((error) => {
 			if (error.message) {
 				onModal('failed', error.message);
@@ -132,7 +136,6 @@ const Profile = ({
 	const onGetContainers = () => {
 		setIsLoadingContainers(true);
 		api('GET', `/containers?ownerId=${walletData.account}`).then((e) => {
-			onModal();
 			if (e.message) {
 				onPopup('failed', e.message);
 			} else {
