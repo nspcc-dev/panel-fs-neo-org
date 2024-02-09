@@ -27,20 +27,20 @@ Changelog for NeoFS Panel
 
 ## [0.3.1] - 2023-12-25
 
-## Fixed
+### Fixed
 - Add profile.html in Makefile (#119)
 
 ## [0.3.0] - 2023-12-25
 
-## Fixed
+### Fixed
 - Incompatibility with new WC version (#112)
 
-## Changed
+### Changed
 - Use mainnet by default (#116)
 
 ## [0.2.1] - 2023-10-18
 
-## Fixed
+### Fixed
 - Improve Makefile (#84, #96)
 - Replace WorkSans font (#89)
 - Break long file names in label (#91)
@@ -48,27 +48,27 @@ Changelog for NeoFS Panel
 - Implement social_pipe for socials list (#98)
 - Hide webpack source map (#100)
 
-## Added
+### Added
 - Website version to the page (#63)
 
-## Changed
+### Changed
 - Implement neo design (#89)
 - Social links for new format (#97)
 - WC sdk react lib for node 18 version (#103)
 
 ## [0.2.0] - 2022-11-23
 
-## Fixed
+### Fixed
 - WalletConnect options (#85)
 - Assets withdraw (#38)
 - Logout on bad websocket connection (#79)
 
-## Added
+### Added
 - Gateway token storage (#15)
 - Loader for object list (#80)
 - Connection issue messages (#40)
 
-## Changed
+### Changed
 - Containers order (#49)
 - Token lifetime (#23)
 
