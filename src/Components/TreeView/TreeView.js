@@ -120,9 +120,9 @@ const File = ({
 		if (!isOpen) {
 			api('GET', `/objects/${containerItem.containerId}/${objectItem.address.objectId}?walletConnect=true`, {}, {
 				[ContentTypeHeader]: "application/json",
-				[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.token}`,
+				[AuthorizationHeader]: `Bearer ${walletData.tokens.object.token}`,
 				[BearerOwnerIdHeader]: walletData.account,
-				[BearerSignatureHeader]: walletData.tokens.object.GET.signature,
+				[BearerSignatureHeader]: walletData.tokens.object.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then((e) => {
 				setObjectDate(e);
@@ -185,9 +185,9 @@ const File = ({
 										onModal('loading');
 										api('GET', `/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
 											[ContentTypeHeader]: "application/json",
-											[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.token}`,
+											[AuthorizationHeader]: `Bearer ${walletData.tokens.object.token}`,
 											[BearerOwnerIdHeader]: walletData.account,
-											[BearerSignatureHeader]: walletData.tokens.object.GET.signature,
+											[BearerSignatureHeader]: walletData.tokens.object.signature,
 											[BearerSignatureKeyHeader]: walletData.publicKey,
 										}).then((data) => {
 										  if (data.status !== 200) {
@@ -223,7 +223,7 @@ const File = ({
 										onModal('loading');
 										api('GET', `/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
 											[ContentTypeHeader]: "application/json",
-											[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.bearer}`,
+											[AuthorizationHeader]: `Bearer ${walletData.tokens.object.bearer}`,
 										}).then((data) => {
 											if (data.status !== 200) {
 												onModal('failed', 'Something went wrong, try again');
@@ -258,7 +258,7 @@ const File = ({
 										onModal('loading');
 										api('GET', `/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
 											[ContentTypeHeader]: "application/json",
-											[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.bearer}`,
+											[AuthorizationHeader]: `Bearer ${walletData.tokens.object.bearer}`,
 										}).then((data) => {
 											const a = document.createElement('a');
 											document.body.appendChild(a);

@@ -47,7 +47,7 @@ export default function ContainerItem({
 	}, [isLoadContainers]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
-		if (walletData.tokens.object.GET && walletData.tokens.object.GET.containerId === containerItem.containerId) {
+		if (walletData.tokens.object && walletData.tokens.object.containerId === containerItem.containerId) {
 			setActivePanel('objects');
 			onGetObjects(containerItem.containerId);
 			onModal();
@@ -57,10 +57,7 @@ export default function ContainerItem({
 					...walletData.tokens,
 					object: {
 						...walletData.tokens.object,
-						GET: {
-							...walletData.tokens.object.GET,
-							containerId: null,
-						}
+						containerId: null,
 					}
 				}
 			});
@@ -90,9 +87,9 @@ export default function ContainerItem({
 			"filters": [],
 		}, {
 			[ContentTypeHeader]: "application/json",
-			[AuthorizationHeader]: `Bearer ${walletData.tokens.object.GET.token}`,
+			[AuthorizationHeader]: `Bearer ${walletData.tokens.object.token}`,
 			[BearerOwnerIdHeader]: walletData.account,
-			[BearerSignatureHeader]: walletData.tokens.object.GET.signature,
+			[BearerSignatureHeader]: walletData.tokens.object.signature,
 			[BearerSignatureKeyHeader]: walletData.publicKey,
 		}).then((e) => {
 			setLoadingObjects(false);
@@ -283,8 +280,8 @@ export default function ContainerItem({
 											size={6}
 											weight="bolder"
 											onClick={() => {
-												if (!walletData.tokens.object.GET) {
-													onModal('signTokens', 'object.GET', { containerId: containerItem.containerId });
+												if (!walletData.tokens.object) {
+													onModal('signTokens', 'object', { containerId: containerItem.containerId });
 												} else if (activePanel === 'objects') {
 													setActivePanel('');
 												} else {
