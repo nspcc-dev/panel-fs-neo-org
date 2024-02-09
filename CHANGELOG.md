@@ -4,6 +4,27 @@ Changelog for NeoFS Panel
 
 ## [Unreleased]
 
+## [0.4.0] - 2024-02-09
+
+### Added
+- REACT_APP_NETWORK configuration (#130)
+- Download button for objects (#137)
+
+### Fixed
+- Add profile.html in Makefile (#119)
+- Missing error handling in some cases (#139, #153, #155)
+- Displaying long file names (#139)
+
+### Changed
+- UI texts and icons for better experience (#129, #140, #142, #150, #151)
+- Upgraded WalletConnect SDK to 3.2.0 (#138)
+- EACL presets to Panel-compatible (#147)
+
+### Removed
+- Useless REACT_APP_NEOFS_GAS_TOKEN configuration (#128)
+- Duplicating REACT_APP_NEOFS_SCRIPT_HASH configuration (#131)
+- Dependency on HTTP gateway (#125, #150)
+
 ## [0.3.1] - 2023-12-25
 
 ## Fixed
@@ -61,4 +82,5 @@ First public review release.
 [0.2.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.2.1
 [0.3.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.3.0
 [0.3.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.3.1
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.3.1...master
+[0.4.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.4.0
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.4.0...master
