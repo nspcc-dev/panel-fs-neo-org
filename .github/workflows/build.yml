@@ -1,0 +1,50 @@
+name: Build
+
+on:
+  pull_request:
+    branches:
+      - master
+    types: [opened, synchronize]
+    paths-ignore:
+      - '**/*.md'
+  push:
+    # Build for the master branch.
+    branches:
+      - master
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Ref to build [default: latest master; examples: v0.4.0, 9595da7d83efc330ca0bc94bef482e4edfbcf8fd]'
+        required: false
+        default: ''
+
+jobs:
+  build_release:
+    name: Build release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref }}
+          # Allows to fetch all history for all branches and tags. Need this for proper versioning.
+          fetch-depth: 0
+
+      - name: Build
+        run: make release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: ./panel.fs.neo.org-*.tar.gz
+          if-no-files-found: error
+
+      - name: Attach binary to the release as an asset
+        if: ${{ github.event_name == 'release' }}
+        run: gh release upload ${{ github.event.release.tag_name }} ./panel.fs.neo.org-*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
