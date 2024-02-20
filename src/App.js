@@ -151,7 +151,7 @@ export const App = () => {
 					data: wcSdk.session.peer,
 					tokens: {
 						container: {},
-						object: {}
+						object: null
 					}
 				});
 				onPopup('success', 'Wallet connected');
@@ -197,8 +197,15 @@ export const App = () => {
 				}
 			}
 		}
+		if (type === 'object') {
+			walletDataTemp.tokens[type] = {
+				...params,
+				token: msg,
+				signature: response.data + response.salt,
+			};
+		}
 		if (bearer) {
-			walletDataTemp.tokens[type][operation].bearer = bearer;
+			walletDataTemp.tokens[type].bearer = bearer;
 		}
 		if (!walletDataTemp.expiry || walletDataTemp.expiry < new Date().getTime()) {
 			walletDataTemp.expiry = new Date().getTime() + 7200000;
@@ -217,7 +224,23 @@ export const App = () => {
 		} else if (type === 'object') {
 			body = [{
 				"object": [{
-					"operation": operation,
+					"operation": 'GET',
+					"action": "ALLOW",
+					"filters": [],
+					"targets": [{
+						"role": "OTHERS",
+						"keys": []
+					}]
+				}, {
+					"operation": 'PUT',
+					"action": "ALLOW",
+					"filters": [],
+					"targets": [{
+						"role": "OTHERS",
+						"keys": []
+					}]
+				}, {
+					"operation": 'DELETE',
 					"action": "ALLOW",
 					"filters": [],
 					"targets": [{
@@ -402,7 +425,7 @@ export const App = () => {
 				attributes.map((attribute) => attributesHeaders[`X-Attribute-${attribute.key}`] = attribute.value);
 				api('POST', `/upload/${containerId}`, formdata, {
 					'Content-Type': "multipart/form-data",
-					[AuthorizationHeader]: `Bearer ${walletData.tokens.object.PUT.bearer}`,
+					[AuthorizationHeader]: `Bearer ${walletData.tokens.object.bearer}`,
 					...attributesHeaders,
 				}).then((e) => {
 					setLoadingForm(false);
@@ -432,14 +455,14 @@ export const App = () => {
 	};
 
 	const onDeleteObject = (containerId, objectId) => {
-		if (walletData.tokens.object.DELETE) {
+		if (walletData.tokens.object) {
 			setError({ active: false, type: [], text: '' });
 			setLoadingForm(true);
 			api('DELETE', `/objects/${containerId}/${objectId}?walletConnect=true`, {}, {
 				[ContentTypeHeader]: "application/json",
-				[AuthorizationHeader]: `Bearer ${walletData.tokens.object.DELETE.token}`,
+				[AuthorizationHeader]: `Bearer ${walletData.tokens.object.token}`,
 				[BearerOwnerIdHeader]: walletData.account,
-				[BearerSignatureHeader]: walletData.tokens.object.DELETE.signature,
+				[BearerSignatureHeader]: walletData.tokens.object.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then((e) => {
 				setLoadingForm(false);
@@ -451,7 +474,7 @@ export const App = () => {
 				}
 			});
 		} else {
-			onModal('signTokens', 'object.DELETE');
+			onModal('signTokens', 'object');
 		}
 	};
 
@@ -634,76 +657,32 @@ export const App = () => {
 									)}
 								</Columns.Column>
 							)}
-							{(modal.text === '' || modal.text === 'object.PUT' || modal.text === 'object.DELETE' || modal.text === 'object.GET') && (
+							{(modal.text === '' || modal.text === 'object') && (
 								<Columns.Column>
-									{(modal.text === '' || modal.text === 'object.PUT') && (
-										<div className="token_status_panel">
-											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock create&nbsp;operation</Heading>
-											{walletData && walletData.tokens.object.PUT ? (
-												<img
-													src="/img/icons/success.svg"
-													height={25}
-													width={25}
-													alt="success"
-												/>
-											) : (
-												<Button
-													color="primary"
-													size="small"
-													onClick={() => onAuth('object', 'PUT')}
-												>
-													Sign
-												</Button>
-											)}
-										</div>
-									)}
-									{(modal.text === '' || modal.text === 'object.DELETE') && (
-										<div className="token_status_panel">
-											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock delete&nbsp;operation</Heading>
-											{walletData && walletData.tokens.object.DELETE ? (
-												<img
-													src="/img/icons/success.svg"
-													height={25}
-													width={25}
-													alt="success"
-												/>
-											) : (
-												<Button
-													color="primary"
-													size="small"
-													onClick={() => onAuth('object', 'DELETE')}
-												>
-													Sign
-												</Button>
-											)}
-										</div>
-									)}
-									{(modal.text === '' || modal.text === 'object.GET') && (
-										<div className="token_status_panel">
-											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock get&nbsp;operation</Heading>
-											{walletData && walletData.tokens.object.GET ? (
-												<img
-													src="/img/icons/success.svg"
-													height={25}
-													width={25}
-													alt="success"
-												/>
-											) : (
-												<Button
-													color="primary"
-													size="small"
-													onClick={() => onAuth('object', 'GET', modal.params)}
-												>
-													Sign
-												</Button>
-											)}
-										</div>
-									)}
+									<div className="token_status_panel">
+										<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock object&nbsp;operations</Heading>
+										{walletData && walletData.tokens.object ? (
+											<img
+												src="/img/icons/success.svg"
+												height={25}
+												width={25}
+												alt="success"
+											/>
+										) : (
+											<Button
+												color="primary"
+												size="small"
+												onClick={() => onAuth('object', null, modal.params)}
+											>
+												Sign
+											</Button>
+										)}
+									</div>
 								</Columns.Column>
 							)}
 						</Columns>
 						{walletData && walletData.tokens.container.PUT && walletData.tokens.container.DELETE && walletData.tokens.container.SETEACL
-							&& walletData.tokens.object.PUT && walletData.tokens.object.DELETE && walletData.tokens.object.GET && (
+							&& walletData.tokens.object && (
 							<Button
 								color="primary"
 								onClick={onModal}
@@ -1169,13 +1148,13 @@ export const App = () => {
 								{isError.text}
 							</Notification>
 						)}
-						{!walletData.tokens.object.PUT ? (
+						{!walletData.tokens.object ? (
 							<div className="token_status_panel" style={{ marginTop: '25px' }}>
-								<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock create&nbsp;operation</Heading>
+								<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock object&nbsp;operations</Heading>
 								<Button
 									color="primary"
 									size="small"
-									onClick={() => onAuth('object', 'PUT')}
+									onClick={() => onAuth('object')}
 								>
 									Sign
 								</Button>
@@ -1239,13 +1218,13 @@ export const App = () => {
 								{isError.text}
 							</Notification>
 						)}
-						{!walletData.tokens.object.DELETE ? (
+						{!walletData.tokens.object ? (
 							<div className="token_status_panel">
-								<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock delete&nbsp;operation</Heading>
+								<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock object&nbsp;operations</Heading>
 								<Button
 									color="primary"
 									size="small"
-									onClick={() => onAuth('object', 'DELETE')}
+									onClick={() => onAuth('object')}
 								>
 									Sign
 								</Button>
