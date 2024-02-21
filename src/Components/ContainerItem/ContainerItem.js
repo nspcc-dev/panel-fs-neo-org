@@ -88,7 +88,7 @@ export default function ContainerItem({
 		}, {
 			[ContentTypeHeader]: "application/json",
 			[AuthorizationHeader]: `Bearer ${walletData.tokens.object.token}`,
-			[BearerOwnerIdHeader]: walletData.account,
+			[BearerOwnerIdHeader]: walletData.account.address,
 			[BearerSignatureHeader]: walletData.tokens.object.signature,
 			[BearerSignatureKeyHeader]: walletData.publicKey,
 		}).then((e) => {
@@ -105,7 +105,7 @@ export default function ContainerItem({
 		setLoadingEACL(true);
 		api('GET', `/containers/${containerId}/eacl?walletConnect=true`, {}, {
 			[ContentTypeHeader]: "application/json",
-			[BearerOwnerIdHeader]: walletData.account,
+			[BearerOwnerIdHeader]: walletData.account.address,
 		}).then((e) => {
 			setLoadingEACL(false);
 			if (e.records) {

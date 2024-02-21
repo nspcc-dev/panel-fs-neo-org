@@ -121,7 +121,7 @@ const File = ({
 			api('GET', `/objects/${containerItem.containerId}/${objectItem.address.objectId}?walletConnect=true`, {}, {
 				[ContentTypeHeader]: "application/json",
 				[AuthorizationHeader]: `Bearer ${walletData.tokens.object.token}`,
-				[BearerOwnerIdHeader]: walletData.account,
+				[BearerOwnerIdHeader]: walletData.account.address,
 				[BearerSignatureHeader]: walletData.tokens.object.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then((e) => {
@@ -186,7 +186,7 @@ const File = ({
 										api('GET', `/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
 											[ContentTypeHeader]: "application/json",
 											[AuthorizationHeader]: `Bearer ${walletData.tokens.object.token}`,
-											[BearerOwnerIdHeader]: walletData.account,
+											[BearerOwnerIdHeader]: walletData.account.address,
 											[BearerSignatureHeader]: walletData.tokens.object.signature,
 											[BearerSignatureKeyHeader]: walletData.publicKey,
 										}).then((data) => {

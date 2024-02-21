@@ -77,7 +77,7 @@ const Profile = ({
 
 	const onNeoFSBalance = async () => {
 		setIsLoadingNeoFSBalance(true);
-		api('GET', `/accounting/balance/${walletData.account}`).then((e) => {
+		api('GET', `/accounting/balance/${walletData.account.address}`).then((e) => {
 			if (e.message) {
 				onPopup('failed', e.message);
 			} else {
@@ -135,7 +135,7 @@ const Profile = ({
 
 	const onGetContainers = () => {
 		setIsLoadingContainers(true);
-		api('GET', `/containers?ownerId=${walletData.account}`).then((e) => {
+		api('GET', `/containers?ownerId=${walletData.account.address}`).then((e) => {
 			if (e.message) {
 				onPopup('failed', e.message);
 			} else {
@@ -251,7 +251,7 @@ const Profile = ({
 						<Heading style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} weight="bold">
 							<span>
 								Account
-								<Tag style={{ margin: '0 0px 0 15px' }}>{`«${walletData.data.metadata.name}»`}</Tag>
+								<Tag style={{ margin: '0 0px 0 15px' }}>{`«${walletData.name} • ${walletData.net}»`}</Tag>
 							</span>
 							<img
 								src="/img/icons/logout.svg"
@@ -262,7 +262,7 @@ const Profile = ({
 						</Heading>
 						<Heading size={6} style={{ marginBottom: 15 }}>
 							{`Address: `}
-							<span style={{ fontWeight: 400 }}>{walletData.account}</span>
+							<span style={{ fontWeight: 400 }}>{walletData.account.address}</span>
 						</Heading>
 						<Tile kind="ancestor">
 							<Tile kind="parent">

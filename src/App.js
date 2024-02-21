@@ -145,10 +145,13 @@ export const App = () => {
 		if (process.env.REACT_APP_WC_PROJECT_ID && process.env.REACT_APP_WC_PROJECT_ID !== '') {
 			if (wcSdk.isConnected()) {
 				setWalletData({
+					name:  wcSdk.session.peer.metadata.name,
 					type: wcSdk.session.namespaces.neo3.accounts[0].split(':')[0],
 					net: wcSdk.session.namespaces.neo3.accounts[0].split(':')[1],
-					account: wcSdk.session.namespaces.neo3.accounts[0].split(':')[2],
-					data: wcSdk.session.peer,
+					account: {
+						address: wcSdk.session.namespaces.neo3.accounts[0].split(':')[2],
+						publicKey: wcSdk.session.peer.publicKey,
+					},
 					tokens: {
 						container: {},
 						object: null
@@ -253,7 +256,7 @@ export const App = () => {
 
 		api('POST', '/auth', body, {
 			[ContentTypeHeader]: "application/json",
-			[BearerOwnerIdHeader]: walletData.account,
+			[BearerOwnerIdHeader]: walletData.account.address,
 			[BearerLifetime]: 2,
 			[BearerForAllUsers]: true,
 		}).then((e) => {
@@ -298,7 +301,7 @@ export const App = () => {
 						}, {
 							[ContentTypeHeader]: "application/json",
 							[AuthorizationHeader]: `Bearer ${walletData.tokens.container.PUT.token}`,
-							[BearerOwnerIdHeader]: walletData.account,
+							[BearerOwnerIdHeader]: walletData.account.address,
 							[BearerSignatureHeader]: walletData.tokens.container.PUT.signature,
 							[BearerSignatureKeyHeader]: walletData.publicKey,
 						}).then((e) => {
@@ -324,7 +327,7 @@ export const App = () => {
 									}, {
 										[ContentTypeHeader]: "application/json",
 										[AuthorizationHeader]: `Bearer ${walletData.tokens.container.SETEACL.token}`,
-										[BearerOwnerIdHeader]: walletData.account,
+										[BearerOwnerIdHeader]: walletData.account.address,
 										[BearerSignatureHeader]: walletData.tokens.container.SETEACL.signature,
 										[BearerSignatureKeyHeader]: walletData.publicKey,
 									}).then(() => {
@@ -376,7 +379,7 @@ export const App = () => {
 			api('DELETE', `/containers/${containerName}?walletConnect=true`, {}, {
 				[ContentTypeHeader]: "application/json",
 				[AuthorizationHeader]: `Bearer ${walletData.tokens.container.DELETE.token}`,
-				[BearerOwnerIdHeader]: walletData.account,
+				[BearerOwnerIdHeader]: walletData.account.address,
 				[BearerSignatureHeader]: walletData.tokens.container.DELETE.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then((e) => {
@@ -461,7 +464,7 @@ export const App = () => {
 			api('DELETE', `/objects/${containerId}/${objectId}?walletConnect=true`, {}, {
 				[ContentTypeHeader]: "application/json",
 				[AuthorizationHeader]: `Bearer ${walletData.tokens.object.token}`,
-				[BearerOwnerIdHeader]: walletData.account,
+				[BearerOwnerIdHeader]: walletData.account.address,
 				[BearerSignatureHeader]: walletData.tokens.object.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then((e) => {

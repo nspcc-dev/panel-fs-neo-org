@@ -46,7 +46,7 @@ export default function EACLPanel({
 			}, {
 				[ContentTypeHeader]: "application/json",
 				[AuthorizationHeader]: `Bearer ${walletData.tokens.container.SETEACL.token}`,
-				[BearerOwnerIdHeader]: walletData.account,
+				[BearerOwnerIdHeader]: walletData.account.address,
 				[BearerSignatureHeader]: walletData.tokens.container.SETEACL.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then((e) => {
