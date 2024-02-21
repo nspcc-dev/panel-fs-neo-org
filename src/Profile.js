@@ -18,10 +18,12 @@ const Profile = ({
 		params,
 		walletData,
 		setWalletData,
+		handleError,
 		onDisconnectWallet,
 		onModal,
 		onPopup,
 		wcSdk,
+		dapi,
 		isLoadContainers,
 		setLoadContainers,
 		ContentTypeHeader,
@@ -94,13 +96,13 @@ const Profile = ({
 	};
 
 	const onNeoBalance = async () => {
+		let response = '';
 		setIsLoadingNeoBalance(true);
-		const targetAddress = wcSdk.getAccountAddress(0);
 		const invocations = [{
 			scriptHash: NeoFSContract.gasToken,
 			operation: 'balanceOf',
 			args: [
-				{ type: 'Address', value: targetAddress },
+				{ type: 'Hash160', value: Neon.create.account(walletData.account.address).scriptHash },
 			]
 		}];
 
@@ -108,17 +110,15 @@ const Profile = ({
 			scopes: 1, // WitnessScope.CalledByEntry
 		}];
 
-		if (wcSdk.session.expiry * 1000 < new Date().getTime()) {
-			onModal('failed', 'Session expired, re-login to continue');
-		}
-
-		const response = await wcSdk.testInvoke({ invocations, signers }).catch((error) => {
-			if (error.message) {
-				onModal('failed', error.message);
-			} else {
-				onModal('failed', 'Something went wrong, try again');
+		if (dapi) {
+			response = await dapi.invokeRead({ ...invocations[0] }).catch((err) => handleError(err));
+		} else {
+			if (wcSdk.session.expiry * 1000 < new Date().getTime()) {
+				onModal('failed', 'Session expired, re-login to continue');
 			}
-		});
+
+			response = await wcSdk.testInvoke({ invocations, signers }).catch((err) => handleError(err));
+		}
 		setIsLoadingNeoBalance(false);
 		if (response && !response.error && response.stack.length > 0) {
 			onPopup('success', 'Mainnet balance has been updated');
@@ -169,13 +169,12 @@ const Profile = ({
 	const onDeposit = async () => {
 		if (depositQuantity * 1e8 >= 1 && depositQuantity * 1e8 <= neoBalance) {
 			onModal('approveRequest');
-			const senderAddress = wcSdk.getAccountAddress(0);
 			const invocations = [{
 				scriptHash: NeoFSContract.gasToken,
 				operation: 'transfer',
 				args: [
-					{ type: 'Address', value: senderAddress },
-					{ type: 'Address', value: NeoFSContract.account },
+					{ type: 'Hash160', value: Neon.create.account(walletData.account.address).scriptHash },
+					{ type: 'Hash160', value: Neon.create.account(NeoFSContract.account).scriptHash },
 					{ type: 'Integer', value: depositQuantity * 1e8 },
 					{ type: 'ByteArray', value: '' },
 				]
@@ -185,17 +184,23 @@ const Profile = ({
 				scopes: 1, // WitnessScope.CalledByEntry
 			}];
 
-			const response = await wcSdk.invokeFunction({ invocations, signers }).catch((error) => {
-				if (error.message === 'Failed or Rejected Request') {
-					onModal('failed', 'Failed or Rejected Request');
-				} else if (error.message === 'Error: intrinsic gas too low') {
-					onModal('failed', 'Transaction intrinsic gas too low');
-				} else {
-					onModal('failed', 'Something went wrong, try again');
-				}
-			});
+			let response = '';
+			if (dapi) {
+				response = await dapi.invoke({ ...invocations[0] }).catch((err) => handleError(err));
+			} else {
+				response = await wcSdk.invokeFunction({ invocations, signers }).catch((error) => {
+					if (error.message === 'Failed or Rejected Request') {
+						onModal('failed', 'Failed or Rejected Request');
+					} else if (error.message === 'Error: intrinsic gas too low') {
+						onModal('failed', 'Transaction intrinsic gas too low');
+					} else {
+						onModal('failed', 'Something went wrong, try again');
+					}
+				});
+			}
 			if (!response.error) {
-				onModal('success', response);
+				setDepositQuantity(0);
+				onModal('success', response.txid ? response.txid : response);
 			}
 		} else {
 			onPopup('failed', 'Incorrect quantity value');
@@ -205,12 +210,11 @@ const Profile = ({
 	const onWithdraw = async () => {
 		if (withdrawQuantity >= 1 && withdrawQuantity * 1e12 <= neoFSBalance) {
 			onModal('approveRequest');
-			const senderAddress = wcSdk.getAccountAddress(0);
 			const invocations = [{
 				scriptHash: NeoFSContract.scriptHash,
 				operation: 'withdraw',
 				args: [
-					{ type: 'Address', value: senderAddress },
+					{ type: 'Hash160', value: Neon.create.account(walletData.account.address).scriptHash },
 					{ type: 'Integer', value: withdrawQuantity },
 				]
 			}];
@@ -220,17 +224,15 @@ const Profile = ({
 				allowedContracts: [NeoFSContract.gasToken, NeoFSContract.scriptHash]
 			}];
 
-			const response = await wcSdk.invokeFunction({ invocations, signers }).catch((error) => {
-				if (error.message === 'Failed or Rejected Request') {
-					onModal('failed', 'Failed or Rejected Request');
-				} else if (error.message === 'Error: intrinsic gas too low') {
-					onModal('failed', 'Transaction intrinsic gas too low');
-				} else {
-					onModal('failed', 'Something went wrong, try again');
-				}
-			});
+			let response = '';
+			if (dapi) {
+				response = await dapi.invoke({ ...invocations[0] }).catch((err) => handleError(err));
+			} else {
+				response = await wcSdk.invokeFunction({ invocations, signers }).catch((err) => handleError(err));
+			}
 			if (!response.message) {
-				onModal('success', response);
+				setWithdrawQuantity(0);
+				onModal('success', response.txid ? response.txid : response);
 			}
 		} else {
 			onPopup('failed', 'Incorrect quantity value');
