@@ -21,12 +21,14 @@ import EACLPanel from './Components/EACLPanel/EACLPanel';
 import api from './api';
 import { useWalletConnect } from "@cityofzion/wallet-connect-sdk-react";
 import { CopyToClipboardBlock } from './CopyToClipboardBlock';
+import { BaseDapi } from '@neongd/neo-dapi';
 import 'bulma/css/bulma.min.css';
 import './App.css';
 
 export const App = () => {
 	const location = useLocation();
 	const wcSdk = useWalletConnect();
+	const dapi = window.OneGate ? new BaseDapi(window.OneGate) : null;
 	const [activeNet] = useState(process.env.REACT_APP_NETWORK ? process.env.REACT_APP_NETWORK : 'mainnet');
 
 	const [ContentTypeHeader] = useState("Content-Type");
@@ -143,12 +145,19 @@ export const App = () => {
 
 	useEffect(() => {
 		if (process.env.REACT_APP_WC_PROJECT_ID && process.env.REACT_APP_WC_PROJECT_ID !== '') {
-			if (wcSdk.isConnected()) {
+			if (dapi) {
+				if (location.pathname.indexOf('/profile') !== -1) {
+					onConnectWallet();
+				}
+			} else if (wcSdk.isConnected()) {
 				setWalletData({
+					name:  wcSdk.session.peer.metadata.name,
 					type: wcSdk.session.namespaces.neo3.accounts[0].split(':')[0],
 					net: wcSdk.session.namespaces.neo3.accounts[0].split(':')[1],
-					account: wcSdk.session.namespaces.neo3.accounts[0].split(':')[2],
-					data: wcSdk.session.peer,
+					account: {
+						address: wcSdk.session.namespaces.neo3.accounts[0].split(':')[2],
+						publicKey: wcSdk.session.peer.publicKey,
+					},
 					tokens: {
 						container: {},
 						object: null
@@ -253,7 +262,7 @@ export const App = () => {
 
 		api('POST', '/auth', body, {
 			[ContentTypeHeader]: "application/json",
-			[BearerOwnerIdHeader]: walletData.account,
+			[BearerOwnerIdHeader]: walletData.account.address,
 			[BearerLifetime]: 2,
 			[BearerForAllUsers]: true,
 		}).then((e) => {
@@ -261,14 +270,25 @@ export const App = () => {
 		});
 	};
 
+	const handleError = (error) => {
+		if (error.data && error.data.message) {
+			onModal('failed', error.data.message);
+		} else if (error.message) {
+			onModal('failed', error.message);
+		} else {
+			onModal('failed', 'Something went wrong, try again');
+		}
+	};
+
 	const onSignMessage = async (msg = '', type, operation, params) => {
-		const response = await wcSdk.signMessage({ message: msg, version: 1 }).catch((error) => {
-			if (error.message) {
-				onModal('failed', error.message);
-			} else {
-				onModal('failed', 'Something went wrong, try again');
-			}
-		});
+		let response = '';
+		if (dapi) {
+			response = await dapi.signMessage({ message: msg }).catch((err) => handleError(err));
+			response.data = response.signature;
+		} else {
+			response = await wcSdk.signMessage({ message: msg, version: 1 }).catch((err) => handleError(err));
+		}
+
 		if (type === 'object') {
 			api('GET', '/auth/bearer?walletConnect=true', {}, {
 				[ContentTypeHeader]: "application/json",
@@ -298,7 +318,7 @@ export const App = () => {
 						}, {
 							[ContentTypeHeader]: "application/json",
 							[AuthorizationHeader]: `Bearer ${walletData.tokens.container.PUT.token}`,
-							[BearerOwnerIdHeader]: walletData.account,
+							[BearerOwnerIdHeader]: walletData.account.address,
 							[BearerSignatureHeader]: walletData.tokens.container.PUT.signature,
 							[BearerSignatureKeyHeader]: walletData.publicKey,
 						}).then((e) => {
@@ -324,7 +344,7 @@ export const App = () => {
 									}, {
 										[ContentTypeHeader]: "application/json",
 										[AuthorizationHeader]: `Bearer ${walletData.tokens.container.SETEACL.token}`,
-										[BearerOwnerIdHeader]: walletData.account,
+										[BearerOwnerIdHeader]: walletData.account.address,
 										[BearerSignatureHeader]: walletData.tokens.container.SETEACL.signature,
 										[BearerSignatureKeyHeader]: walletData.publicKey,
 									}).then(() => {
@@ -376,7 +396,7 @@ export const App = () => {
 			api('DELETE', `/containers/${containerName}?walletConnect=true`, {}, {
 				[ContentTypeHeader]: "application/json",
 				[AuthorizationHeader]: `Bearer ${walletData.tokens.container.DELETE.token}`,
-				[BearerOwnerIdHeader]: walletData.account,
+				[BearerOwnerIdHeader]: walletData.account.address,
 				[BearerSignatureHeader]: walletData.tokens.container.DELETE.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then((e) => {
@@ -461,7 +481,7 @@ export const App = () => {
 			api('DELETE', `/objects/${containerId}/${objectId}?walletConnect=true`, {}, {
 				[ContentTypeHeader]: "application/json",
 				[AuthorizationHeader]: `Bearer ${walletData.tokens.object.token}`,
-				[BearerOwnerIdHeader]: walletData.account,
+				[BearerOwnerIdHeader]: walletData.account.address,
 				[BearerSignatureHeader]: walletData.tokens.object.signature,
 				[BearerSignatureKeyHeader]: walletData.publicKey,
 			}).then((e) => {
@@ -479,18 +499,44 @@ export const App = () => {
 	};
 
 	const onConnectWallet = async () => {
-		try {
-			const { uri, approval } = await wcSdk.createConnection(`neo3:${activeNet}`, ['invokeFunction', 'testInvoke', 'signMessage', 'verifyMessage']);
-			onModal('connectWallet', uri);
-			const session = await approval();
-			wcSdk.setSession(session);
-		} catch (error) {
-			onModal('failed', 'Something went wrong, contact the application administrator');
+		if (dapi) {
+			const provider = await dapi.getProvider();
+			const networks = await dapi.getNetworks();
+			const account = await dapi.getAccount();
+
+			setWalletData({
+				name: provider.name,
+				type: 'neo3',
+				net: networks.defaultNetwork.toLowerCase(),
+				account: account,
+				tokens: {
+					container: {},
+					object: null,
+				}
+			});
+			onPopup('success', 'Wallet connected');
+			onModal();
+
+			if (location.pathname.indexOf('/profile') === -1) {
+				document.location.href = "/profile";
+			}
+		} else {
+			try {
+				const { uri, approval } = await wcSdk.createConnection(`neo3:${activeNet}`, ['invokeFunction', 'testInvoke', 'signMessage', 'verifyMessage']);
+				onModal('connectWallet', uri);
+				const session = await approval();
+				wcSdk.setSession(session);
+			} catch (error) {
+				onModal('failed', 'Something went wrong, contact the application administrator');
+			}
 		}
 	}
 
 	const onDisconnectWallet = async () => {
-		await wcSdk.disconnect();
+		if (!dapi) {
+			await wcSdk.disconnect();
+		}
+		document.location.href = "/";
 		onPopup('success', 'Wallet disconnected');
 		setWalletData(null);
 	};
@@ -1349,8 +1395,10 @@ export const App = () => {
 						params={params}
 						onAuth={onAuth}
 						walletData={walletData}
+						handleError={handleError}
 						setWalletData={setWalletData}
 						wcSdk={wcSdk}
+						dapi={dapi}
 						isLoadContainers={isLoadContainers}
 						setLoadContainers={setLoadContainers}
 						onDisconnectWallet={onDisconnectWallet}
