@@ -70,7 +70,7 @@ const Profile = ({
 
 	useEffect(() => {
 		if (walletData && walletData.account && !isLoading) {
-			onNeoBalance();
+			setTimeout(() => onNeoBalance(), 500);
 			onNeoFSBalance();
 			onGetContainers();
 			setIsLoading(true);
