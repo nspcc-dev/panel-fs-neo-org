@@ -84,9 +84,9 @@ $ make docker/start
 
 ## Wallets
 
-Any wallet that supports WalletConnect 2.0 should work. Specifically, we've tested:
-
 - [Neon wallet for Windows, Mac OS, Linux, Android and iOS](https://neon.coz.io/)
+- [NeoLine wallet for chrome extension](https://neoline.io/)
+- [OneGate wallet (Mobile)](https://onegate.space/)
 - [Aero web wallet](https://melanke.github.io/aero-beta/) (testnet only, see #133)
 
 ## Setup guide
