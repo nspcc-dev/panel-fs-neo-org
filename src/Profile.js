@@ -107,7 +107,8 @@ const Profile = ({
 		}];
 
 		const signers = [{
-			scopes: 1, // WitnessScope.CalledByEntry
+			scopes: 'CalledByEntry',
+			account: Neon.create.account(walletData.account.address).scriptHash,
 		}];
 
 		if (dapi) {
@@ -181,7 +182,8 @@ const Profile = ({
 			}];
 
 			const signers = [{
-				scopes: 1, // WitnessScope.CalledByEntry
+				scopes: 'CalledByEntry',
+				account: Neon.create.account(walletData.account.address).scriptHash,
 			}];
 
 			let response = '';
@@ -220,7 +222,8 @@ const Profile = ({
 			}];
 
 			const signers = [{
-				scopes: 16, // WitnessScope.CustomContracts
+				scopes: 'CustomContracts',
+				account: Neon.create.account(walletData.account.address).scriptHash,
 				allowedContracts: [NeoFSContract.gasToken, NeoFSContract.scriptHash]
 			}];
 
