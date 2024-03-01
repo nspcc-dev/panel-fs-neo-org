@@ -35,7 +35,7 @@ const Home = ({
 							<Heading align="center">Connect your wallet to log in</Heading>
 							<Button
 								color="primary"
-								onClick={onConnectWallet}
+								onClick={() => onConnectWallet()}
 								style={{ display: 'flex', margin: '0 auto 20px' }}
 							>
 								Connect wallet

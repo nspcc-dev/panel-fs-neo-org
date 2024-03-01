@@ -24,6 +24,7 @@ const Profile = ({
 		onPopup,
 		wcSdk,
 		dapi,
+		neolineN3,
 		isLoadContainers,
 		setLoadContainers,
 		ContentTypeHeader,
@@ -111,7 +112,9 @@ const Profile = ({
 			account: Neon.create.account(walletData.account.address).scriptHash,
 		}];
 
-		if (dapi) {
+		if (neolineN3) {
+			response = await neolineN3.invokeRead({ ...invocations[0], signers }).catch((err) => handleError(err));
+		} else if (dapi) {
 			response = await dapi.invokeRead({ ...invocations[0] }).catch((err) => handleError(err));
 		} else {
 			if (wcSdk.session.expiry * 1000 < new Date().getTime()) {
@@ -187,8 +190,10 @@ const Profile = ({
 			}];
 
 			let response = '';
-			if (dapi) {
-				response = await dapi.invoke({ ...invocations[0] }).catch((err) => handleError(err));
+			if (neolineN3) {
+				response = await neolineN3.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
+			} else if (dapi) {
+				response = await dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
 			} else {
 				response = await wcSdk.invokeFunction({ invocations, signers }).catch((error) => {
 					if (error.message === 'Failed or Rejected Request') {
@@ -228,12 +233,14 @@ const Profile = ({
 			}];
 
 			let response = '';
-			if (dapi) {
-				response = await dapi.invoke({ ...invocations[0] }).catch((err) => handleError(err));
+			if (neolineN3) {
+				response = await neolineN3.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
+			} else if (dapi) {
+				response = await dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
 			} else {
 				response = await wcSdk.invokeFunction({ invocations, signers }).catch((err) => handleError(err));
 			}
-			if (!response.message) {
+			if (response && !response.message) {
 				setWithdrawQuantity(0);
 				onModal('success', response.txid ? response.txid : response);
 			}

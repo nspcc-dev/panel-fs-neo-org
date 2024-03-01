@@ -29,6 +29,7 @@ export const App = () => {
 	const location = useLocation();
 	const wcSdk = useWalletConnect();
 	const dapi = window.OneGate ? new BaseDapi(window.OneGate) : null;
+	let [neolineN3, setNeolineN3] = useState(null);
 	const [activeNet] = useState(process.env.REACT_APP_NETWORK ? process.env.REACT_APP_NETWORK : 'mainnet');
 
 	const [ContentTypeHeader] = useState("Content-Type");
@@ -142,6 +143,20 @@ export const App = () => {
 			setPopup({ current: null, text: null });
 		}, 2000);
 	};
+
+	const loadNeolineN3 = () => {
+		const neolineN3 = new window.NEOLineN3.Init();
+		setNeolineN3(neolineN3);
+
+		if (location.pathname.indexOf('/profile') !== -1) {
+			onConnectWallet(neolineN3);
+		}
+	};
+
+	useEffect(() => {
+		window.addEventListener("NEOLine.N3.EVENT.READY", loadNeolineN3);
+		return () => window.removeListener("NEOLine.N3.EVENT.READY", loadNeolineN3);
+	}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
 		if (process.env.REACT_APP_WC_PROJECT_ID && process.env.REACT_APP_WC_PROJECT_ID !== '') {
@@ -275,6 +290,8 @@ export const App = () => {
 			onModal('failed', error.data.message);
 		} else if (error.message) {
 			onModal('failed', error.message);
+		} else if (error.description) {
+			onModal('failed', error.description);
 		} else {
 			onModal('failed', 'Something went wrong, try again');
 		}
@@ -282,7 +299,10 @@ export const App = () => {
 
 	const onSignMessage = async (msg = '', type, operation, params) => {
 		let response = '';
-		if (dapi) {
+
+		if (neolineN3) {
+			response = await neolineN3.signMessage({ message: msg }).catch((err) => handleError(err));
+		} else if (dapi) {
 			response = await dapi.signMessage({ message: msg }).catch((err) => handleError(err));
 			response.data = response.signature;
 		} else {
@@ -498,8 +518,30 @@ export const App = () => {
 		}
 	};
 
-	const onConnectWallet = async () => {
-		if (dapi) {
+	const onConnectWallet = async (neolineN3Temp = neolineN3) => {
+		if (neolineN3Temp) {
+			neolineN3Temp.getPublicKey().then((account) => {
+				neolineN3Temp.getNetworks().then((networks) => {
+					setWalletData({
+						name: 'NeoLine',
+						type: 'neo3',
+						net: networks.defaultNetwork.toLowerCase(),
+						account: account,
+						tokens: {
+							container: {},
+							object: null,
+						}
+					});
+
+					onPopup('success', 'Wallet connected');
+					onModal();
+
+					if (location.pathname.indexOf('/profile') === -1) {
+						document.location.href = "/profile";
+					}
+				}).catch((err) => handleError(err));
+			}).catch((err) => handleError(err));
+		} else if (dapi) {
 			const provider = await dapi.getProvider();
 			const networks = await dapi.getNetworks();
 			const account = await dapi.getAccount();
@@ -1399,6 +1441,7 @@ export const App = () => {
 						setWalletData={setWalletData}
 						wcSdk={wcSdk}
 						dapi={dapi}
+						neolineN3={neolineN3}
 						isLoadContainers={isLoadContainers}
 						setLoadContainers={setLoadContainers}
 						onDisconnectWallet={onDisconnectWallet}
