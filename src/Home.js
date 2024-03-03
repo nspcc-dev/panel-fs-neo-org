@@ -35,13 +35,13 @@ const Home = ({
 							<Heading align="center">Connect your wallet to log in</Heading>
 							<Button
 								color="primary"
-								onClick={onConnectWallet}
+								onClick={() => onConnectWallet()}
 								style={{ display: 'flex', margin: '0 auto 20px' }}
 							>
 								Connect wallet
 							</Button>
 							<Heading align="center" size={6} weight="normal">
-								Built with <a href="https://walletconnect.com/" target="_blank" rel="noopener noreferrer">WalletConnect</a>, tested with <a href="https://neonwallet.com/" target="_blank" rel="noopener noreferrer">NEON wallet</a>.
+								Built with <a href="https://walletconnect.com/" target="_blank" rel="noopener noreferrer">WalletConnect</a>, tested with <a href="https://neonwallet.com/" target="_blank" rel="noopener noreferrer">NEON wallet</a>, <a href="https://neoline.io/" target="_blank" rel="noopener noreferrer">NeoLine extension</a>, <a href="https://onegate.space/" target="_blank" rel="noopener noreferrer">OneGate wallet (Mobile)</a>.
 							</Heading>
 						</>
 					)}
