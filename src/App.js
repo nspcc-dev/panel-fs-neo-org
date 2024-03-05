@@ -155,7 +155,7 @@ export const App = () => {
 
 	useEffect(() => {
 		window.addEventListener("NEOLine.N3.EVENT.READY", loadNeolineN3);
-		return () => window.removeListener("NEOLine.N3.EVENT.READY", loadNeolineN3);
+		return () => window.removeEventListener("NEOLine.N3.EVENT.READY", loadNeolineN3);
 	}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
