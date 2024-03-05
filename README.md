@@ -86,6 +86,7 @@ $ make docker/start
 
 - [Neon wallet for Windows, Mac OS, Linux, Android and iOS](https://neon.coz.io/)
 - [NeoLine wallet for chrome extension](https://neoline.io/)
+- [O3 wallet](https://o3.network/#/wallet)
 - [OneGate wallet (Mobile)](https://onegate.space/)
 - [Aero web wallet](https://melanke.github.io/aero-beta/) (testnet only, see #133)
 
