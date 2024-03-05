@@ -4,6 +4,7 @@ import {
 	Route,
 	Link,
 	useLocation,
+	useNavigate,
 } from "react-router-dom";
 import {
 	Navbar,
@@ -22,11 +23,13 @@ import api from './api';
 import { useWalletConnect } from "@cityofzion/wallet-connect-sdk-react";
 import { CopyToClipboardBlock } from './CopyToClipboardBlock';
 import { BaseDapi } from '@neongd/neo-dapi';
+import neo3Dapi from "neo3-dapi";
 import 'bulma/css/bulma.min.css';
 import './App.css';
 
 export const App = () => {
 	const location = useLocation();
+	const navigate = useNavigate();
 	const wcSdk = useWalletConnect();
 	const dapi = window.OneGate ? new BaseDapi(window.OneGate) : null;
 	let [neolineN3, setNeolineN3] = useState(null);
@@ -184,7 +187,7 @@ export const App = () => {
 				if (location.pathname.indexOf('/profile') === -1) {
 					document.location.href = "/profile";
 				}
-			} else if (walletData) {
+			} else if (walletData || (!walletData && location.pathname !== '/')) {
 				onDisconnectWallet();
 				if (location.pathname !== '/') {
 					document.location.href = "/";
@@ -290,6 +293,8 @@ export const App = () => {
 			onModal('failed', error.data.message);
 		} else if (error.message) {
 			onModal('failed', error.message);
+		} else if (error.description && error.description.msg) {
+			onModal('failed', error.description.msg);
 		} else if (error.description) {
 			onModal('failed', error.description);
 		} else {
@@ -300,7 +305,9 @@ export const App = () => {
 	const onSignMessage = async (msg = '', type, operation, params) => {
 		let response = '';
 
-		if (neolineN3) {
+		if (walletData.name === 'o3-desktop') {
+			response = await neo3Dapi.signMessage({ message: msg }).catch((err) => handleError(err));
+		} else if (neolineN3) {
 			response = await neolineN3.signMessage({ message: msg }).catch((err) => handleError(err));
 		} else if (dapi) {
 			response = await dapi.signMessage({ message: msg }).catch((err) => handleError(err));
@@ -519,7 +526,32 @@ export const App = () => {
 	};
 
 	const onConnectWallet = async (neolineN3Temp = neolineN3) => {
-		if (neolineN3Temp) {
+		let account;
+		try {
+			account = await neo3Dapi.getPublicKey();
+		} catch(err) {}
+		if (account) {
+			const provider = await neo3Dapi.getProvider();
+			const networks = await neo3Dapi.getNetworks();
+
+			setWalletData({
+				name: provider.name,
+				type: 'neo3',
+				net: networks.defaultNetwork.toLowerCase(),
+				account: account,
+				tokens: {
+					container: {},
+					object: null,
+				}
+			});
+
+			onPopup('success', 'Wallet connected');
+			onModal();
+
+			if (location.pathname.indexOf('/profile') === -1) {
+				navigate('/profile');
+			}
+		} else if (neolineN3Temp) {
 			neolineN3Temp.getPublicKey().then((account) => {
 				neolineN3Temp.getNetworks().then((networks) => {
 					setWalletData({
@@ -575,7 +607,9 @@ export const App = () => {
 	}
 
 	const onDisconnectWallet = async () => {
-		if (!dapi) {
+		if (walletData.name === 'o3-desktop') {
+			await neo3Dapi.disconnect();
+		} else if (!dapi) {
 			await wcSdk.disconnect();
 		}
 		document.location.href = "/";

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Neon from "@cityofzion/neon-js";
+import neo3Dapi from "neo3-dapi";
 import {
 	Container,
 	Section,
@@ -112,7 +113,9 @@ const Profile = ({
 			account: Neon.create.account(walletData.account.address).scriptHash,
 		}];
 
-		if (neolineN3) {
+		if (walletData.name === 'o3-desktop') {
+			response = await neo3Dapi.invokeRead({ ...invocations[0], signers }).catch((err) => handleError(err));
+		} else if (neolineN3) {
 			response = await neolineN3.invokeRead({ ...invocations[0], signers }).catch((err) => handleError(err));
 		} else if (dapi) {
 			response = await dapi.invokeRead({ ...invocations[0] }).catch((err) => handleError(err));
@@ -190,7 +193,9 @@ const Profile = ({
 			}];
 
 			let response = '';
-			if (neolineN3) {
+			if (walletData.name === 'o3-desktop') {
+				response = await neo3Dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
+			} else if (neolineN3) {
 				response = await neolineN3.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
 			} else if (dapi) {
 				response = await dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
@@ -233,7 +238,9 @@ const Profile = ({
 			}];
 
 			let response = '';
-			if (neolineN3) {
+			if (walletData.name === 'o3-desktop') {
+				response = await neo3Dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
+			} else if (neolineN3) {
 				response = await neolineN3.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
 			} else if (dapi) {
 				response = await dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
