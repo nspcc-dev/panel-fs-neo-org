@@ -143,7 +143,14 @@ const File = ({
 					alt="file"
 					style={{ display: 'block' }}
 				/>
-				<span>{name}</span>
+				<span
+					style={{
+						WebkitLineClamp: '1',
+						display: '-webkit-box',
+						WebkitBoxOrient: 'vertical',
+						overflow: 'hidden'
+					}}
+				>{name}</span>
 			</div>
 			<div
 				className="file_collapsible"
@@ -154,9 +161,9 @@ const File = ({
 						<>
 							<Section>
 								<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Information</Heading>
-								<Heading size={6} weight="light" style={{ display: 'flex' }}>
-									<span style={{ marginRight: 5 }}>{`Object id:`}</span>
-									<div>{objectItem.address.objectId}</div>
+								<Heading size={6} weight="light">
+									<span>{`Object id: `}</span>
+									{objectItem.address.objectId}
 								</Heading>
 								<Heading size={6} weight="light">
 									<span>{`Owner id: `}</span>

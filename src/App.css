@@ -32,7 +32,7 @@ body {
     color: #003;
     background: #f0f5f6;
     font-family: WorkSans, sans-serif;
-    min-width: 300px;
+    min-width: 350px;
     -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 }
 
@@ -136,6 +136,11 @@ label.is-error {
     padding-left: 7px;
 }
 
+.navbar-item,
+.navbar-link {
+    padding: 0.5rem 0;
+}
+
 ul {
     list-style: unset;
 }
@@ -191,7 +196,8 @@ ul {
 .navbar {
     box-shadow: 0 1px rgb(12 13 14 / 10%), 0 1px 6px rgb(59 64 69 / 10%);
     min-height: unset;
-    height: 56px;
+    height: 52px;
+    padding: 0 1.5rem;
 }
 
 .navbar img {
@@ -581,27 +587,106 @@ label.panel-block:hover {
 }
 
 @media (min-width: 1024px) {
-    .navbar-menu {
-        margin-right: 6rem;
-    }
-
-    .navbar-brand {
-        margin-left: 6rem;
-    }
-}
-
-@media (max-width: 800px) {
-    .tile.is-ancestor {
-        margin: 20px 0;
+    .navbar {
+        display: block;
+        padding: 0 6rem;
     }
 }
 
 @media (max-width: 500px) {
     .title {
-        font-size: 30px;
+        font-size: 24px;
     }
 
     .notification {
         padding: 1rem;
+    }
+
+    .section {
+        padding: 1rem 0.75rem;
+    }
+
+    .navbar {
+        padding: 0 0.75rem;
+    }
+
+    .box {
+        padding: 1rem;
+    }
+
+    #containers .tile.is-parent>.notification>h1 {
+        padding: 0.75rem 1rem 0.75rem;
+    }
+
+    #containers .title.is-5 {
+        font-size: 1rem;
+    }
+
+    #containers .objects_tree_file_content .title.is-6 {
+        font-size: 0.75rem;
+        line-height: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    #containers .notification>h1::after {
+        margin: 18px;
+    }
+
+    .container_panel {
+        padding: 0 1rem .75rem;
+    }
+
+    .panel-block-content {
+        width: 100%;
+    }
+
+    .panel-block-content .field.is-grouped {
+        flex-direction: column;
+    }
+
+    .panel-block-content .field.is-grouped img {
+        margin: auto;
+    }
+
+    .panel-block-content .field.is-grouped>.control {
+        flex-basis: 100%;
+        margin: 0 0 10px 0;
+    }
+
+    .token_status_panel {
+        max-width: 290px;
+    }
+
+    #containers .token_status_panel {
+        flex-direction: column;
+        text-align: center;
+        max-width: 200px;
+    }
+
+    #containers .token_status_panel .title.is-6 {
+        margin: 0 0 10px 0 !important;
+        font-size: 0.9rem;
+    }
+
+    .objects_tree_file {
+        padding: 0 10px;
+    }
+
+    #containers .active.title img {
+        width: 14px;
+    }
+
+    .objects_tree_folder {
+        padding-left: 10px;
+    }
+
+    .objects_tree_file_content {
+        border-left: 3px solid rgb(0, 229, 153);
+        margin: 5px 0 10px;
+    }
+
+    .container_panel .section {
+        padding: 10px;
+        margin: 5px 0 0;
     }
 }

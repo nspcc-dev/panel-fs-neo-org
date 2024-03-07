@@ -16,7 +16,7 @@ const Home = ({
 	return (
 		<Container
 			id="login"
-			style={{ minHeight: 'calc(100vh - 221px)' }}
+			style={{ minHeight: 'calc(100vh - 217px)' }}
 		>
 			<Section>
 				<Box style={{ maxWidth: 600, margin: 'auto' }}>
@@ -32,7 +32,7 @@ const Home = ({
 						</Tile>
 					) : (
 						<>
-							<Heading align="center">Connect your wallet to log in</Heading>
+							<Heading align="center">Connect your wallet to log&nbsp;in</Heading>
 							<Button
 								color="primary"
 								onClick={() => onConnectWallet()}
