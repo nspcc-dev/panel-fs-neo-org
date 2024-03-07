@@ -183,7 +183,7 @@ const Profile = ({
 					{ type: 'Hash160', value: Neon.create.account(walletData.account.address).scriptHash },
 					{ type: 'Hash160', value: Neon.create.account(NeoFSContract.account).scriptHash },
 					{ type: 'Integer', value: depositQuantity * 1e8 },
-					{ type: 'ByteArray', value: '' },
+					{ type: 'Any', value: null },
 				]
 			}];
 
