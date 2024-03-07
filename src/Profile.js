@@ -19,7 +19,6 @@ const Profile = ({
 		walletData,
 		setWalletData,
 		handleError,
-		onDisconnectWallet,
 		onModal,
 		onPopup,
 		wcSdk,
@@ -165,7 +164,7 @@ const Profile = ({
 	};
 
 	return (
-		<Container style={{ minHeight: 'calc(100vh - 221px)' }}>
+		<Container style={{ minHeight: 'calc(100vh - 217px)' }}>
 			{walletData ? (
 				<Section>
 					{isNotAvailableNeoFS && (
@@ -175,17 +174,9 @@ const Profile = ({
 						</Box>
 					)}
 					<Box id="account">
-						<Heading style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} weight="bold">
-							<span>
-								<span style={{ margin: '0 15px 0 0' }}>{walletData.name}</span>
-								<Tag>{`${walletData.account.address}`}</Tag>
-							</span>
-							<img
-								src="/img/icons/logout.svg"
-								alt="logout"
-								style={{ marginLeft: 5, cursor: 'pointer', width: 25, height: 25 }}
-								onClick={onDisconnectWallet}
-							/>
+						<Heading style={{ marginBottom: 15 }} weight="bold">
+							<span style={{ margin: '0 15px 0 0' }}>{walletData.name}</span>
+							<Tag style={{ margin: '5px 0 10px' }}>{`${walletData.account.address}`}</Tag>
 						</Heading>
 						<Heading size={6} weight="light" style={{ display: 'flex', marginBottom: 15 }}>
 							<span style={{ fontWeight: 600, marginRight: 5 }}>{`${activeNet}:`}</span>
@@ -253,8 +244,8 @@ const Profile = ({
 						</Button>
 					</Box>
 					<Box id="containers">
-						<Heading style={{ display: 'flex', justifyContent: 'space-between' }} weight="bold">
-							<span>
+						<Heading style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} weight="bold">
+							<span style={{ display: 'flex', alignItems: 'center' }}>
 								{`Containers`}
 								{!isNotAvailableNeoFS && (
 									<img
