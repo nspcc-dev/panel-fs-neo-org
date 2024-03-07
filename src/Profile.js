@@ -4,10 +4,7 @@ import neo3Dapi from "neo3-dapi";
 import {
 	Container,
 	Section,
-	Form,
 	Heading,
-	Notification,
-	Tile,
 	Button,
 	Box,
 	Tag,
@@ -17,6 +14,8 @@ import api from './api';
 
 const Profile = ({
 		params,
+		NeoFSContract,
+		activeNet,
 		walletData,
 		setWalletData,
 		handleError,
@@ -36,11 +35,6 @@ const Profile = ({
 		onAuth,
 	}) => {
 	const [isLoading, setIsLoading] = useState(false);
-	const [NeoFSContract] = useState({
-		gasToken: '0xd2a4cff31913016155e38e474a2c06d08be276cf',
-		account: process.env.REACT_APP_NEOFS_ACCOUNT ? process.env.REACT_APP_NEOFS_ACCOUNT : 'NZAUkYbJ1Cb2HrNmwZ1pg9xYHBhm2FgtKV',
-		scriptHash: Neon.create.account(process.env.REACT_APP_NEOFS_ACCOUNT).scriptHash,
-	});
 	const [containers, setContainers] = useState([]);
 	const [isLoadingContainers, setIsLoadingContainers] = useState(false);
 
@@ -51,9 +45,6 @@ const Profile = ({
 	const [isLoadingNeoFSBalance, setIsLoadingNeoFSBalance] = useState(false);
 
 	const [isNotAvailableNeoFS, setNotAvailableNeoFS] = useState(false);
-
-	const [depositQuantity, setDepositQuantity] = useState(0);
-	const [withdrawQuantity, setWithdrawQuantity] = useState(0);
 
 	useEffect(() => {
 		if (params.rest_gw.indexOf('http://') !== 0 && params.rest_gw.indexOf('https://') !== 0) {
@@ -128,7 +119,7 @@ const Profile = ({
 		}
 		setIsLoadingNeoBalance(false);
 		if (response && !response.error && response.stack.length > 0) {
-			onPopup('success', 'Mainnet balance has been updated');
+			onPopup('success', `${activeNet} balance has been updated`);
 			setNeoBalance(response.stack[0].value);
 			setTimeout(() => {
 				setIsLoadingNeoBalance(false);
@@ -173,89 +164,6 @@ const Profile = ({
 		});
 	};
 
-	const onDeposit = async () => {
-		if (depositQuantity * 1e8 >= 1 && depositQuantity * 1e8 <= neoBalance) {
-			onModal('approveRequest');
-			const invocations = [{
-				scriptHash: NeoFSContract.gasToken,
-				operation: 'transfer',
-				args: [
-					{ type: 'Hash160', value: Neon.create.account(walletData.account.address).scriptHash },
-					{ type: 'Hash160', value: Neon.create.account(NeoFSContract.account).scriptHash },
-					{ type: 'Integer', value: depositQuantity * 1e8 },
-					{ type: 'ByteArray', value: '' },
-				]
-			}];
-
-			const signers = [{
-				scopes: 'CalledByEntry',
-				account: Neon.create.account(walletData.account.address).scriptHash,
-			}];
-
-			let response = '';
-			if (walletData.name === 'o3-desktop') {
-				response = await neo3Dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
-			} else if (neolineN3) {
-				response = await neolineN3.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
-			} else if (dapi) {
-				response = await dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
-			} else {
-				response = await wcSdk.invokeFunction({ invocations, signers }).catch((error) => {
-					if (error.message === 'Failed or Rejected Request') {
-						onModal('failed', 'Failed or Rejected Request');
-					} else if (error.message === 'Error: intrinsic gas too low') {
-						onModal('failed', 'Transaction intrinsic gas too low');
-					} else {
-						onModal('failed', 'Something went wrong, try again');
-					}
-				});
-			}
-			if (!response.error) {
-				setDepositQuantity(0);
-				onModal('success', response.txid ? response.txid : response);
-			}
-		} else {
-			onPopup('failed', 'Incorrect quantity value');
-		}
-	};
-
-	const onWithdraw = async () => {
-		if (withdrawQuantity >= 1 && withdrawQuantity * 1e12 <= neoFSBalance) {
-			onModal('approveRequest');
-			const invocations = [{
-				scriptHash: NeoFSContract.scriptHash,
-				operation: 'withdraw',
-				args: [
-					{ type: 'Hash160', value: Neon.create.account(walletData.account.address).scriptHash },
-					{ type: 'Integer', value: withdrawQuantity },
-				]
-			}];
-
-			const signers = [{
-				scopes: 'CustomContracts',
-				account: Neon.create.account(walletData.account.address).scriptHash,
-				allowedContracts: [NeoFSContract.gasToken, NeoFSContract.scriptHash]
-			}];
-
-			let response = '';
-			if (walletData.name === 'o3-desktop') {
-				response = await neo3Dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
-			} else if (neolineN3) {
-				response = await neolineN3.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
-			} else if (dapi) {
-				response = await dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
-			} else {
-				response = await wcSdk.invokeFunction({ invocations, signers }).catch((err) => handleError(err));
-			}
-			if (response && !response.message) {
-				setWithdrawQuantity(0);
-				onModal('success', response.txid ? response.txid : response);
-			}
-		} else {
-			onPopup('failed', 'Incorrect quantity value');
-		}
-	};
-
 	return (
 		<Container style={{ minHeight: 'calc(100vh - 221px)' }}>
 			{walletData ? (
@@ -269,8 +177,8 @@ const Profile = ({
 					<Box id="account">
 						<Heading style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} weight="bold">
 							<span>
-								Account
-								<Tag style={{ margin: '0 0px 0 15px' }}>{`«${walletData.name} • ${walletData.net}»`}</Tag>
+								<span style={{ margin: '0 15px 0 0' }}>{walletData.name}</span>
+								<Tag>{`${walletData.account.address}`}</Tag>
 							</span>
 							<img
 								src="/img/icons/logout.svg"
@@ -279,159 +187,70 @@ const Profile = ({
 								onClick={onDisconnectWallet}
 							/>
 						</Heading>
-						<Heading size={6} style={{ marginBottom: 15 }}>
-							{`Address: `}
-							<span style={{ fontWeight: 400 }}>{walletData.account.address}</span>
+						<Heading size={6} weight="light" style={{ display: 'flex', marginBottom: 15 }}>
+							<span style={{ fontWeight: 600, marginRight: 5 }}>{`${activeNet}:`}</span>
+							<span>{neoBalance ? `${(neoBalance * 0.00000001).toFixed(8)} GAS` : '-'}</span>
+							{!isNotAvailableNeoFS && (
+								<img
+									src="/img/icons/sync.svg"
+									alt="sync"
+									style={isLoadingNeoBalance ? {
+										margin: '2px 0 0 5px',
+										cursor: 'pointer',
+										animation: 'spin 1.5s infinite linear',
+										width: 15,
+										height: 15,
+									} : {
+										margin: '2px 0 0 5px',
+										cursor: 'pointer',
+										width: 15,
+										height: 15,
+									}}
+									onClick={onNeoBalance}
+								/>
+							)}
 						</Heading>
-						<Tile kind="ancestor">
-							<Tile kind="parent">
-								<Tile
-									kind="child"
-									renderAs={Notification}
-									color="gray"
-									style={{
-										borderLeft: '5px solid #00e599',
-										borderRadius: 0,
+						<Heading size={6} weight="light" style={{ display: 'flex' }}>
+							<span style={{ fontWeight: 600, marginRight: 5 }}>NeoFS:</span>
+							<span>{neoFSBalance ? `${(neoFSBalance * 0.000000000001).toFixed(12)} GAS` : '-'}</span>
+							{!isNotAvailableNeoFS && (
+								<img
+									src="/img/icons/sync.svg"
+									width={20}
+									height={20}
+									alt="sync"
+									style={isLoadingNeoFSBalance ? {
+										margin: '2px 0 0 5px',
+										cursor: 'pointer',
+										animation: 'spin 1.5s infinite linear',
+										width: 15,
+										height: 15,
+									} : {
+										margin: '2px 0 0 5px',
+										cursor: 'pointer',
+										width: 15,
+										height: 15,
 									}}
-								>
-									<Heading size={6} weight="light" style={{ display: 'flex' }}>
-										<span>{neoBalance ? `${(neoBalance * 0.00000001).toFixed(8)} GAS` : '-'}</span>
-										{!isNotAvailableNeoFS && (
-											<img
-												src="/img/icons/sync.svg"
-												alt="sync"
-												style={isLoadingNeoBalance ? {
-													margin: '2px 0 0 5px',
-													cursor: 'pointer',
-													animation: 'spin 1.5s infinite linear',
-													width: 15,
-													height: 15,
-												} : {
-													margin: '2px 0 0 5px',
-													cursor: 'pointer',
-													width: 15,
-													height: 15,
-												}}
-												onClick={onNeoBalance}
-											/>
-										)}
-									</Heading>
-									<Heading size={6} weight="bold">Mainnet balance</Heading>
-								</Tile>
-							</Tile>
-							<Tile kind="parent">
-								<Tile
-									kind="child"
-									renderAs={Notification}
-									color="gray"
-									style={{
-										borderLeft: '5px solid #00e599',
-										borderRadius: 0,
-									}}
-								>
-									<Heading size={6} weight="light" style={{ display: 'flex' }}>
-										<span>{neoFSBalance ? `${(neoFSBalance * 0.000000000001).toFixed(12)} GAS` : '-'}</span>
-										{!isNotAvailableNeoFS && (
-											<img
-												src="/img/icons/sync.svg"
-												width={20}
-												height={20}
-												alt="sync"
-												style={isLoadingNeoFSBalance ? {
-													margin: '2px 0 0 5px',
-													cursor: 'pointer',
-													animation: 'spin 1.5s infinite linear',
-													width: 15,
-													height: 15,
-												} : {
-													margin: '2px 0 0 5px',
-													cursor: 'pointer',
-													width: 15,
-													height: 15,
-												}}
-												onClick={onNeoFSBalance}
-											/>
-										)}
-									</Heading>
-									<Heading size={6} weight="bold">NeoFS chain balance</Heading>
-								</Tile>
-							</Tile>
-						</Tile>
-						<Tile kind="ancestor">
-							<Tile kind="parent">
-								<Tile
-									kind="child"
-									renderAs={Notification}
-									color="grey"
-								>
-									<Heading size={5}>Deposit to NeoFS contract</Heading>
-									<Form.Field>
-										<Form.Label size="small" weight="light">Quantity (GAS)</Form.Label>
-										<Form.Control>
-											<Form.Input
-												type="number"
-												value={depositQuantity}
-												onChange={(e) => setDepositQuantity(e.target.value)}
-											/>
-										</Form.Control>
-									</Form.Field>
-									<Button
-										color="primary"
-										onClick={onDeposit}
-										style={isNotAvailableNeoFS ? {
-											display: 'flex',
-											margin: 'auto',
-											pointerEvents: 'none',
-											opacity: 0.6,
-										} : {
-											display: 'flex',
-											margin: 'auto',
-										}}
-									>
-										Make a payment
-									</Button>
-								</Tile>
-							</Tile>
-							<Tile kind="parent">
-								<Tile
-									kind="child"
-									renderAs={Notification}
-									color="grey"
-								>
-									<Heading size={5}>Withdraw from NeoFS contract</Heading>
-									<Form.Field>
-										<Form.Label size="small">Quantity (GAS)</Form.Label>
-										<Form.Control>
-											<Form.Input
-												type="number"
-												value={withdrawQuantity}
-												onChange={(e) => setWithdrawQuantity(e.target.value)}
-												onKeyPress={(event) => {
-													if (!/[0-9]/.test(event.key)) {
-														event.preventDefault();
-													}
-												}}
-											/>
-										</Form.Control>
-									</Form.Field>
-									<Button
-										color="primary"
-										onClick={onWithdraw}
-										style={isNotAvailableNeoFS ? {
-											display: 'flex',
-											margin: 'auto',
-											pointerEvents: 'none',
-											opacity: 0.6,
-										} : {
-											display: 'flex',
-											margin: 'auto',
-										}}
-									>
-										Receive funds
-									</Button>
-								</Tile>
-							</Tile>
-						</Tile>
+									onClick={onNeoFSBalance}
+								/>
+							)}
+						</Heading>
+						<Button
+							color="primary"
+							size="small"
+							onClick={() => onModal('deposit', { neoBalance })}
+							style={isNotAvailableNeoFS ? { display: 'block', marginBottom: 15, pointerEvents: 'none', opacity: 0.6 } : { display: 'block', marginBottom: 15 }}
+						>
+							{`Deposit from ${activeNet} to NeoFS`}
+						</Button>
+						<Button
+							color="primary"
+							size="small"
+							onClick={() => onModal('withdraw', { neoFSBalance })}
+							style={isNotAvailableNeoFS ? { display: 'block', pointerEvents: 'none', opacity: 0.6 } : { display: 'block' }}
+						>
+							{`Withdraw from NeoFS to ${activeNet}`}
+						</Button>
 					</Box>
 					<Box id="containers">
 						<Heading style={{ display: 'flex', justifyContent: 'space-between' }} weight="bold">
