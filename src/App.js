@@ -20,6 +20,7 @@ import Home from './Home';
 import Profile from './Profile';
 import EACLPanel from './Components/EACLPanel/EACLPanel';
 import api from './api';
+import Neon from "@cityofzion/neon-js";
 import { useWalletConnect } from "@cityofzion/wallet-connect-sdk-react";
 import { CopyToClipboardBlock } from './CopyToClipboardBlock';
 import { BaseDapi } from '@neongd/neo-dapi';
@@ -27,13 +28,22 @@ import neo3Dapi from "neo3-dapi";
 import 'bulma/css/bulma.min.css';
 import './App.css';
 
+function capitalizeFirstLetter(string) {
+	return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 export const App = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const wcSdk = useWalletConnect();
 	const dapi = window.OneGate ? new BaseDapi(window.OneGate) : null;
 	let [neolineN3, setNeolineN3] = useState(null);
-	const [activeNet] = useState(process.env.REACT_APP_NETWORK ? process.env.REACT_APP_NETWORK : 'mainnet');
+	const [activeNet] = useState(process.env.REACT_APP_NETWORK ? capitalizeFirstLetter(process.env.REACT_APP_NETWORK) : 'Mainnet');
+	const [NeoFSContract] = useState({
+		gasToken: '0xd2a4cff31913016155e38e474a2c06d08be276cf',
+		account: process.env.REACT_APP_NEOFS_ACCOUNT ? process.env.REACT_APP_NEOFS_ACCOUNT : 'NNxVrKjLsRkWsmGgmuNXLcMswtxTGaNQLk',
+		scriptHash: Neon.create.account(process.env.REACT_APP_NEOFS_ACCOUNT).scriptHash,
+	});
 
 	const [ContentTypeHeader] = useState("Content-Type");
 	const [AuthorizationHeader] = useState("Authorization");
@@ -47,6 +57,8 @@ export const App = () => {
 		rest_gw: process.env.REACT_APP_RESTGW ? process.env.REACT_APP_RESTGW : 'https://rest.t5.fs.neo.org/v1',
 	});
 
+	const [depositQuantity, setDepositQuantity] = useState(0);
+	const [withdrawQuantity, setWithdrawQuantity] = useState(0);
 	const [attributes, setAttributes] = useState([]);
 	const [isLoadContainers, setLoadContainers] = useState(false);
 	const [isLoadingForm, setLoadingForm] = useState(false);
@@ -525,6 +537,89 @@ export const App = () => {
 		}
 	};
 
+	const onDeposit = async (neoBalanceTemp) => {
+		if (depositQuantity * 1e8 >= 1 && depositQuantity * 1e8 <= neoBalanceTemp) {
+			onModal('approveRequest');
+			const invocations = [{
+				scriptHash: NeoFSContract.gasToken,
+				operation: 'transfer',
+				args: [
+					{ type: 'Hash160', value: Neon.create.account(walletData.account.address).scriptHash },
+					{ type: 'Hash160', value: Neon.create.account(NeoFSContract.account).scriptHash },
+					{ type: 'Integer', value: depositQuantity * 1e8 },
+					{ type: 'Any', value: null },
+				]
+			}];
+
+			const signers = [{
+				scopes: 'CalledByEntry',
+				account: Neon.create.account(walletData.account.address).scriptHash,
+			}];
+
+			let response = '';
+			if (walletData.name === 'o3-desktop') {
+				response = await neo3Dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
+			} else if (neolineN3) {
+				response = await neolineN3.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
+			} else if (dapi) {
+				response = await dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
+			} else {
+				response = await wcSdk.invokeFunction({ invocations, signers }).catch((error) => {
+					if (error.message === 'Failed or Rejected Request') {
+						onModal('failed', 'Failed or Rejected Request');
+					} else if (error.message === 'Error: intrinsic gas too low') {
+						onModal('failed', 'Transaction intrinsic gas too low');
+					} else {
+						onModal('failed', 'Something went wrong, try again');
+					}
+				});
+			}
+			if (!response.error) {
+				setDepositQuantity(0);
+				onModal('success', response.txid ? response.txid : response);
+			}
+		} else {
+			onPopup('failed', 'Incorrect amount');
+		}
+	};
+
+	const onWithdraw = async (neoFSBalanceTemp) => {
+		if (withdrawQuantity >= 1 && withdrawQuantity * 1e12 <= neoFSBalanceTemp) {
+			onModal('approveRequest');
+			const invocations = [{
+				scriptHash: NeoFSContract.scriptHash,
+				operation: 'withdraw',
+				args: [
+					{ type: 'Hash160', value: Neon.create.account(walletData.account.address).scriptHash },
+					{ type: 'Integer', value: withdrawQuantity },
+				]
+			}];
+
+			const signers = [{
+				scopes: 'CustomContracts',
+				account: Neon.create.account(walletData.account.address).scriptHash,
+				allowedContracts: [NeoFSContract.gasToken, NeoFSContract.scriptHash]
+			}];
+
+			let response = '';
+			if (walletData.name === 'o3-desktop') {
+				response = await neo3Dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
+			} else if (neolineN3) {
+				response = await neolineN3.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
+			} else if (dapi) {
+				response = await dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
+			} else {
+				response = await wcSdk.invokeFunction({ invocations, signers }).catch((err) => handleError(err));
+			}
+			if (response && !response.message) {
+				setWithdrawQuantity(0);
+				onModal('success', response.txid ? response.txid : response);
+			}
+		} else {
+			onPopup('failed', 'Incorrect amount');
+		}
+	};
+
 	const onConnectWallet = async (neolineN3Temp = neolineN3) => {
 		let account;
 		try {
@@ -596,7 +691,7 @@ export const App = () => {
 			}
 		} else {
 			try {
-				const { uri, approval } = await wcSdk.createConnection(`neo3:${activeNet}`, ['invokeFunction', 'testInvoke', 'signMessage', 'verifyMessage']);
+				const { uri, approval } = await wcSdk.createConnection(`neo3:${activeNet.toLowerCase()}`, ['invokeFunction', 'testInvoke', 'signMessage', 'verifyMessage']);
 				onModal('connectWallet', uri);
 				const session = await approval();
 				wcSdk.setSession(session);
@@ -1384,6 +1479,91 @@ export const App = () => {
 					</div>
 				</div>
 			)}
+			{modal.current === 'deposit' && (
+				<div className="modal">
+					<div
+						className="modal_close_panel"
+						onClick={onModal}
+					/>
+					<div className="modal_content">
+						<div
+							className="modal_close"
+							onClick={onModal}
+						>
+							<img
+								src="/img/icons/close.svg"
+								height={30}
+								width={30}
+								alt="loader"
+							/>
+						</div>
+						<Heading align="center" size={5} weight="bold">{`Deposit from ${activeNet} to NeoFS`}</Heading>
+						<Form.Field>
+							<Form.Label size="small" weight="light">Quantity (GAS)</Form.Label>
+							<Form.Control>
+								<Form.Input
+									type="number"
+									value={depositQuantity}
+									onChange={(e) => setDepositQuantity(e.target.value)}
+								/>
+							</Form.Control>
+						</Form.Field>
+						<Button
+							color="primary"
+							onClick={() => onDeposit(modal.text.neoBalance)}
+							size="small"
+							style={{ display: 'flex', margin: 'auto' }}
+						>
+							Make a payment
+						</Button>
+					</div>
+				</div>
+			)}
+			{modal.current === 'withdraw' && (
+				<div className="modal">
+					<div
+						className="modal_close_panel"
+						onClick={onModal}
+					/>
+					<div className="modal_content">
+						<div
+							className="modal_close"
+							onClick={onModal}
+						>
+							<img
+								src="/img/icons/close.svg"
+								height={30}
+								width={30}
+								alt="loader"
+							/>
+						</div>
+						<Heading align="center" size={5} weight="bold">{`Withdraw from NeoFS to ${activeNet}`}</Heading>
+						<Form.Field>
+							<Form.Label size="small" weight="light">Quantity (GAS)</Form.Label>
+							<Form.Control>
+								<Form.Input
+									type="number"
+									value={withdrawQuantity}
+									onChange={(e) => setWithdrawQuantity(e.target.value)}
+									onKeyPress={(event) => {
+										if (!/[0-9]/.test(event.key)) {
+											event.preventDefault();
+										}
+									}}
+								/>
+							</Form.Control>
+						</Form.Field>
+						<Button
+							color="primary"
+							onClick={() => onWithdraw(modal.text.neoFSBalance)}
+							size="small"
+							style={{ display: 'flex', margin: 'auto' }}
+						>
+							Receive funds
+						</Button>
+					</div>
+				</div>
+			)}
 			{modal.current === 'loading' && (
 				<div className="modal">
 					<div
@@ -1469,6 +1649,8 @@ export const App = () => {
 					path="/profile"
 					element={<Profile
 						params={params}
+						NeoFSContract={NeoFSContract}
+						activeNet={activeNet}
 						onAuth={onAuth}
 						walletData={walletData}
 						handleError={handleError}
