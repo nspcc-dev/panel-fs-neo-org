@@ -104,17 +104,17 @@ const Profile = ({
 		}];
 
 		if (walletData.name === 'o3-desktop') {
-			response = await neo3Dapi.invokeRead({ ...invocations[0], signers }).catch((err) => handleError(err));
+			response = await neo3Dapi.invokeRead({ ...invocations[0], signers }).catch((err) => handleError(err, 'balance'));
 		} else if (neolineN3) {
-			response = await neolineN3.invokeRead({ ...invocations[0], signers }).catch((err) => handleError(err));
+			response = await neolineN3.invokeRead({ ...invocations[0], signers }).catch((err) => handleError(err, 'balance'));
 		} else if (dapi) {
-			response = await dapi.invokeRead({ ...invocations[0] }).catch((err) => handleError(err));
+			response = await dapi.invokeRead({ ...invocations[0] }).catch((err) => handleError(err, 'balance'));
 		} else {
 			if (wcSdk.session.expiry * 1000 < new Date().getTime()) {
 				onModal('failed', 'Session expired, re-login to continue');
 			}
 
-			response = await wcSdk.testInvoke({ invocations, signers }).catch((err) => handleError(err));
+			response = await wcSdk.testInvoke({ invocations, signers }).catch((err) => handleError(err, 'balance'));
 		}
 		setIsLoadingNeoBalance(false);
 		if (response && !response.error && response.stack.length > 0) {
