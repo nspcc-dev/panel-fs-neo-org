@@ -300,7 +300,7 @@ export const App = () => {
 		});
 	};
 
-	const handleError = (error) => {
+	const handleError = (error, type) => {
 		if (error.data && error.data.message) {
 			onModal('failed', error.data.message);
 		} else if (error.message) {
@@ -309,6 +309,8 @@ export const App = () => {
 			onModal('failed', error.description.msg);
 		} else if (error.description) {
 			onModal('failed', error.description);
+		} else if (type === 'balance') {
+			onModal('failed', 'Wallet request failed: check your wallet connection');
 		} else {
 			onModal('failed', 'Something went wrong, try again');
 		}
