@@ -10,7 +10,7 @@ import {
 } from 'react-bulma-components';
 
 const Home = ({
-		onConnectWallet,
+		onModal,
 	}) => {
 
 	return (
@@ -35,7 +35,7 @@ const Home = ({
 							<Heading align="center">Connect your wallet to log&nbsp;in</Heading>
 							<Button
 								color="primary"
-								onClick={() => onConnectWallet()}
+								onClick={() => onModal('connectWallet')}
 								style={{ display: 'flex', margin: '0 auto 20px' }}
 							>
 								Connect wallet
