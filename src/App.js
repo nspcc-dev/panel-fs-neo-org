@@ -421,6 +421,7 @@ export const App = () => {
 				if (e.message) {
 					setError({ active: true, type: [], text: e.message });
 				} else {
+					onModal();
 					onPopup('success', 'Container was deleted successfully');
 					setLoadContainers(true);
 				}
