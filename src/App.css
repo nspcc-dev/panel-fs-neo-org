@@ -189,6 +189,22 @@ ul {
     /* background: #00e599; */
 }
 
+.btn_connect_wallet {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-transform: none;
+    min-width: 200px;
+    margin-bottom: 10px;
+}
+
+.btn_connect_wallet img {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    right: 15px;
+}
+
 .box {
     border-radius: 0;
 }

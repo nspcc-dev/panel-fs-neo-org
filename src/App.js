@@ -22,7 +22,6 @@ import EACLPanel from './Components/EACLPanel/EACLPanel';
 import api from './api';
 import Neon from "@cityofzion/neon-js";
 import { useWalletConnect } from "@cityofzion/wallet-connect-sdk-react";
-import { CopyToClipboardBlock } from './CopyToClipboardBlock';
 import { BaseDapi } from '@neongd/neo-dapi';
 import neo3Dapi from "neo3-dapi";
 import 'bulma/css/bulma.min.css';
@@ -159,54 +158,29 @@ export const App = () => {
 		}, 2000);
 	};
 
-	const loadNeolineN3 = () => {
-		const neolineN3 = new window.NEOLineN3.Init();
-		setNeolineN3(neolineN3);
-
-		if (location.pathname.indexOf('/profile') !== -1) {
-			onConnectWallet(neolineN3);
-		}
-	};
-
 	useEffect(() => {
-		window.addEventListener("NEOLine.N3.EVENT.READY", loadNeolineN3);
-		return () => window.removeEventListener("NEOLine.N3.EVENT.READY", loadNeolineN3);
-	}, []); // eslint-disable-line react-hooks/exhaustive-deps
+		if (wcSdk.isConnected()) {
+			setWalletData({
+				name:  wcSdk.session.peer.metadata.name,
+				type: wcSdk.session.namespaces.neo3.accounts[0].split(':')[0],
+				net: wcSdk.session.namespaces.neo3.accounts[0].split(':')[1],
+				account: {
+					address: wcSdk.session.namespaces.neo3.accounts[0].split(':')[2],
+					publicKey: wcSdk.session.peer.publicKey,
+				},
+				tokens: {
+					container: {},
+					object: null
+				}
+			});
+			onPopup('success', 'Wallet connected');
+			onModal();
 
-	useEffect(() => {
-		if (process.env.REACT_APP_WC_PROJECT_ID && process.env.REACT_APP_WC_PROJECT_ID !== '') {
-			if (dapi) {
-				if (location.pathname.indexOf('/profile') !== -1) {
-					onConnectWallet();
-				}
-			} else if (wcSdk.isConnected()) {
-				setWalletData({
-					name:  wcSdk.session.peer.metadata.name,
-					type: wcSdk.session.namespaces.neo3.accounts[0].split(':')[0],
-					net: wcSdk.session.namespaces.neo3.accounts[0].split(':')[1],
-					account: {
-						address: wcSdk.session.namespaces.neo3.accounts[0].split(':')[2],
-						publicKey: wcSdk.session.peer.publicKey,
-					},
-					tokens: {
-						container: {},
-						object: null
-					}
-				});
-				onPopup('success', 'Wallet connected');
-				onModal();
-
-				if (location.pathname.indexOf('/profile') === -1) {
-					document.location.href = "/profile";
-				}
-			} else if (walletData || (!walletData && location.pathname !== '/')) {
-				onDisconnectWallet();
-				if (location.pathname !== '/') {
-					document.location.href = "/";
-				}
+			if (location.pathname.indexOf('/profile') === -1) {
+				navigate('/profile');
 			}
-		} else {
-			onModal('failed', 'Error: Global variable REACT_APP_WC_PROJECT_ID is not set.');
+		} else if (location.pathname !== '/') {
+			document.location.href = "/";
 		}
 	}, [wcSdk]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -309,6 +283,8 @@ export const App = () => {
 			onModal('failed', error.description.msg);
 		} else if (error.description) {
 			onModal('failed', error.description);
+		} else if (error.type) {
+			onModal('failed', error.type);
 		} else if (type === 'balance') {
 			onModal('failed', 'Wallet request failed: check your wallet connection');
 		} else {
@@ -622,37 +598,16 @@ export const App = () => {
 		}
 	};
 
-	const onConnectWallet = async (neolineN3Temp = neolineN3) => {
-		let account;
+	const onConnectWallet = async (type) => {
 		try {
-			account = await neo3Dapi.getPublicKey();
-		} catch(err) {}
-		if (account) {
-			const provider = await neo3Dapi.getProvider();
-			const networks = await neo3Dapi.getNetworks();
+			if (type === 'o3') {
+				const account = await neo3Dapi.getPublicKey().catch((err) => handleError(err));
+				const provider = await neo3Dapi.getProvider();
+				const networks = await neo3Dapi.getNetworks();
 
-			setWalletData({
-				name: provider.name,
-				type: 'neo3',
-				net: networks.defaultNetwork.toLowerCase(),
-				account: account,
-				tokens: {
-					container: {},
-					object: null,
-				}
-			});
-
-			onPopup('success', 'Wallet connected');
-			onModal();
-
-			if (location.pathname.indexOf('/profile') === -1) {
-				navigate('/profile');
-			}
-		} else if (neolineN3Temp) {
-			neolineN3Temp.getPublicKey().then((account) => {
-				neolineN3Temp.getNetworks().then((networks) => {
+				if (account) {
 					setWalletData({
-						name: 'NeoLine',
+						name: provider.name,
 						type: 'neo3',
 						net: networks.defaultNetwork.toLowerCase(),
 						account: account,
@@ -666,51 +621,75 @@ export const App = () => {
 					onModal();
 
 					if (location.pathname.indexOf('/profile') === -1) {
-						document.location.href = "/profile";
+						navigate('/profile');
 					}
-				}).catch((err) => handleError(err));
-			}).catch((err) => handleError(err));
-		} else if (dapi) {
-			const provider = await dapi.getProvider();
-			const networks = await dapi.getNetworks();
-			const account = await dapi.getAccount();
-
-			setWalletData({
-				name: provider.name,
-				type: 'neo3',
-				net: networks.defaultNetwork.toLowerCase(),
-				account: account,
-				tokens: {
-					container: {},
-					object: null,
 				}
-			});
-			onPopup('success', 'Wallet connected');
-			onModal();
+			} else if (type === 'neoline') {
+				const neolineN3 = new window.NEOLineN3.Init();
+				setNeolineN3(neolineN3);
+				neolineN3.getPublicKey().then((account) => {
+					neolineN3.getNetworks().then((networks) => {
+						setWalletData({
+							name: 'NeoLine',
+							type: 'neo3',
+							net: networks.defaultNetwork.toLowerCase(),
+							account: account,
+							tokens: {
+								container: {},
+								object: null,
+							}
+						});
 
-			if (location.pathname.indexOf('/profile') === -1) {
-				document.location.href = "/profile";
-			}
-		} else {
-			try {
+						onPopup('success', 'Wallet connected');
+						onModal();
+
+						if (location.pathname.indexOf('/profile') === -1) {
+							navigate('/profile');
+						}
+					}).catch((err) => handleError(err));
+				}).catch((err) => handleError(err));
+			} else if (type === 'onegate') {
+				const account = await dapi.getAccount().catch((err) => handleError(err));
+				const provider = await dapi.getProvider();
+				const networks = await dapi.getNetworks();
+
+				if (account) {
+					setWalletData({
+						name: provider.name,
+						type: 'neo3',
+						net: networks.defaultNetwork.toLowerCase(),
+						account: account,
+						tokens: {
+							container: {},
+							object: null,
+						}
+					});
+					onPopup('success', 'Wallet connected');
+					onModal();
+
+					if (location.pathname.indexOf('/profile') === -1) {
+						navigate('/profile');
+					}
+				}
+			} else {
 				const { uri, approval } = await wcSdk.createConnection(`neo3:${activeNet.toLowerCase()}`, ['invokeFunction', 'testInvoke', 'signMessage', 'verifyMessage']);
-				onModal('connectWallet', uri);
+				window.open(`https://neon.coz.io/connect?uri=${uri}`, '_blank').focus();
 				const session = await approval();
 				wcSdk.setSession(session);
-			} catch (error) {
-				onModal('failed', 'Something went wrong, contact the application administrator');
 			}
+		} catch (error) {
+			onModal('failed', 'Failed to connect to the wallet, please try again');
 		}
 	}
 
 	const onDisconnectWallet = async () => {
-		if (walletData.name === 'o3-desktop') {
+		if (walletData && walletData.name === 'o3-desktop') {
 			await neo3Dapi.disconnect();
 		} else if (!dapi) {
 			await wcSdk.disconnect();
 		}
-		document.location.href = "/";
 		onPopup('success', 'Wallet disconnected');
+		document.location.href = "/";
 		setWalletData(null);
 	};
 
@@ -766,25 +745,38 @@ export const App = () => {
 								alt="loader"
 							/>
 						</div>
-						<Heading align="center" size={5} weight="bold">Please select an option</Heading>
-						<Heading align="center" size={6}>Connection URL</Heading>
-						<Heading align="center" size={6} weight="normal">Copy and paste the connection URL into the Add connection page in your wallet</Heading>
-						<div>
-							<CopyToClipboardBlock
-								copy={modal.text}
-								text={modal.text}
-								onPopup={onPopup}
-								className="modal_highlighted_copy"
-							/>
-						</div>
-						<Heading align="center" size={6}>QR code connection</Heading>
-						<Heading align="center" size={6} weight="normal">Please scan QR code to connect your wallet on a compatible device</Heading>
+						<Heading align="center" size={5} weight="bold">Select wallet</Heading>
 						<Button
-							color="primary"
-							onClick={() => window.open(`https://neon.coz.io/connect?uri=${modal.text}`, '_blank').focus()}
-							style={{ margin: 'auto', display: 'flex' }}
+							color="secondary"
+							className="btn_connect_wallet"
+							onClick={() => onConnectWallet('neoline')}
 						>
-							Scan
+							NeoLine
+							<img src="/img/icons/wallets/neoline.svg" alt="neoline logo" />
+						</Button>
+						<Button
+							color="secondary"
+							className="btn_connect_wallet"
+							onClick={() => onConnectWallet('o3')}
+						>
+							O3
+							<img src="/img/icons/wallets/o3.svg" alt="o3 logo" />
+						</Button>
+						<Button
+							color="secondary"
+							className="btn_connect_wallet"
+							onClick={() => onConnectWallet('neon')}
+						>
+							Neon
+							<img src="/img/icons/wallets/neon.svg" alt="neon logo" />
+						</Button>
+						<Button
+							color="secondary"
+							className="btn_connect_wallet"
+							onClick={() => onConnectWallet('onegate')}
+						>
+							Onegate
+							<img src="/img/icons/wallets/onegate.svg" alt="onegate logo" />
 						</Button>
 					</div>
 				</div>
@@ -1626,7 +1618,9 @@ export const App = () => {
 				</div>
 			)}
 			<Navbar>
-				<Navbar.Brand>
+				<Navbar.Brand
+					style={{ justifyContent: 'space-between' }}
+				>
 					<Navbar.Item renderAs="div">
 						<Link
 							to={walletData ? "/profile" : "/"}
@@ -1638,13 +1632,24 @@ export const App = () => {
 							/>
 						</Link>
 					</Navbar.Item>
-				</Navbar.Brand>
+					{walletData && (
+						<Navbar.Item renderAs="div" align="end">
+							<Button
+								color="secondary"
+								size="small"
+								onClick={onDisconnectWallet}
+							>
+								Disconnect
+							</Button>
+						</Navbar.Item>
+					)}
+			</Navbar.Brand>
 			</Navbar>
 			<Routes>
 				<Route
 					path="/"
 					element={<Home
-						onConnectWallet={onConnectWallet}
+						onModal={onModal}
 					/>}
 				/>
 				<Route
