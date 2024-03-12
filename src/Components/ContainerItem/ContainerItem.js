@@ -31,7 +31,12 @@ export default function ContainerItem({
 	BearerSignatureHeader,
 	BearerSignatureKeyHeader,
 }) {
+	const ObjectsPerPage = 40;
 	const [isOpen, setIsOpen] = useState(false);
+	const [pagination, setPagination] = useState({
+		page: 0,
+		objects: 0,
+	});
 	const [objects, setObjects] = useState(null);
 	const [isLoadingObjects, setLoadingObjects] = useState(false);
 	const [isLoadingEACL, setLoadingEACL] = useState(false);
@@ -81,9 +86,10 @@ export default function ContainerItem({
 		}
 	}, [walletData]); // eslint-disable-line react-hooks/exhaustive-deps
 
-	const onGetObjects = (containerId) => {
+	const onGetObjects = (containerId, pageTemp = pagination.page) => {
+		setPagination({ ...pagination, page: pageTemp});
 		setLoadingObjects(true);
-		api('POST', `/objects/${containerId}/search?walletConnect=true`, {
+		api('POST', `/objects/${containerId}/search?walletConnect=true&limit=${ObjectsPerPage}&offset=${pageTemp * ObjectsPerPage}`, {
 			"filters": [],
 		}, {
 			[ContentTypeHeader]: "application/json",
@@ -96,6 +102,7 @@ export default function ContainerItem({
 			if (e.message) {
 				onPopup('failed', e.message);
 			} else {
+				setPagination({ objects: e.objects ? e.objects.length : 0, page: pageTemp});
 				setObjects(e.objects ? formatForTreeView(e.objects) : []);
 			}
 		});
@@ -285,20 +292,34 @@ export default function ContainerItem({
 												} else if (activePanel === 'objects') {
 													setActivePanel('');
 												} else {
-													onGetObjects(containerItem.containerId);
+													onGetObjects(containerItem.containerId, 0);
 													setActivePanel('objects');
 												}
 											}}
-											style={{ cursor: 'pointer', display: 'flex' }}
+											style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between' }}
 										>
-											<img
-												src={activePanel === 'objects' ? '/img/icons/chevron_down.svg' : '/img/icons/chevron_right.svg'}
-												style={{ marginRight: 10 }}
-												width={22}
-												height={22}
-												alt="chevron"
-											/>
-											Objects
+											<div style={{ display: 'flex', alignItems: 'center' }}>
+												<img
+													src={activePanel === 'objects' ? '/img/icons/chevron_down.svg' : '/img/icons/chevron_right.svg'}
+													style={{ marginRight: 10 }}
+													width={22}
+													height={22}
+													alt="chevron"
+												/>
+												Objects
+											</div>
+											{activePanel === 'objects' && !isLoadingObjects && (
+												<Button
+													size="small"
+													color="primary"
+													onClick={(e) => {
+														onModal('createObject', { containerId: containerItem.containerId })
+														e.stopPropagation();
+													}}
+												>
+													New object
+												</Button>
+											)}
 										</Heading>
 										{activePanel === 'objects' && (
 											<>
@@ -320,6 +341,21 @@ export default function ContainerItem({
 															BearerSignatureHeader={BearerSignatureHeader}
 															BearerSignatureKeyHeader={BearerSignatureKeyHeader}
 														/>
+														{!(pagination.page === 0 && pagination.objects === 0) && (
+															<div className="pagination">
+																<div
+																	className="pagination-previous"
+																	onClick={() => onGetObjects(containerItem.containerId, pagination.page - 1)}
+																	style={pagination.page === 0 ? { pointerEvents: 'none', borderColor: '#e9e9e9' } : {}}
+																>{`<`}</div>
+																<div className="pagination-text">{pagination.page + 1}</div>
+																<div
+																	className="pagination-next"
+																	onClick={() => onGetObjects(containerItem.containerId, pagination.page + 1)}
+																	style={pagination.objects < ObjectsPerPage ? { pointerEvents: 'none', borderColor: '#e9e9e9' } : {}}
+																>{`>`}</div>
+															</div>
+														)}
 													</>
 												) : (
 													<img
@@ -329,15 +365,6 @@ export default function ContainerItem({
 														width={30}
 														alt="loader"
 													/>
-												)}
-												{!isLoadingObjects && (
-													<Button
-														color="primary"
-														onClick={() => onModal('createObject', { containerId: containerItem.containerId })}
-														style={{ display: 'flex', margin: '20px auto 0' }}
-													>
-														New object
-													</Button>
 												)}
 											</>
 										)}

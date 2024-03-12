@@ -114,6 +114,10 @@ const Profile = ({
 				onModal('failed', 'Session expired, re-login to continue');
 			}
 
+			if (walletData.name === 'CoZ Wallet Prototype') {
+				signers[0].scopes = 1;
+			}
+
 			response = await wcSdk.testInvoke({ invocations, signers }).catch((err) => handleError(err, 'balance'));
 		}
 		setIsLoadingNeoBalance(false);

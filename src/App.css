@@ -363,6 +363,24 @@ label.panel-block:hover {
     margin: 5px 15px 0 0;
 }
 
+.pagination {
+    margin: 1rem 0 0;
+    justify-content: center;
+}
+
+.pagination-previous,
+.pagination-next {
+    order: unset;
+    cursor: pointer;
+    min-width: 2em;
+    font-size: 12px;
+    margin: 0;
+}
+
+.pagination-text {
+    margin: 0 0.75rem;
+}
+
 .footer {
     background-color: #f0f5f6;
     padding: 40px 20px;
