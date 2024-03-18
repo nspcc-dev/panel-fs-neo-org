@@ -11,6 +11,7 @@ const Tree = ({ children }) => {
 
 const Branch = ({
 		params,
+		formatBytes,
 		objectPath,
 		containerItem,
 		containerChildren,
@@ -23,6 +24,8 @@ const Branch = ({
 		BearerOwnerIdHeader,
 		BearerSignatureHeader,
 		BearerSignatureKeyHeader,
+		BearerLifetime,
+		BearerForAllUsers,
 	}) => {
 	return (
 		<Tree.Folder name={objectPath}>
@@ -30,6 +33,7 @@ const Branch = ({
 				<Tree.Branch
 					key={objectPathNew}
 					params={params}
+					formatBytes={formatBytes}
 					objectPath={objectPathNew}
 					walletData={walletData}
 					onModal={onModal}
@@ -42,12 +46,15 @@ const Branch = ({
 					BearerOwnerIdHeader={BearerOwnerIdHeader}
 					BearerSignatureHeader={BearerSignatureHeader}
 					BearerSignatureKeyHeader={BearerSignatureKeyHeader}
+					BearerLifetime={BearerLifetime}
+					BearerForAllUsers={BearerForAllUsers}
 				/>
 			)))}
 			{containerChildren[objectPath]['/'] && containerChildren[objectPath]['/'].map((objectItem, objectIndex) => (
 				<Tree.File
 					key={`${objectItem.name}-${objectIndex}`}
 					params={params}
+					formatBytes={formatBytes}
 					name={objectItem.name}
 					containerItem={containerItem}
 					objectItem={objectItem}
@@ -58,6 +65,8 @@ const Branch = ({
 					BearerOwnerIdHeader={BearerOwnerIdHeader}
 					BearerSignatureHeader={BearerSignatureHeader}
 					BearerSignatureKeyHeader={BearerSignatureKeyHeader}
+					BearerLifetime={BearerLifetime}
+					BearerForAllUsers={BearerForAllUsers}
 				/>
 			))}
 		</Tree.Folder>
@@ -90,17 +99,9 @@ const Folder = ({ name, children }) => {
 	);
 };
 
-function formatBytes(bytes) {
-	const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
-	let i = 0
-	for (i; bytes >= 1024; i += 1) {
-		bytes /= 1024;
-	}
-	return `${bytes === 0 ? bytes : bytes.toFixed(1)} ${units[i]}`;
-}
-
 const File = ({
 		params,
+		formatBytes,
 		name,
 		containerItem,
 		objectItem,
@@ -111,6 +112,8 @@ const File = ({
 		BearerOwnerIdHeader,
 		BearerSignatureHeader,
 		BearerSignatureKeyHeader,
+		BearerLifetime,
+		BearerForAllUsers,
 	}) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [objectDate, setObjectDate] = useState(null);
@@ -234,8 +237,8 @@ const File = ({
 													[ContentTypeHeader]: "application/json",
 													[AuthorizationHeader]: `Bearer ${walletData.tokens.object.bearer}`,
 												}).then((data) => {
-													if (data.status !== 200) {
-														onModal('failed', 'Something went wrong, try again');
+													if (data.message) {
+														onModal('failed', data.message);
 													} else if (data.header.indexOf("image/") !== -1 || data.header === 'text/plain; charset=utf-8') {
 														const fileURL = URL.createObjectURL(data.res);
 														window.open(fileURL, '_blank');
@@ -269,18 +272,22 @@ const File = ({
 													[ContentTypeHeader]: "application/json",
 													[AuthorizationHeader]: `Bearer ${walletData.tokens.object.bearer}`,
 												}).then((data) => {
-													const a = document.createElement('a');
-													document.body.appendChild(a);
-													const url = window.URL.createObjectURL(data.res);
-													a.href = url;
-													a.download = name;
-													a.target = '_blank';
-													a.click();
-													setTimeout(() => {
-														onModal();
-														window.URL.revokeObjectURL(url);
-														document.body.removeChild(a);
-													}, 0);
+													if (data.message) {
+														onModal('failed', data.message);
+													} else {
+														const a = document.createElement('a');
+														document.body.appendChild(a);
+														const url = window.URL.createObjectURL(data.res);
+														a.href = url;
+														a.download = name;
+														a.target = '_blank';
+														a.click();
+														setTimeout(() => {
+															onModal();
+															window.URL.revokeObjectURL(url);
+															document.body.removeChild(a);
+														}, 0);
+													}
 												});
 											}}
 											width={40}
@@ -289,6 +296,14 @@ const File = ({
 										/>
 									</>
 								)}
+								<img
+									src="/img/icons/manage/share.png"
+									className="manage_icon"
+									onClick={() => onModal('shareObjectLink', { containerId: containerItem.containerId, objectId: objectItem.address.objectId })}
+									width={40}
+									height={40}
+									alt="share an object"
+								/>
 								<img
 									src="/img/icons/manage/delete.png"
 									className="manage_icon"
@@ -323,6 +338,7 @@ Tree.Branch = Branch;
 
 export default function TreeView({
 	params,
+	formatBytes,
 	containerItem,
 	walletData,
 	onModal,
@@ -334,6 +350,8 @@ export default function TreeView({
 	BearerOwnerIdHeader,
 	BearerSignatureHeader,
 	BearerSignatureKeyHeader,
+	BearerLifetime,
+	BearerForAllUsers,
 }) {
 	return (
 		<Tree>
@@ -342,6 +360,7 @@ export default function TreeView({
 					{objectPath !== '/' && (
 						<Tree.Branch
 							params={params}
+							formatBytes={formatBytes}
 							objectPath={objectPath}
 							walletData={walletData}
 							onModal={onModal}
@@ -354,12 +373,15 @@ export default function TreeView({
 							BearerOwnerIdHeader={BearerOwnerIdHeader}
 							BearerSignatureHeader={BearerSignatureHeader}
 							BearerSignatureKeyHeader={BearerSignatureKeyHeader}
+							BearerLifetime={BearerLifetime}
+							BearerForAllUsers={BearerForAllUsers}
 						/>
 					)}
 					{Object.keys(objects).length === (index + 1) && objects['/'] && objects['/'].map((objectItem, objectIndex) => (
 						<Tree.File
 							key={`${objectItem.name}-${objectIndex}`}
 							params={params}
+							formatBytes={formatBytes}
 							name={objectItem.name}
 							containerItem={containerItem}
 							objectItem={objectItem}
@@ -370,6 +392,8 @@ export default function TreeView({
 							BearerOwnerIdHeader={BearerOwnerIdHeader}
 							BearerSignatureHeader={BearerSignatureHeader}
 							BearerSignatureKeyHeader={BearerSignatureKeyHeader}
+							BearerLifetime={BearerLifetime}
+							BearerForAllUsers={BearerForAllUsers}
 						/>
 					))}
 				</div>

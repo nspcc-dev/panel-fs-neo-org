@@ -14,6 +14,7 @@ import api from './api';
 
 const Profile = ({
 		params,
+		formatBytes,
 		NeoFSContract,
 		activeNet,
 		walletData,
@@ -31,6 +32,8 @@ const Profile = ({
 		BearerOwnerIdHeader,
 		BearerSignatureHeader,
 		BearerSignatureKeyHeader,
+		BearerLifetime,
+		BearerForAllUsers,
 		onAuth,
 	}) => {
 	const [isLoading, setIsLoading] = useState(false);
@@ -269,14 +272,6 @@ const Profile = ({
 									/>
 								)}
 							</span>
-							{/* <img
-								src="/img/icons/settings.svg"
-								width={22}
-								height={22}
-								alt="settings"
-								style={{ marginLeft: 5, cursor: 'pointer' }}
-								onClick={() => onModal('signTokens', '')}
-							/> */}
 							<Button
 								color="primary"
 								size="small"
@@ -290,6 +285,7 @@ const Profile = ({
 							<ContainerItem
 								key={containerItem.containerId}
 								params={params}
+								formatBytes={formatBytes}
 								setWalletData={setWalletData}
 								walletData={walletData}
 								onModal={onModal}
@@ -304,6 +300,8 @@ const Profile = ({
 								BearerOwnerIdHeader={BearerOwnerIdHeader}
 								BearerSignatureHeader={BearerSignatureHeader}
 								BearerSignatureKeyHeader={BearerSignatureKeyHeader}
+								BearerLifetime={BearerLifetime}
+								BearerForAllUsers={BearerForAllUsers}
 							/>
 						))}
 					</Box>

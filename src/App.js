@@ -16,8 +16,10 @@ import {
 	Tag,
 	Notification,
 } from 'react-bulma-components';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import Home from './Home';
 import Profile from './Profile';
+import Share from './Share';
 import EACLPanel from './Components/EACLPanel/EACLPanel';
 import api from './api';
 import Neon from "@cityofzion/neon-js";
@@ -29,6 +31,15 @@ import './App.css';
 
 function capitalizeFirstLetter(string) {
 	return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function formatBytes(bytes) {
+	const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+	let i = 0
+	for (i; bytes >= 1024; i += 1) {
+		bytes /= 1024;
+	}
+	return `${bytes === 0 ? bytes : bytes.toFixed(1)} ${units[i]}`;
 }
 
 export const App = () => {
@@ -61,6 +72,7 @@ export const App = () => {
 	const [attributes, setAttributes] = useState([]);
 	const [isLoadContainers, setLoadContainers] = useState(false);
 	const [isLoadingForm, setLoadingForm] = useState(false);
+	const [isCopied, setCopy] = useState(false);
 	const [isError, setError] = useState({
 		active: false,
 		type: [],
@@ -159,7 +171,7 @@ export const App = () => {
 	};
 
 	useEffect(() => {
-		if (wcSdk.isConnected()) {
+		if (wcSdk.isConnected() && location.pathname.indexOf('/share') === -1) {
 			setWalletData({
 				name:  wcSdk.session.peer.metadata.name,
 				type: wcSdk.session.namespaces.neo3.accounts[0].split(':')[0],
@@ -176,10 +188,10 @@ export const App = () => {
 			onPopup('success', 'Wallet connected');
 			onModal();
 
-			if (location.pathname.indexOf('/profile') === -1) {
+			if (location.pathname.indexOf('/profile') === -1 && location.pathname.indexOf('/share') === -1) {
 				navigate('/profile');
 			}
-		} else if (location.pathname !== '/') {
+		} else if (location.pathname !== '/' && location.pathname.indexOf('/share') === -1) {
 			document.location.href = "/";
 		}
 	}, [wcSdk]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -234,6 +246,49 @@ export const App = () => {
 					"verb": operation,
 				}
 			}]
+		} else if (type === 'object' && params.objectId) {
+			body = [{
+				"object": [{
+					"operation": 'GET',
+					"action": "ALLOW",
+					"filters": [{
+						"headerType": "OBJECT",
+						"key": "$Object:objectID",
+						"matchType": "STRING_EQUAL",
+						"value": params.objectId,
+					}],
+					"targets": [{
+						"role": "OTHERS",
+						"keys": []
+					}]
+				}, {
+					"operation": 'RANGE',
+					"action": "ALLOW",
+					"filters": [{
+						"headerType": "OBJECT",
+						"key": "$Object:objectID",
+						"matchType": "STRING_EQUAL",
+						"value": params.objectId,
+					}],
+					"targets": [{
+						"role": "OTHERS",
+						"keys": []
+					}]
+				}, {
+					"operation": 'HEAD',
+					"action": "ALLOW",
+					"filters": [{
+						"headerType": "OBJECT",
+						"key": "$Object:objectID",
+						"matchType": "STRING_EQUAL",
+						"value": params.objectId,
+					}],
+					"targets": [{
+						"role": "OTHERS",
+						"keys": []
+					}]
+				}, ...presets.forbid.eACLParams]
+			}]
 		} else if (type === 'object') {
 			body = [{
 				"object": [{
@@ -267,7 +322,7 @@ export const App = () => {
 		api('POST', '/auth', body, {
 			[ContentTypeHeader]: "application/json",
 			[BearerOwnerIdHeader]: walletData.account.address,
-			[BearerLifetime]: 2,
+			[BearerLifetime]: params.objectId ? 24 : 2,
 			[BearerForAllUsers]: true,
 		}).then((e) => {
 			onSignMessage(e[0].token, type, operation, params);
@@ -313,7 +368,11 @@ export const App = () => {
 				[BearerSignatureHeader]: response.data + response.salt,
 				[BearerSignatureKeyHeader]: response.publicKey,
 			}).then((e) => {
-				onUpdateWalletData(response, params, operation, type, msg, e.token);
+				if (params.objectId) {
+					onModal('shareObjectLink', { ...params, token: e.token })
+				} else {
+					onUpdateWalletData(response, params, operation, type, msg, e.token);
+				}
 			});
 		} else if (!response.error) {
 			onUpdateWalletData(response, params, operation, type, msg);
@@ -407,28 +466,24 @@ export const App = () => {
 	};
 
 	const onDeleteContainer = (containerName) => {
-		if (walletData.tokens.container.DELETE) {
-			setLoadingForm(true);
-			setError({ active: false, type: [], text: '' });
-			api('DELETE', `/containers/${containerName}?walletConnect=true`, {}, {
-				[ContentTypeHeader]: "application/json",
-				[AuthorizationHeader]: `Bearer ${walletData.tokens.container.DELETE.token}`,
-				[BearerOwnerIdHeader]: walletData.account.address,
-				[BearerSignatureHeader]: walletData.tokens.container.DELETE.signature,
-				[BearerSignatureKeyHeader]: walletData.publicKey,
-			}).then((e) => {
-				setLoadingForm(false);
-				if (e.message) {
-					setError({ active: true, type: [], text: e.message });
-				} else {
-					onModal();
-					onPopup('success', 'Container was deleted successfully');
-					setLoadContainers(true);
-				}
-			});
-		} else {
-			onModal('signTokens', 'container.DELETE');
-		}
+		setLoadingForm(true);
+		setError({ active: false, type: [], text: '' });
+		api('DELETE', `/containers/${containerName}?walletConnect=true`, {}, {
+			[ContentTypeHeader]: "application/json",
+			[AuthorizationHeader]: `Bearer ${walletData.tokens.container.DELETE.token}`,
+			[BearerOwnerIdHeader]: walletData.account.address,
+			[BearerSignatureHeader]: walletData.tokens.container.DELETE.signature,
+			[BearerSignatureKeyHeader]: walletData.publicKey,
+		}).then((e) => {
+			setLoadingForm(false);
+			if (e.message) {
+				setError({ active: true, type: [], text: e.message });
+			} else {
+				onModal();
+				onPopup('success', 'Container was deleted successfully');
+				setLoadContainers(true);
+			}
+		});
 	};
 
 	const onHandleObject = (e) => {
@@ -493,27 +548,23 @@ export const App = () => {
 	};
 
 	const onDeleteObject = (containerId, objectId) => {
-		if (walletData.tokens.object) {
-			setError({ active: false, type: [], text: '' });
-			setLoadingForm(true);
-			api('DELETE', `/objects/${containerId}/${objectId}?walletConnect=true`, {}, {
-				[ContentTypeHeader]: "application/json",
-				[AuthorizationHeader]: `Bearer ${walletData.tokens.object.token}`,
-				[BearerOwnerIdHeader]: walletData.account.address,
-				[BearerSignatureHeader]: walletData.tokens.object.signature,
-				[BearerSignatureKeyHeader]: walletData.publicKey,
-			}).then((e) => {
-				setLoadingForm(false);
-				if (e.message) {
-					setError({ active: true, type: [], text: e.message });
-				} else {
-					onPopup('success', 'Object was deleted successfully');
-					setLoadContainers(containerId);
-				}
-			});
-		} else {
-			onModal('signTokens', 'object');
-		}
+		setError({ active: false, type: [], text: '' });
+		setLoadingForm(true);
+		api('DELETE', `/objects/${containerId}/${objectId}?walletConnect=true`, {}, {
+			[ContentTypeHeader]: "application/json",
+			[AuthorizationHeader]: `Bearer ${walletData.tokens.object.token}`,
+			[BearerOwnerIdHeader]: walletData.account.address,
+			[BearerSignatureHeader]: walletData.tokens.object.signature,
+			[BearerSignatureKeyHeader]: walletData.publicKey,
+		}).then((e) => {
+			setLoadingForm(false);
+			if (e.message) {
+				setError({ active: true, type: [], text: e.message });
+			} else {
+				onPopup('success', 'Object was deleted successfully');
+				setLoadContainers(containerId);
+			}
+		});
 	};
 
 	const onDeposit = async (neoBalanceTemp) => {
@@ -1360,41 +1411,95 @@ export const App = () => {
 								{isError.text}
 							</Notification>
 						)}
-						{!walletData.tokens.object ? (
-							<div className="token_status_panel" style={{ marginTop: '25px' }}>
-								<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock object&nbsp;operations</Heading>
+						<Button
+							color="primary"
+							onClick={() => onCreateObject(modal.text.containerId)}
+							style={isLoadingForm ? {
+								display: 'flex',
+								margin: '30px auto 0',
+								pointerEvents: 'none',
+								opacity: 0.8,
+							} : {
+								display: 'flex',
+								margin: '30px auto 0',
+							}}
+						>
+							{isLoadingForm ? (
+								<img
+									src="/img/icons/spinner.svg"
+									className="spinner"
+									width={20}
+									height={20}
+									alt="spinner"
+								/>
+							) : "Create"}
+						</Button>
+					</div>
+				</div>
+			)}
+			{modal.current === 'shareObjectLink' && (
+				<div className="modal">
+					<div
+						className="modal_close_panel"
+						onClick={onModal}
+					/>
+					<div className="modal_content" style={{ maxWidth: 400 }}>
+						<div
+							className="modal_close"
+							onClick={onModal}
+						>
+							<img
+								src="/img/icons/close.svg"
+								height={30}
+								width={30}
+								alt="loader"
+							/>
+						</div>
+						<Heading align="center" size={5} weight="bold">Sharing object</Heading>
+						<Heading align="center" size={6}>You can share a link to this object, it will be available for 1 day to everyone without authorization</Heading>
+						{!modal.text.token ? (
+							<div className="token_status_panel">
+								<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to share&nbsp;object</Heading>
 								<Button
 									color="primary"
 									size="small"
-									onClick={() => onAuth('object')}
+									onClick={() => onAuth('object', null, modal.text)}
 								>
 									Sign
 								</Button>
 							</div>
 						) : (
-							<Button
-								color="primary"
-								onClick={() => onCreateObject(modal.text.containerId)}
-								style={isLoadingForm ? {
-									display: 'flex',
-									margin: '30px auto 0',
-									pointerEvents: 'none',
-									opacity: 0.8,
-								} : {
-									display: 'flex',
-									margin: '30px auto 0',
-								}}
-							>
-								{isLoadingForm ? (
-									<img
-										src="/img/icons/spinner.svg"
-										className="spinner"
-										width={20}
-										height={20}
-										alt="spinner"
-									/>
-								) : "Create"}
-							</Button>
+							<>
+								<a
+									href={`${document.location.origin}/share/${modal.text.containerId}/${modal.text.objectId}?token=${modal.text.token}`}
+									className="modal_highlighted_copy"
+									target="_blank"
+									rel="noopener noreferrer"
+								>
+									{`${document.location.origin}/share/${modal.text.containerId}/${modal.text.objectId}?token=${modal.text.token}`}
+								</a>
+								<CopyToClipboard
+									text={`${document.location.origin}/share/${modal.text.containerId}/${modal.text.objectId}?token=${modal.text.token}`}
+									className="copy_text"
+									onCopy={() => {
+										setCopy(true);
+										setTimeout(() => {
+											setCopy(false);
+										}, 700);
+									}}
+								>
+									<Button
+										color="primary"
+										size="small"
+										style={{ margin: 'auto', display: 'flex' }}
+									>
+										Copy link
+										{isCopied && (
+											<div className="tooltip">Copied!</div>
+										)}
+									</Button>
+								</CopyToClipboard>
+							</>
 						)}
 					</div>
 				</div>
@@ -1430,47 +1535,34 @@ export const App = () => {
 								{isError.text}
 							</Notification>
 						)}
-						{!walletData.tokens.object ? (
-							<div className="token_status_panel">
-								<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock object&nbsp;operations</Heading>
+						<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
+							{!isLoadingForm && (
 								<Button
-									color="primary"
-									size="small"
-									onClick={() => onAuth('object')}
+									color="gray"
+									onClick={() => {
+										onModal();
+										setError({ active: false, type: [], text: '' });
+									}}
+									style={{ marginRight: 10 }}
 								>
-									Sign
+									No
 								</Button>
-							</div>
-						) : (
-							<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
-								{!isLoadingForm && (
-									<Button
-										color="gray"
-										onClick={() => {
-											onModal();
-											setError({ active: false, type: [], text: '' });
-										}}
-										style={{ marginRight: 10 }}
-									>
-										No
-									</Button>
-								)}
-								<Button
-									color="danger"
-									onClick={() => onDeleteObject(modal.text.containerId, modal.text.objectId)}
-								>
-									{isLoadingForm ? (
-										<img
-											src="/img/icons/spinner.svg"
-											className="spinner"
-											width={20}
-											height={20}
-											alt="spinner"
-										/>
-									) : "Yes"}
-								</Button>
-							</div>
-						)}
+							)}
+							<Button
+								color="danger"
+								onClick={() => onDeleteObject(modal.text.containerId, modal.text.objectId)}
+							>
+								{isLoadingForm ? (
+									<img
+										src="/img/icons/spinner.svg"
+										className="spinner"
+										width={20}
+										height={20}
+										alt="spinner"
+									/>
+								) : "Yes"}
+							</Button>
+						</div>
 					</div>
 				</div>
 			)}
@@ -1654,10 +1746,20 @@ export const App = () => {
 					/>}
 				/>
 				<Route
+					path="/share/:containerId/:objectId"
+					element={<Share
+						onModal={onModal}
+						formatBytes={formatBytes}
+						ContentTypeHeader={ContentTypeHeader}
+						AuthorizationHeader={AuthorizationHeader}
+					/>}
+				/>
+				<Route
 					path="/profile"
 					element={<Profile
 						params={params}
 						NeoFSContract={NeoFSContract}
+						formatBytes={formatBytes}
 						activeNet={activeNet}
 						onAuth={onAuth}
 						walletData={walletData}
@@ -1674,6 +1776,8 @@ export const App = () => {
 						BearerOwnerIdHeader={BearerOwnerIdHeader}
 						BearerSignatureHeader={BearerSignatureHeader}
 						BearerSignatureKeyHeader={BearerSignatureKeyHeader}
+						BearerLifetime={BearerLifetime}
+						BearerForAllUsers={BearerForAllUsers}
 						onModal={onModal}
 						onPopup={onPopup}
 					/>}

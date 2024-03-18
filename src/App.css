@@ -287,11 +287,13 @@ label.panel-block:hover {
     padding: 0 1.5rem 1.25rem;
 }
 
-.container_panel .title span {
+.container_panel .title span,
+#share .title span {
     font-weight: 600;
 }
 
-.container_panel .section {
+.container_panel .section,
+#share .section {
     background: #fff;
     padding: 15px;
     margin: 10px 0 0;
@@ -305,12 +307,14 @@ label.panel-block:hover {
     background: #29363b;
 }
 
-.notification .title {
+.notification .title,
+#share .title {
     margin-bottom: 0.5rem;
     white-space: normal;
 }
 
-.notification .title:last-child {
+.notification .title:last-child,
+#share .title:last-child {
     margin-bottom: 0;
 }
 
@@ -361,6 +365,35 @@ label.panel-block:hover {
 .manage_icon {
     cursor: pointer;
     margin: 5px 15px 0 0;
+}
+
+.copy_text {
+    position: relative;
+}
+
+.tooltip {
+    position: absolute;
+    min-width: 70px;
+    background: #29363b;
+    text-align: center;
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+    color: #fff;
+    top: -80%;
+}
+
+.tooltip:after {
+    position: absolute;
+    border: solid transparent;
+    content: "";
+    height: 0;
+    width: 0;
+    top: 100%;
+    right: 50%;
+    border-width: 6px;
+    margin: -2px -6px;
+    border-top-color: #29363b;
 }
 
 .pagination {
@@ -575,15 +608,15 @@ label.panel-block:hover {
 }
 
 .modal_highlighted_copy {
-    font-size: 12px;
+    font-size: 10px;
     font-family: monospace;
+    color: #003 !important;
     background: #f0f5f6;
     display: flex;
     padding: 10px;
     border-radius: 4px;
     word-break: break-all;
     margin: 10px 10px 20px;
-    cursor: pointer;
 }
 
 .modal_close {
