@@ -16,8 +16,10 @@ import {
 	Tag,
 	Notification,
 } from 'react-bulma-components';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import Home from './Home';
 import Profile from './Profile';
+import Share from './Share';
 import EACLPanel from './Components/EACLPanel/EACLPanel';
 import api from './api';
 import Neon from "@cityofzion/neon-js";
@@ -29,6 +31,15 @@ import './App.css';
 
 function capitalizeFirstLetter(string) {
 	return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function formatBytes(bytes) {
+	const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+	let i = 0
+	for (i; bytes >= 1024; i += 1) {
+		bytes /= 1024;
+	}
+	return `${bytes === 0 ? bytes : bytes.toFixed(1)} ${units[i]}`;
 }
 
 export const App = () => {
@@ -61,6 +72,7 @@ export const App = () => {
 	const [attributes, setAttributes] = useState([]);
 	const [isLoadContainers, setLoadContainers] = useState(false);
 	const [isLoadingForm, setLoadingForm] = useState(false);
+	const [isCopied, setCopy] = useState(false);
 	const [isError, setError] = useState({
 		active: false,
 		type: [],
@@ -159,7 +171,7 @@ export const App = () => {
 	};
 
 	useEffect(() => {
-		if (wcSdk.isConnected()) {
+		if (wcSdk.isConnected() && location.pathname.indexOf('/share') === -1) {
 			setWalletData({
 				name:  wcSdk.session.peer.metadata.name,
 				type: wcSdk.session.namespaces.neo3.accounts[0].split(':')[0],
@@ -176,10 +188,10 @@ export const App = () => {
 			onPopup('success', 'Wallet connected');
 			onModal();
 
-			if (location.pathname.indexOf('/profile') === -1) {
+			if (location.pathname.indexOf('/profile') === -1 && location.pathname.indexOf('/share') === -1) {
 				navigate('/profile');
 			}
-		} else if (location.pathname !== '/') {
+		} else if (location.pathname !== '/' && location.pathname.indexOf('/share') === -1) {
 			document.location.href = "/";
 		}
 	}, [wcSdk]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -234,6 +246,49 @@ export const App = () => {
 					"verb": operation,
 				}
 			}]
+		} else if (type === 'object' && params.objectId) {
+			body = [{
+				"object": [{
+					"operation": 'GET',
+					"action": "ALLOW",
+					"filters": [{
+						"headerType": "OBJECT",
+						"key": "$Object:objectID",
+						"matchType": "STRING_EQUAL",
+						"value": params.objectId,
+					}],
+					"targets": [{
+						"role": "OTHERS",
+						"keys": []
+					}]
+				}, {
+					"operation": 'RANGE',
+					"action": "ALLOW",
+					"filters": [{
+						"headerType": "OBJECT",
+						"key": "$Object:objectID",
+						"matchType": "STRING_EQUAL",
+						"value": params.objectId,
+					}],
+					"targets": [{
+						"role": "OTHERS",
+						"keys": []
+					}]
+				}, {
+					"operation": 'HEAD',
+					"action": "ALLOW",
+					"filters": [{
+						"headerType": "OBJECT",
+						"key": "$Object:objectID",
+						"matchType": "STRING_EQUAL",
+						"value": params.objectId,
+					}],
+					"targets": [{
+						"role": "OTHERS",
+						"keys": []
+					}]
+				}, ...presets.forbid.eACLParams]
+			}]
 		} else if (type === 'object') {
 			body = [{
 				"object": [{
@@ -267,7 +322,7 @@ export const App = () => {
 		api('POST', '/auth', body, {
 			[ContentTypeHeader]: "application/json",
 			[BearerOwnerIdHeader]: walletData.account.address,
-			[BearerLifetime]: 2,
+			[BearerLifetime]: params.objectId ? 24 : 2,
 			[BearerForAllUsers]: true,
 		}).then((e) => {
 			onSignMessage(e[0].token, type, operation, params);
@@ -313,7 +368,11 @@ export const App = () => {
 				[BearerSignatureHeader]: response.data + response.salt,
 				[BearerSignatureKeyHeader]: response.publicKey,
 			}).then((e) => {
-				onUpdateWalletData(response, params, operation, type, msg, e.token);
+				if (params.objectId) {
+					onModal('shareObjectLink', { ...params, token: e.token })
+				} else {
+					onUpdateWalletData(response, params, operation, type, msg, e.token);
+				}
 			});
 		} else if (!response.error) {
 			onUpdateWalletData(response, params, operation, type, msg);
@@ -1687,10 +1746,20 @@ export const App = () => {
 					/>}
 				/>
 				<Route
+					path="/share/:containerId/:objectId"
+					element={<Share
+						onModal={onModal}
+						formatBytes={formatBytes}
+						ContentTypeHeader={ContentTypeHeader}
+						AuthorizationHeader={AuthorizationHeader}
+					/>}
+				/>
+				<Route
 					path="/profile"
 					element={<Profile
 						params={params}
 						NeoFSContract={NeoFSContract}
+						formatBytes={formatBytes}
 						activeNet={activeNet}
 						onAuth={onAuth}
 						walletData={walletData}
@@ -1707,6 +1776,8 @@ export const App = () => {
 						BearerOwnerIdHeader={BearerOwnerIdHeader}
 						BearerSignatureHeader={BearerSignatureHeader}
 						BearerSignatureKeyHeader={BearerSignatureKeyHeader}
+						BearerLifetime={BearerLifetime}
+						BearerForAllUsers={BearerForAllUsers}
 						onModal={onModal}
 						onPopup={onPopup}
 					/>}

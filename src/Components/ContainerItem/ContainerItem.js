@@ -16,6 +16,7 @@ import api from '../../api';
 
 export default function ContainerItem({
 	params,
+	formatBytes,
 	containerItem,
 	onAuth,
 	walletData,
@@ -30,6 +31,8 @@ export default function ContainerItem({
 	BearerOwnerIdHeader,
 	BearerSignatureHeader,
 	BearerSignatureKeyHeader,
+	BearerLifetime,
+	BearerForAllUsers,
 }) {
 	const ObjectsPerPage = 40;
 	const [isOpen, setIsOpen] = useState(false);
@@ -330,6 +333,7 @@ export default function ContainerItem({
 														)}
 														<TreeView
 															params={params}
+															formatBytes={formatBytes}
 															walletData={walletData}
 															onModal={onModal}
 															containerIndex={index}
@@ -340,6 +344,8 @@ export default function ContainerItem({
 															BearerOwnerIdHeader={BearerOwnerIdHeader}
 															BearerSignatureHeader={BearerSignatureHeader}
 															BearerSignatureKeyHeader={BearerSignatureKeyHeader}
+															BearerLifetime={BearerLifetime}
+															BearerForAllUsers={BearerForAllUsers}
 														/>
 														{!(pagination.page === 0 && pagination.objects === 0) && (
 															<div className="pagination">
