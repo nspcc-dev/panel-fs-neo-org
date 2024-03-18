@@ -4,6 +4,25 @@ Changelog for NeoFS Panel
 
 ## [Unreleased]
 
+## [0.5.0] - 2024-03-18
+
+### Added
+- OneGate wallet support (#161)
+- NeoLine wallet support (#164)
+- O3 wallet support (#166)
+- Wallet selector (#171)
+- Pagination for object list (#172)
+- Object sharing via link (#173)
+
+### Fixed
+- Error on mainnet balance update (#163)
+- Design for mobile browsers (#168)
+- Error messsage for disconnected wallet (#170)
+
+### Changed
+- Single bearer token for object operations is used now (#157)
+- Account panel was redesigned (#167)
+
 ## [0.4.0] - 2024-02-09
 
 ### Added
@@ -83,4 +102,5 @@ First public review release.
 [0.3.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.3.0
 [0.3.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.3.1
 [0.4.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.4.0
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.4.0...master
+[0.5.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.5.0
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.5.0...master
