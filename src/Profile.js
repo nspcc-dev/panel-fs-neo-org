@@ -269,14 +269,6 @@ const Profile = ({
 									/>
 								)}
 							</span>
-							{/* <img
-								src="/img/icons/settings.svg"
-								width={22}
-								height={22}
-								alt="settings"
-								style={{ marginLeft: 5, cursor: 'pointer' }}
-								onClick={() => onModal('signTokens', '')}
-							/> */}
 							<Button
 								color="primary"
 								size="small"
