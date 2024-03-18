@@ -234,8 +234,8 @@ const File = ({
 													[ContentTypeHeader]: "application/json",
 													[AuthorizationHeader]: `Bearer ${walletData.tokens.object.bearer}`,
 												}).then((data) => {
-													if (data.status !== 200) {
-														onModal('failed', 'Something went wrong, try again');
+													if (data.message) {
+														onModal('failed', data.message);
 													} else if (data.header.indexOf("image/") !== -1 || data.header === 'text/plain; charset=utf-8') {
 														const fileURL = URL.createObjectURL(data.res);
 														window.open(fileURL, '_blank');
@@ -269,18 +269,22 @@ const File = ({
 													[ContentTypeHeader]: "application/json",
 													[AuthorizationHeader]: `Bearer ${walletData.tokens.object.bearer}`,
 												}).then((data) => {
-													const a = document.createElement('a');
-													document.body.appendChild(a);
-													const url = window.URL.createObjectURL(data.res);
-													a.href = url;
-													a.download = name;
-													a.target = '_blank';
-													a.click();
-													setTimeout(() => {
-														onModal();
-														window.URL.revokeObjectURL(url);
-														document.body.removeChild(a);
-													}, 0);
+													if (data.message) {
+														onModal('failed', data.message);
+													} else {
+														const a = document.createElement('a');
+														document.body.appendChild(a);
+														const url = window.URL.createObjectURL(data.res);
+														a.href = url;
+														a.download = name;
+														a.target = '_blank';
+														a.click();
+														setTimeout(() => {
+															onModal();
+															window.URL.revokeObjectURL(url);
+															document.body.removeChild(a);
+														}, 0);
+													}
 												});
 											}}
 											width={40}

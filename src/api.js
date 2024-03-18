@@ -30,7 +30,7 @@ export default function api(method, url, params = {}, headers = {}) {
 				});
 			} else {
 				let res = response;
-				if (method === 'GET' && url.indexOf(`/get/`) !== -1) {
+				if (method === 'GET' && url.indexOf(`/get/`) !== -1 && response.status === 200) {
 					res = await response.blob();
 					const header = response.headers.get('Content-Type');
 					resolve({ header, res, status: response.status });
