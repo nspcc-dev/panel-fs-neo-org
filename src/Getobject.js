@@ -24,10 +24,12 @@ const Getobject = ({
 		const objectId = searchParams.get('oid');
 		setParams({ token, containerId, objectId });
 
-		api('GET', `/objects/${containerId}/${objectId}?fullBearer=true`, {}, {
-			[ContentTypeHeader]: "application/json",
-			[AuthorizationHeader]: `Bearer ${token}`,
-		}).then((e) => {
+		const payload = {};
+		if (token) {
+			payload[ContentTypeHeader] = "application/json";
+			payload[AuthorizationHeader] = `Bearer ${token}`;
+		}
+		api('GET', `/objects/${containerId}/${objectId}?fullBearer=true`, {}, payload).then((e) => {
 			if (e.message) {
 				onModal('failed', e.message);
 			} else {
@@ -38,10 +40,13 @@ const Getobject = ({
 
 	const onDownload = () => {
 		onModal('loading');
-		api('GET', `/get/${params.containerId}/${params.objectId}`, {}, {
-			[ContentTypeHeader]: "application/json",
-			[AuthorizationHeader]: `Bearer ${params.token}`,
-		}).then((data) => {
+
+		const payload = {};
+		if (params.token) {
+			payload[ContentTypeHeader] = "application/json";
+			payload[AuthorizationHeader] = `Bearer ${params.token}`;
+		}
+		api('GET', `/get/${params.containerId}/${params.objectId}`, {}, payload).then((data) => {
 			if (data.message) {
 				onModal('failed', data.message);
 			} else {

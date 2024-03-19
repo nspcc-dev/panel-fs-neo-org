@@ -1457,7 +1457,7 @@ export const App = () => {
 						</div>
 						<Heading align="center" size={5} weight="bold">Sharing object</Heading>
 						<Heading align="center" size={6}>You can share a link to this object, it will be available for 1 day to everyone without authorization</Heading>
-						{!modal.text.token ? (
+						{!modal.text.token && modal.text.type === 'private' ? (
 							<div className="token_status_panel">
 								<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to share&nbsp;object</Heading>
 								<Button
@@ -1471,17 +1471,17 @@ export const App = () => {
 						) : (
 							<>
 								<a
-									href={`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}&token=${modal.text.token}`}
+									href={`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}${modal.text.token ? `&token=${modal.text.token}` : ''}`}
 									className="modal_highlighted_copy"
 									target="_blank"
 									rel="noopener noreferrer"
 								>
 									<span>
-										{`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}&token=${modal.text.token}`}
+										{`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}${modal.text.token ? `&token=${modal.text.token}` : ''}`}
 									</span>
 								</a>
 								<CopyToClipboard
-									text={`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}&token=${modal.text.token}`}
+									text={`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}${modal.text.token ? `&token=${modal.text.token}` : ''}`}
 									className="copy_text"
 									onCopy={() => {
 										setCopy(true);

@@ -253,7 +253,16 @@ const File = ({
 								<img
 									src="/img/icons/manage/share.png"
 									className="manage_icon"
-									onClick={() => onModal('shareObjectLink', { containerId: containerItem.containerId, objectId: objectItem.address.objectId })}
+									onClick={() => {
+										onModal('loading');
+										api('HEAD', `/get/${containerItem.containerId}/${objectItem.address.objectId}`).then((e) => {
+											onModal('shareObjectLink', {
+												type: e === 200 ? 'public' : 'private',
+												containerId: containerItem.containerId,
+												objectId: objectItem.address.objectId,
+											});
+										});
+									}}
 									width={40}
 									height={40}
 									alt="share an object"
