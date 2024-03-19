@@ -31,8 +31,6 @@ export default function ContainerItem({
 	BearerOwnerIdHeader,
 	BearerSignatureHeader,
 	BearerSignatureKeyHeader,
-	BearerLifetime,
-	BearerForAllUsers,
 }) {
 	const ObjectsPerPage = 40;
 	const [isOpen, setIsOpen] = useState(false);
@@ -344,8 +342,6 @@ export default function ContainerItem({
 															BearerOwnerIdHeader={BearerOwnerIdHeader}
 															BearerSignatureHeader={BearerSignatureHeader}
 															BearerSignatureKeyHeader={BearerSignatureKeyHeader}
-															BearerLifetime={BearerLifetime}
-															BearerForAllUsers={BearerForAllUsers}
 														/>
 														{!(pagination.page === 0 && pagination.objects === 0) && (
 															<div className="pagination">

@@ -24,8 +24,6 @@ const Branch = ({
 		BearerOwnerIdHeader,
 		BearerSignatureHeader,
 		BearerSignatureKeyHeader,
-		BearerLifetime,
-		BearerForAllUsers,
 	}) => {
 	return (
 		<Tree.Folder name={objectPath}>
@@ -46,8 +44,6 @@ const Branch = ({
 					BearerOwnerIdHeader={BearerOwnerIdHeader}
 					BearerSignatureHeader={BearerSignatureHeader}
 					BearerSignatureKeyHeader={BearerSignatureKeyHeader}
-					BearerLifetime={BearerLifetime}
-					BearerForAllUsers={BearerForAllUsers}
 				/>
 			)))}
 			{containerChildren[objectPath]['/'] && containerChildren[objectPath]['/'].map((objectItem, objectIndex) => (
@@ -65,8 +61,6 @@ const Branch = ({
 					BearerOwnerIdHeader={BearerOwnerIdHeader}
 					BearerSignatureHeader={BearerSignatureHeader}
 					BearerSignatureKeyHeader={BearerSignatureKeyHeader}
-					BearerLifetime={BearerLifetime}
-					BearerForAllUsers={BearerForAllUsers}
 				/>
 			))}
 		</Tree.Folder>
@@ -112,8 +106,6 @@ const File = ({
 		BearerOwnerIdHeader,
 		BearerSignatureHeader,
 		BearerSignatureKeyHeader,
-		BearerLifetime,
-		BearerForAllUsers,
 	}) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [objectDate, setObjectDate] = useState(null);
@@ -197,44 +189,6 @@ const File = ({
 												onModal('loading');
 												api('GET', `/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
 													[ContentTypeHeader]: "application/json",
-													[AuthorizationHeader]: `Bearer ${walletData.tokens.object.token}`,
-													[BearerOwnerIdHeader]: walletData.account.address,
-													[BearerSignatureHeader]: walletData.tokens.object.signature,
-													[BearerSignatureKeyHeader]: walletData.publicKey,
-												}).then((data) => {
-													if (data.status !== 200) {
-														onModal('failed', 'Object is not accessible without a token');
-													} else if (data.header.indexOf("image/") !== -1 || data.header === 'text/plain; charset=utf-8') {
-														const fileURL = URL.createObjectURL(data.res);
-														window.open(fileURL, '_blank');
-														onModal();
-													} else {
-														const a = document.createElement('a');
-														document.body.appendChild(a);
-														const url = window.URL.createObjectURL(data.res);
-														a.href = url;
-														a.download = name;
-														a.target = '_blank';
-														a.click();
-														setTimeout(() => {
-															onModal();
-															window.URL.revokeObjectURL(url);
-															document.body.removeChild(a);
-														}, 0);
-													}
-												});
-											}}
-											width={40}
-											height={40}
-											alt="get an object by link"
-										/>
-										<img
-											src="/img/icons/manage/unlock.png"
-											className="manage_icon"
-											onClick={() => {
-												onModal('loading');
-												api('GET', `/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
-													[ContentTypeHeader]: "application/json",
 													[AuthorizationHeader]: `Bearer ${walletData.tokens.object.bearer}`,
 												}).then((data) => {
 													if (data.message) {
@@ -299,7 +253,16 @@ const File = ({
 								<img
 									src="/img/icons/manage/share.png"
 									className="manage_icon"
-									onClick={() => onModal('shareObjectLink', { containerId: containerItem.containerId, objectId: objectItem.address.objectId })}
+									onClick={() => {
+										onModal('loading');
+										api('HEAD', `/get/${containerItem.containerId}/${objectItem.address.objectId}`).then((e) => {
+											onModal('shareObjectLink', {
+												type: e === 200 ? 'public' : 'private',
+												containerId: containerItem.containerId,
+												objectId: objectItem.address.objectId,
+											});
+										});
+									}}
 									width={40}
 									height={40}
 									alt="share an object"
@@ -350,8 +313,6 @@ export default function TreeView({
 	BearerOwnerIdHeader,
 	BearerSignatureHeader,
 	BearerSignatureKeyHeader,
-	BearerLifetime,
-	BearerForAllUsers,
 }) {
 	return (
 		<Tree>
@@ -373,8 +334,6 @@ export default function TreeView({
 							BearerOwnerIdHeader={BearerOwnerIdHeader}
 							BearerSignatureHeader={BearerSignatureHeader}
 							BearerSignatureKeyHeader={BearerSignatureKeyHeader}
-							BearerLifetime={BearerLifetime}
-							BearerForAllUsers={BearerForAllUsers}
 						/>
 					)}
 					{Object.keys(objects).length === (index + 1) && objects['/'] && objects['/'].map((objectItem, objectIndex) => (
@@ -392,8 +351,6 @@ export default function TreeView({
 							BearerOwnerIdHeader={BearerOwnerIdHeader}
 							BearerSignatureHeader={BearerSignatureHeader}
 							BearerSignatureKeyHeader={BearerSignatureKeyHeader}
-							BearerLifetime={BearerLifetime}
-							BearerForAllUsers={BearerForAllUsers}
 						/>
 					))}
 				</div>
