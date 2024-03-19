@@ -19,7 +19,7 @@ import {
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import Home from './Home';
 import Profile from './Profile';
-import Share from './Share';
+import Getobject from './Getobject';
 import EACLPanel from './Components/EACLPanel/EACLPanel';
 import api from './api';
 import Neon from "@cityofzion/neon-js";
@@ -171,7 +171,7 @@ export const App = () => {
 	};
 
 	useEffect(() => {
-		if (wcSdk.isConnected() && location.pathname.indexOf('/share') === -1) {
+		if (wcSdk.isConnected() && location.pathname.indexOf('/getobject') === -1) {
 			setWalletData({
 				name:  wcSdk.session.peer.metadata.name,
 				type: wcSdk.session.namespaces.neo3.accounts[0].split(':')[0],
@@ -188,10 +188,10 @@ export const App = () => {
 			onPopup('success', 'Wallet connected');
 			onModal();
 
-			if (location.pathname.indexOf('/profile') === -1 && location.pathname.indexOf('/share') === -1) {
+			if (location.pathname.indexOf('/profile') === -1 && location.pathname.indexOf('/getobject') === -1) {
 				navigate('/profile');
 			}
-		} else if (location.pathname !== '/' && location.pathname.indexOf('/share') === -1) {
+		} else if (location.pathname !== '/' && location.pathname.indexOf('/getobject') === -1) {
 			document.location.href = "/";
 		}
 	}, [wcSdk]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -1471,15 +1471,15 @@ export const App = () => {
 						) : (
 							<>
 								<a
-									href={`${document.location.origin}/share/${modal.text.containerId}/${modal.text.objectId}?token=${modal.text.token}`}
+									href={`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}&token=${modal.text.token}`}
 									className="modal_highlighted_copy"
 									target="_blank"
 									rel="noopener noreferrer"
 								>
-									{`${document.location.origin}/share/${modal.text.containerId}/${modal.text.objectId}?token=${modal.text.token}`}
+										{`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}&token=${modal.text.token}`}
 								</a>
 								<CopyToClipboard
-									text={`${document.location.origin}/share/${modal.text.containerId}/${modal.text.objectId}?token=${modal.text.token}`}
+									text={`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}&token=${modal.text.token}`}
 									className="copy_text"
 									onCopy={() => {
 										setCopy(true);
@@ -1746,8 +1746,8 @@ export const App = () => {
 					/>}
 				/>
 				<Route
-					path="/share/:containerId/:objectId"
-					element={<Share
+					path="/getobject"
+					element={<Getobject
 						onModal={onModal}
 						formatBytes={formatBytes}
 						ContentTypeHeader={ContentTypeHeader}

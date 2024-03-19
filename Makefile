@@ -32,6 +32,7 @@ start:
 .PHONY: release
 release: $(SITE_DIR)
 	cp $(SITE_DIR)/index.html $(SITE_DIR)/profile
+	cp $(SITE_DIR)/index.html $(SITE_DIR)/getobject
 	@ln -sf $(SITE_DIR) $(RELEASE_DIR)
 	@tar cfvhz $(RELEASE_PATH) $(RELEASE_DIR)
 
