@@ -1778,8 +1778,6 @@ export const App = () => {
 						BearerOwnerIdHeader={BearerOwnerIdHeader}
 						BearerSignatureHeader={BearerSignatureHeader}
 						BearerSignatureKeyHeader={BearerSignatureKeyHeader}
-						BearerLifetime={BearerLifetime}
-						BearerForAllUsers={BearerForAllUsers}
 						onModal={onModal}
 						onPopup={onPopup}
 					/>}

@@ -32,8 +32,6 @@ const Profile = ({
 		BearerOwnerIdHeader,
 		BearerSignatureHeader,
 		BearerSignatureKeyHeader,
-		BearerLifetime,
-		BearerForAllUsers,
 		onAuth,
 	}) => {
 	const [isLoading, setIsLoading] = useState(false);
@@ -300,8 +298,6 @@ const Profile = ({
 								BearerOwnerIdHeader={BearerOwnerIdHeader}
 								BearerSignatureHeader={BearerSignatureHeader}
 								BearerSignatureKeyHeader={BearerSignatureKeyHeader}
-								BearerLifetime={BearerLifetime}
-								BearerForAllUsers={BearerForAllUsers}
 							/>
 						))}
 					</Box>
