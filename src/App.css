@@ -619,6 +619,13 @@ label.panel-block:hover {
     margin: 10px 10px 20px;
 }
 
+.modal_highlighted_copy span {
+    -webkit-line-clamp: 3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 .modal_close {
     padding: 5px;
     position: absolute;

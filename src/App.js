@@ -1476,7 +1476,9 @@ export const App = () => {
 									target="_blank"
 									rel="noopener noreferrer"
 								>
+									<span>
 										{`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}&token=${modal.text.token}`}
+									</span>
 								</a>
 								<CopyToClipboard
 									text={`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}&token=${modal.text.token}`}
