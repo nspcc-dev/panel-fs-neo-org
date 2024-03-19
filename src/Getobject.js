@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-	useParams,
-	useSearchParams,
-} from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import {
 	Container,
 	Section,
@@ -11,20 +8,21 @@ import {
 } from 'react-bulma-components';
 import api from './api';
 
-const Share = ({
+const Getobject = ({
 		onModal,
 		formatBytes,
 		ContentTypeHeader,
 		AuthorizationHeader,
 	}) => {
-	const { containerId, objectId } = useParams();
 	const [searchParams] = useSearchParams();
 	const [objectData, setObjectData] = useState(null);
-	const [token, setToken] = useState(null);
+	const [params, setParams] = useState(null);
 
 	useEffect(() => {
-		const token = searchParams.get('token').replace(/ /g, '+');
-		setToken(token);
+		const token = searchParams.get('token') ? searchParams.get('token').replace(/ /g, '+') : '';
+		const containerId = searchParams.get('cid');
+		const objectId = searchParams.get('oid');
+		setParams({ token, containerId, objectId });
 
 		api('GET', `/objects/${containerId}/${objectId}?fullBearer=true`, {}, {
 			[ContentTypeHeader]: "application/json",
@@ -40,9 +38,9 @@ const Share = ({
 
 	const onDownload = () => {
 		onModal('loading');
-		api('GET', `/get/${containerId}/${objectId}`, {}, {
+		api('GET', `/get/${params.containerId}/${params.objectId}`, {}, {
 			[ContentTypeHeader]: "application/json",
-			[AuthorizationHeader]: `Bearer ${token}`,
+			[AuthorizationHeader]: `Bearer ${params.token}`,
 		}).then((data) => {
 			if (data.message) {
 				onModal('failed', data.message);
@@ -51,7 +49,7 @@ const Share = ({
 				document.body.appendChild(a);
 				const url = window.URL.createObjectURL(data.res);
 				a.href = url;
-				a.download = objectData['x-attribute-filename'] ? objectData['x-attribute-filename'] : objectId;
+				a.download = objectData['x-attribute-filename'] ? objectData['x-attribute-filename'] : params.objectId;
 				a.target = '_blank';
 				a.click();
 				setTimeout(() => {
@@ -65,7 +63,7 @@ const Share = ({
 
 	return (
 		<Container style={{ minHeight: 'calc(100vh - 217px)' }}>
-			{containerId && objectId ? (
+			{params && params.containerId && params.objectId ? (
 				<Section>
 					<Box id="share">
 						<Heading weight="bold">Sharing object</Heading>
@@ -74,11 +72,11 @@ const Share = ({
 								<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Information</Heading>
 								<Heading size={6} weight="light">
 									<span>{`Container id: `}</span>
-									{containerId}
+									{params.containerId}
 								</Heading>
 								<Heading size={6} weight="light">
 									<span>{`Object id: `}</span>
-									{objectId}
+									{params.objectId}
 								</Heading>
 								{objectData && (
 									<>
@@ -136,4 +134,4 @@ const Share = ({
 	);
 };
 
-export default Share;
+export default Getobject;
