@@ -216,6 +216,7 @@ const File = ({
 											width={40}
 											height={40}
 											alt="get an object by bearer"
+											title="get an object by bearer"
 										/>
 										<img
 											src="/img/icons/manage/download.png"
@@ -247,6 +248,7 @@ const File = ({
 											width={40}
 											height={40}
 											alt="download an object"
+											title="download an object"
 										/>
 									</>
 								)}
@@ -266,6 +268,7 @@ const File = ({
 									width={40}
 									height={40}
 									alt="share an object"
+									title="share an object"
 								/>
 								<img
 									src="/img/icons/manage/delete.png"
@@ -277,6 +280,7 @@ const File = ({
 									width={40}
 									height={40}
 									alt="delete an object"
+									title="delete an object"
 								/>
 							</Section>
 						</>
