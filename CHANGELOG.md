@@ -4,6 +4,15 @@ Changelog for NeoFS Panel
 
 ## [Unreleased]
 
+## [0.5.1] - 2024-03-20
+
+### Fixed
+- Link to share objects was incompatible with NeoFS hosting (#180)
+- Confusing duplication of links to access object with/without token (#181)
+
+### Changed
+- Minor UI optimizations (#184)
+
 ## [0.5.0] - 2024-03-18
 
 ### Added
@@ -103,4 +112,5 @@ First public review release.
 [0.3.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.3.1
 [0.4.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.4.0
 [0.5.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.5.0
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.5.0...master
+[0.5.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.5.1
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.5.1...master

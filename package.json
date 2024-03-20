@@ -1,6 +1,6 @@
 {
   "name": "neofs-panel",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "dependencies": {
     "@cityofzion/neon-js": "^5.5.1",
