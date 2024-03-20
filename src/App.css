@@ -132,7 +132,7 @@ label.is-error {
     font-weight: 400;
     border-left: 2px solid #ffd781;
     margin-top: 1em;
-    margin-bottom: 1rem;
+    margin-bottom: 1rem !important;
     padding-left: 7px;
 }
 
@@ -194,8 +194,8 @@ ul {
     align-items: center;
     justify-content: flex-start;
     text-transform: none;
-    min-width: 200px;
-    margin-bottom: 10px;
+    min-width: 300px;
+    margin: 0 auto 15px;
 }
 
 .btn_connect_wallet img {

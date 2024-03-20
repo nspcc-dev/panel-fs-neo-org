@@ -115,6 +115,7 @@ const Getobject = ({
 										width={40}
 										height={40}
 										alt="download an object"
+										title="download an object"
 									/>
 								) : '-'}
 							</Section>
