@@ -132,7 +132,7 @@ label.is-error {
     font-weight: 400;
     border-left: 2px solid #ffd781;
     margin-top: 1em;
-    margin-bottom: 1rem;
+    margin-bottom: 1rem !important;
     padding-left: 7px;
 }
 

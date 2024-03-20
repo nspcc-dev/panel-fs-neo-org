@@ -1573,6 +1573,7 @@ export const App = () => {
 							/>
 						</div>
 						<Heading align="center" size={5} weight="bold">{`Withdraw from NeoFS to ${activeNet}`}</Heading>
+						<Heading className="input_caption" style={{ maxWidth: 320 }}>Withdrawing requires a fee to be paid, currently it's 7 GAS. It will be reduced once the <a href="https://github.com/neo-project/neo/issues/1573" target="_blank" rel="noopener noreferrer" alt="neofs-node">notary subsystem</a> is implemented in Neo</Heading>
 						<Form.Field>
 							<Form.Label size="small" weight="light">Quantity (GAS)</Form.Label>
 							<Form.Control>
