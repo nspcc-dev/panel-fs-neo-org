@@ -12,6 +12,10 @@ import {
 import ContainerItem from './Components/ContainerItem/ContainerItem';
 import api from './api';
 
+function formatAddress(address) {
+	return `${address.slice(0, 4)}...${address.slice(-4)}`;
+}
+
 const Profile = ({
 		params,
 		formatBytes,
@@ -180,8 +184,8 @@ const Profile = ({
 					)}
 					<Box id="account">
 						<Heading style={{ marginBottom: 15 }} weight="bold">
-							<span style={{ margin: '0 15px 0 0' }}>{walletData.name}</span>
-							<Tag style={{ margin: '5px 0 10px' }}>{`${walletData.account.address}`}</Tag>
+							<span style={{ margin: '0 15px 0 0' }}>{formatAddress(walletData.account.address)}</span>
+							<Tag style={{ margin: '5px 0 10px' }}>{walletData.name}</Tag>
 						</Heading>
 						<Heading size={6} weight="light" style={{ display: 'flex', marginBottom: 15 }}>
 							<span style={{ fontWeight: 600, marginRight: 5 }}>{`${activeNet}:`}</span>
