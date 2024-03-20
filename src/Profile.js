@@ -231,22 +231,24 @@ const Profile = ({
 								/>
 							)}
 						</Heading>
-						<Button
-							color="primary"
-							size="small"
-							onClick={() => onModal('deposit', { neoBalance })}
-							style={isNotAvailableNeoFS ? { display: 'block', marginBottom: 15, pointerEvents: 'none', opacity: 0.6 } : { display: 'block', marginBottom: 15 }}
-						>
-							{`Deposit from ${activeNet} to NeoFS`}
-						</Button>
-						<Button
-							color="primary"
-							size="small"
-							onClick={() => onModal('withdraw', { neoFSBalance })}
-							style={isNotAvailableNeoFS ? { display: 'block', pointerEvents: 'none', opacity: 0.6 } : { display: 'block' }}
-						>
-							{`Withdraw from NeoFS to ${activeNet}`}
-						</Button>
+						<div style={{ display: 'flex', flexWrap: 'wrap' }}>
+							<Button
+								color="primary"
+								size="small"
+								onClick={() => onModal('deposit', { neoBalance })}
+								style={isNotAvailableNeoFS ? { display: 'block', margin: '0 10px 10px 0', pointerEvents: 'none', opacity: 0.6 } : { display: 'block', margin: '0 10px 10px 0' }}
+							>
+								{`Deposit from ${activeNet} to NeoFS`}
+							</Button>
+							<Button
+								color="primary"
+								size="small"
+								onClick={() => onModal('withdraw', { neoFSBalance })}
+								style={isNotAvailableNeoFS ? { display: 'block', pointerEvents: 'none', opacity: 0.6 } : { display: 'block' }}
+							>
+								{`Withdraw from NeoFS to ${activeNet}`}
+							</Button>
+						</div>
 					</Box>
 					<Box id="containers">
 						<Heading style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} weight="bold">
