@@ -10,7 +10,7 @@ import {
 } from 'react-bulma-components';
 
 const Home = ({
-		onModal,
+		onConnectWallet,
 	}) => {
 
 	return (
@@ -32,17 +32,36 @@ const Home = ({
 						</Tile>
 					) : (
 						<>
-							<Heading align="center">Connect your wallet to log&nbsp;in</Heading>
+							<Heading align="center" size={6}>Welcome to NeoFS Panel, it allows you to move funds from/to NeoFS and manage containers and objects via web UI</Heading>
+							<Heading align="center" size={6} weight="normal">Connect your wallet to log&nbsp;in</Heading>
 							<Button
-								color="primary"
-								onClick={() => onModal('connectWallet')}
-								style={{ display: 'flex', margin: '0 auto 20px' }}
+								className="btn_connect_wallet"
+								onClick={() => onConnectWallet('neoline')}
 							>
-								Connect wallet
+								NeoLine
+								<img src="/img/icons/wallets/neoline.svg" alt="neoline logo" />
 							</Button>
-							<Heading align="center" size={6} weight="normal">
-								Built with <a href="https://walletconnect.com/" target="_blank" rel="noopener noreferrer">WalletConnect</a>, tested with <a href="https://neonwallet.com/" target="_blank" rel="noopener noreferrer">NEON wallet</a>, <a href="https://neoline.io/" target="_blank" rel="noopener noreferrer">NeoLine extension</a>, <a href="https://o3.network/#/wallet" target="_blank" rel="noopener noreferrer">O3 wallet</a>, <a href="https://onegate.space/" target="_blank" rel="noopener noreferrer">OneGate wallet (Mobile)</a>.
-							</Heading>
+							<Button
+								className="btn_connect_wallet"
+								onClick={() => onConnectWallet('o3')}
+							>
+								O3
+								<img src="/img/icons/wallets/o3.svg" alt="o3 logo" />
+							</Button>
+							<Button
+								className="btn_connect_wallet"
+								onClick={() => onConnectWallet('neon')}
+							>
+								Neon
+								<img src="/img/icons/wallets/neon.svg" alt="neon logo" />
+							</Button>
+							<Button
+								className="btn_connect_wallet"
+								onClick={() => onConnectWallet('onegate')}
+							>
+								Onegate
+								<img src="/img/icons/wallets/onegate.svg" alt="onegate logo" />
+							</Button>
 						</>
 					)}
 				</Box>

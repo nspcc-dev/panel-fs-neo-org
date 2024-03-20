@@ -194,8 +194,8 @@ ul {
     align-items: center;
     justify-content: flex-start;
     text-transform: none;
-    min-width: 200px;
-    margin-bottom: 10px;
+    min-width: 300px;
+    margin: 0 auto 15px;
 }
 
 .btn_connect_wallet img {

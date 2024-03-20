@@ -779,60 +779,6 @@ export const App = () => {
 					</div>
 				</div>
 			)}
-			{modal.current === 'connectWallet' && (
-				<div className="modal">
-					<div
-						className="modal_close_panel"
-						onClick={onModal}
-					/>
-					<div className="modal_content" style={{ maxWidth: 400 }}>
-						<div
-							className="modal_close"
-							onClick={onModal}
-						>
-							<img
-								src="/img/icons/close.svg"
-								height={30}
-								width={30}
-								alt="loader"
-							/>
-						</div>
-						<Heading align="center" size={5} weight="bold">Select wallet</Heading>
-						<Button
-							color="secondary"
-							className="btn_connect_wallet"
-							onClick={() => onConnectWallet('neoline')}
-						>
-							NeoLine
-							<img src="/img/icons/wallets/neoline.svg" alt="neoline logo" />
-						</Button>
-						<Button
-							color="secondary"
-							className="btn_connect_wallet"
-							onClick={() => onConnectWallet('o3')}
-						>
-							O3
-							<img src="/img/icons/wallets/o3.svg" alt="o3 logo" />
-						</Button>
-						<Button
-							color="secondary"
-							className="btn_connect_wallet"
-							onClick={() => onConnectWallet('neon')}
-						>
-							Neon
-							<img src="/img/icons/wallets/neon.svg" alt="neon logo" />
-						</Button>
-						<Button
-							color="secondary"
-							className="btn_connect_wallet"
-							onClick={() => onConnectWallet('onegate')}
-						>
-							Onegate
-							<img src="/img/icons/wallets/onegate.svg" alt="onegate logo" />
-						</Button>
-					</div>
-				</div>
-			)}
 			{modal.current === 'signTokens' && (
 				<div className="modal">
 					<div
@@ -1744,7 +1690,7 @@ export const App = () => {
 				<Route
 					path="/"
 					element={<Home
-						onModal={onModal}
+						onConnectWallet={onConnectWallet}
 					/>}
 				/>
 				<Route
