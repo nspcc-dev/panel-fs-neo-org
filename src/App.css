@@ -262,6 +262,7 @@ ul {
 .panel-block-content {
     margin: 10px 0;
     cursor: default;
+    width: 100%;
 }
 
 .panel-block-content .field.is-grouped>.control {
