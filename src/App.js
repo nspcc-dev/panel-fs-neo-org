@@ -128,12 +128,37 @@ export const App = () => {
 			name: 'allow reads for others',
 			preset: 'shared',
 			eACLParams: [{
+				"operation": "PUT",
+				"action": "DENY",
+				"filters": [],
+				"targets": [{ "keys": [], "role": "OTHERS" }],
+			}, {
+				"operation": "DELETE",
+				"action": "DENY",
+				"filters": [],
+				"targets": [{ "keys": [], "role": "OTHERS" }],
+			}, {
+				"operation": "SEARCH",
+				"action": "DENY",
+				"filters": [],
+				"targets": [{ "keys": [], "role": "OTHERS" }],
+			}, {
 				"operation": "GET",
 				"action": "ALLOW",
 				"filters": [],
 				"targets": [{ "keys": [], "role": "OTHERS" }],
 			}, {
 				"operation": "HEAD",
+				"action": "ALLOW",
+				"filters": [],
+				"targets": [{ "keys": [], "role": "OTHERS" }],
+			}, {
+				"operation": "RANGE",
+				"action": "ALLOW",
+				"filters": [],
+				"targets": [{ "keys": [], "role": "OTHERS" }],
+			}, {
+				"operation": "RANGEHASH",
 				"action": "ALLOW",
 				"filters": [],
 				"targets": [{ "keys": [], "role": "OTHERS" }],
