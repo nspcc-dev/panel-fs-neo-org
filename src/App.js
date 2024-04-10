@@ -779,6 +779,73 @@ export const App = () => {
 					</div>
 				</div>
 			)}
+			{modal.current === 'installWallet' && (
+				<div className="modal">
+					<div
+						className="modal_close_panel"
+						onClick={onModal}
+					/>
+					<div className="modal_content">
+						<div
+							className="modal_close"
+							onClick={onModal}
+						>
+							<img
+								src="/img/icons/close.svg"
+								height={30}
+								width={30}
+								alt="loader"
+							/>
+						</div>
+						<Heading align="center" size={5} weight="bold">New here?</Heading>
+						<Heading className="input_caption" style={{ width: '300px', margin: '0 auto 15px' }}>In order to use Panel you need to connect a Neo N3 wallet.</Heading>
+						<a
+							href="https://neoline.io/"
+							style={{ textDecoration: 'none' }}
+							rel="noopener noreferrer"
+							target="_blank"
+						>
+							<Button className="btn_connect_wallet">
+								Install NeoLine
+								<img src="/img/icons/wallets/neoline.svg" alt="neoline logo" />
+							</Button>
+						</a>
+						<a
+							href="https://o3.network/#/wallet"
+							style={{ textDecoration: 'none' }}
+							rel="noopener noreferrer"
+							target="_blank"
+						>
+							<Button className="btn_connect_wallet">
+								Install O3
+								<img src="/img/icons/wallets/o3.svg" alt="o3 logo" />
+							</Button>
+						</a>
+						<a
+							href="https://neon.coz.io/"
+							style={{ textDecoration: 'none' }}
+							rel="noopener noreferrer"
+							target="_blank"
+						>
+							<Button className="btn_connect_wallet">
+								Install Neon
+								<img src="/img/icons/wallets/neon.svg" alt="neon logo" />
+							</Button>
+						</a>
+						<a
+							href="https://onegate.space/"
+							style={{ textDecoration: 'none' }}
+							rel="noopener noreferrer"
+							target="_blank"
+						>
+							<Button className="btn_connect_wallet">
+								Install Onegate
+								<img src="/img/icons/wallets/onegate.svg" alt="onegate logo" />
+							</Button>
+						</a>
+					</div>
+				</div>
+			)}
 			{modal.current === 'signTokens' && (
 				<div className="modal">
 					<div
@@ -1691,6 +1758,7 @@ export const App = () => {
 				<Route
 					path="/"
 					element={<Home
+						onModal={onModal}
 						onConnectWallet={onConnectWallet}
 					/>}
 				/>

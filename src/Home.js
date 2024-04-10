@@ -10,6 +10,7 @@ import {
 } from 'react-bulma-components';
 
 const Home = ({
+		onModal,
 		onConnectWallet,
 	}) => {
 
@@ -62,6 +63,7 @@ const Home = ({
 								Onegate
 								<img src="/img/icons/wallets/onegate.svg" alt="onegate logo" />
 							</Button>
+							<Heading align="center" size={6} weight="normal" style={{ textDecoration: 'underline', cursor: 'pointer' }} onClick={() => onModal('installWallet')}>I don't have a wallet</Heading>
 						</>
 					)}
 				</Box>
