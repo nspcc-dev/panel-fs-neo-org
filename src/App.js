@@ -1494,7 +1494,7 @@ export const App = () => {
 							/>
 						</div>
 						<Heading align="center" size={5} weight="bold">Sharing object</Heading>
-						<Heading align="center" size={6}>You can share a link to this object, it will be available for 1 day to everyone without authorization</Heading>
+						<Heading align="center" size={6}>{`You can share a link to this object, it will be available ${modal.text.type === 'private' ? 'for 1 day' : 'until EACL change'} to everyone without authorization`}</Heading>
 						{!modal.text.token && modal.text.type === 'private' ? (
 							<div className="token_status_panel">
 								<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to share&nbsp;object</Heading>
