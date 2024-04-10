@@ -171,7 +171,37 @@ export default function EACLPanel({
 								</Form.Control>
 							</Form.Field>
 							{isEdit && (
-								<Heading align="center" weight="normal" size={6} style={{ marginBottom: 10 }}>Filters</Heading>
+								<Heading
+									align="center"
+									weight="normal"
+									size={6}
+									style={{
+										marginBottom: '10px',
+										display: 'flex',
+										alignItems: 'center',
+										justifyContent: 'space-between',
+									}}
+								>
+									Filters
+									<Button
+										color="primary"
+										size="small"
+										onClick={() => {
+											if (!isLoadingForm) {
+												let aECLParamsTemp = [...eACLParams];
+												aECLParamsTemp[index].filters.push({
+													headerType: "",
+													matchType: "",
+													key: "",
+													value: ""
+												});
+												setEACLParams(aECLParamsTemp);
+											}
+										}}
+									>
+										Add filter
+									</Button>
+								</Heading>
 							)}
 							{eACLItem.filters.map((filterItem, filterIndex) => (
 								<Form.Field className="panel-block-content" kind="group" key={filterIndex}>
@@ -253,27 +283,6 @@ export default function EACLPanel({
 									)}
 								</Form.Field>
 							))}
-							{isEdit && (
-								<Button
-									color="primary"
-									size="small"
-									onClick={() => {
-										if (!isLoadingForm) {
-											let aECLParamsTemp = [...eACLParams];
-											aECLParamsTemp[index].filters.push({
-												headerType: "",
-												matchType: "",
-												key: "",
-												value: ""
-											});
-											setEACLParams(aECLParamsTemp);
-										}
-									}}
-									style={{ display: 'flex', margin: 'auto' }}
-								>
-									Add filter
-								</Button>
-							)}
 						</div>
 					)}
 				</Panel.Block>
