@@ -1878,13 +1878,18 @@ export const App = () => {
 					</a>
 				</div>
 				<Heading
-					size={6}
+					size={7}
 					weight="light"
 					subtitle
 					align="center"
 					style={{ marginBottom: 0 }}
 				>
-					NeoFS Panel
+					<a
+						href="https://fs.neo.org/hosting/"
+						target="_blank"
+						rel="noopener noreferrer"
+						style={{ textDecoration: 'underline', color: '#003' }}
+					>Hosted on NeoFS</a>
 				</Heading>
 				<Heading
 					size={7}

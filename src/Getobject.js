@@ -67,7 +67,7 @@ const Getobject = ({
 	};
 
 	return (
-		<Container style={{ minHeight: 'calc(100vh - 217px)' }}>
+		<Container style={{ minHeight: 'calc(100vh - 212px)' }}>
 			{params && params.containerId && params.objectId ? (
 				<Section>
 					<Box id="share">
