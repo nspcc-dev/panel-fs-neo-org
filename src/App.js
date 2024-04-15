@@ -756,7 +756,7 @@ export const App = () => {
 				wcSdk.setSession(session);
 			}
 		} catch (error) {
-			onModal('failed', 'Failed to connect to the wallet, please try again');
+			onModal('failed', type === 'onegate' ? 'OneGate connection works only if you open the page from OneGate explorer' : 'Failed to connect to the wallet, please try again');
 		}
 	}
 
@@ -1836,6 +1836,7 @@ export const App = () => {
 					path="/"
 					element={<Home
 						onModal={onModal}
+						dapi={dapi}
 						onConnectWallet={onConnectWallet}
 					/>}
 				/>

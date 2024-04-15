@@ -205,6 +205,12 @@ ul {
     right: 15px;
 }
 
+.btn_connect_wallet span {
+    color: #00e599;
+    position: absolute;
+    right: 15px;
+}
+
 .box {
     border-radius: 0;
 }
