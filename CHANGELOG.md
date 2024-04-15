@@ -4,6 +4,23 @@ Changelog for NeoFS Panel
 
 ## [Unreleased]
 
+## [0.5.2] - 2024-04-15
+
+### Added
+- Wallet installation instructions (#198)
+- "Hosted on NeoFS" (#203)
+- Container creation cost message (#204)
+- OneGate instructions (#207)
+
+### Fixed
+- Missing restrictions for "allow reads for others" EACL preset (#201)
+- "Share" link text for open containers (#202)
+- Incorrect background (#206)
+
+### Changed
+- Filter/rule addition button placement (#200)
+- WalletConnect popup to in-page modal screen (#205)
+
 ## [0.5.1] - 2024-03-20
 
 ### Fixed
@@ -113,4 +130,5 @@ First public review release.
 [0.4.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.4.0
 [0.5.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.5.0
 [0.5.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.5.1
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.5.1...master
+[0.5.2]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.5.2
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.5.2...master
