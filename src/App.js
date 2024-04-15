@@ -26,6 +26,7 @@ import Neon from "@cityofzion/neon-js";
 import { useWalletConnect } from "@cityofzion/wallet-connect-sdk-react";
 import { BaseDapi } from '@neongd/neo-dapi';
 import neo3Dapi from "neo3-dapi";
+import QRCode from "react-qr-code";
 import 'bulma/css/bulma.min.css';
 import './App.css';
 
@@ -750,7 +751,7 @@ export const App = () => {
 				}
 			} else {
 				const { uri, approval } = await wcSdk.createConnection(`neo3:${activeNet.toLowerCase()}`, ['invokeFunction', 'testInvoke', 'signMessage', 'verifyMessage']);
-				window.open(`https://neon.coz.io/connect?uri=${uri}`, '_blank').focus();
+				onModal('connectWallet', uri);
 				const session = await approval();
 				wcSdk.setSession(session);
 			}
@@ -801,6 +802,56 @@ export const App = () => {
 						</div>
 						<Heading align="center" size={5} weight="bold">{modal.current === 'success' ? 'Success' : 'Failed'}</Heading>
 						<Heading align="center" size={6} weight="normal">{modal.text}</Heading>
+					</div>
+				</div>
+			)}
+			{modal.current === 'connectWallet' && (
+				<div className="modal">
+					<div
+						className="modal_close_panel"
+						onClick={onModal}
+					/>
+					<div className="modal_content" style={{ maxWidth: 400 }}>
+						<div
+							className="modal_close"
+							onClick={onModal}
+						>
+							<img
+								src="/img/icons/close.svg"
+								height={30}
+								width={30}
+								alt="loader"
+							/>
+						</div>
+						<Heading align="center" size={5} weight="bold">Select connection method</Heading>
+						<Heading align="center" size={6} style={{ marginBottom: 10 }}>QR code connection</Heading>
+						<Heading align="center" size={7} weight="normal">Please scan QR code to connect your wallet on a compatible device</Heading>
+						<div style={{ margin: "0 auto 20px", width: 128 }}>
+							<QRCode
+								value={modal.text}
+								style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+							/>
+						</div>
+						<Heading align="center" size={6} style={{ marginBottom: 10 }}>Connection URL</Heading>
+						<Heading align="center" size={7} weight="normal">Copy and paste the connection URL into the Add connection page in your wallet</Heading>
+						<CopyToClipboard
+							text={modal.text}
+							className="modal_highlighted_copy"
+							style={{ marginBottom: 0 }}
+							onCopy={() => {
+								setCopy(true);
+								setTimeout(() => {
+									setCopy(false);
+								}, 700);
+							}}
+						>
+							<div>
+								{modal.text}
+								{isCopied && (
+									<div className="tooltip">Copied!</div>
+								)}
+							</div>
+						</CopyToClipboard>
 					</div>
 				</div>
 			)}
