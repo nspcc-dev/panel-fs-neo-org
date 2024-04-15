@@ -1032,6 +1032,7 @@ export const App = () => {
 									Container creation is a paid operation, make sure you have sufficient NeoFS chain balance
 								</Notification>
 							)}
+							<Heading className="input_caption">Container cost is 0.0070000014 GAS for mainnet now.</Heading>
 							<Form.Field>
 								<Form.Label>Name</Form.Label>
 								<Form.Control>
