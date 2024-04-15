@@ -381,7 +381,7 @@ label.panel-block:hover {
     font-size: 12px;
     border-radius: 4px;
     color: #fff;
-    top: -80%;
+    top: -24px;
 }
 
 .tooltip:after {
@@ -614,10 +614,12 @@ label.panel-block:hover {
     color: #003 !important;
     background: #f0f5f6;
     display: flex;
+    justify-content: center;
     padding: 10px;
     border-radius: 4px;
     word-break: break-all;
     margin: 10px 10px 20px;
+    position: relative;
 }
 
 .modal_highlighted_copy span {
