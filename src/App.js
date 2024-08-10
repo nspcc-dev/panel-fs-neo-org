@@ -68,6 +68,7 @@ export const App = () => {
 		rest_gw: process.env.REACT_APP_RESTGW ? process.env.REACT_APP_RESTGW : 'https://rest.t5.fs.neo.org/v1',
 	});
 
+	const [networkInfo, setNetworkInfo] = useState(null);
 	const [depositQuantity, setDepositQuantity] = useState(0);
 	const [withdrawQuantity, setWithdrawQuantity] = useState(0);
 	const [attributes, setAttributes] = useState([]);
@@ -213,6 +214,12 @@ export const App = () => {
 			});
 			onPopup('success', 'Wallet connected');
 			onModal();
+
+			api('GET', '/network-info').then((e) => {
+				if (!e.message) {
+					setNetworkInfo(e);
+				}
+			});
 
 			if (location.pathname.indexOf('/profile') === -1 && location.pathname.indexOf('/getobject') === -1) {
 				navigate('/profile');
@@ -1083,7 +1090,7 @@ export const App = () => {
 									Container creation is a paid operation, make sure you have sufficient NeoFS chain balance
 								</Notification>
 							)}
-							<Heading className="input_caption">Container cost is 0.0070000014 GAS for mainnet now.</Heading>
+							<Heading className="input_caption">{`Container cost is ${networkInfo ? 7 * (networkInfo.containerFee + networkInfo.namedContainerFee) * 1e-12 : '-'} GAS for mainnet now.`}</Heading>
 							<Form.Field>
 								<Form.Label>Name</Form.Label>
 								<Form.Control>
@@ -1717,7 +1724,7 @@ export const App = () => {
 							/>
 						</div>
 						<Heading align="center" size={5} weight="bold">{`Withdraw from NeoFS to ${activeNet}`}</Heading>
-						<Heading className="input_caption" style={{ maxWidth: 320 }}>Withdrawing requires a fee to be paid, currently it's 7 GAS. It will be reduced once the <a href="https://github.com/neo-project/neo/issues/1573" target="_blank" rel="noopener noreferrer" alt="neofs-node">notary subsystem</a> is implemented in Neo</Heading>
+						<Heading className="input_caption" style={{ maxWidth: 310 }}>{`Withdrawing requires a fee to be paid, currently it's ${networkInfo ? 7 * networkInfo.withdrawalFee * 1e-8  : '-'} GAS.`} It will be reduced once the <a href="https://github.com/neo-project/neo/issues/1573" target="_blank" rel="noopener noreferrer" alt="neofs-node">notary subsystem</a> is implemented in Neo</Heading>
 						<Form.Field>
 							<Form.Label size="small" weight="light">Quantity (GAS)</Form.Label>
 							<Form.Control>
