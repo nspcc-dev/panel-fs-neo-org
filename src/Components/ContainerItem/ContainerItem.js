@@ -16,7 +16,6 @@ import api from '../../api';
 
 export default function ContainerItem({
 	params,
-	formatBytes,
 	containerItem,
 	onAuth,
 	walletData,
@@ -331,7 +330,6 @@ export default function ContainerItem({
 														)}
 														<TreeView
 															params={params}
-															formatBytes={formatBytes}
 															walletData={walletData}
 															onModal={onModal}
 															containerIndex={index}

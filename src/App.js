@@ -34,15 +34,6 @@ function capitalizeFirstLetter(string) {
 	return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function formatBytes(bytes) {
-	const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
-	let i = 0
-	for (i; bytes >= 1024; i += 1) {
-		bytes /= 1024;
-	}
-	return `${bytes === 0 ? bytes : bytes.toFixed(1)} ${units[i]}`;
-}
-
 export const App = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -1861,7 +1852,6 @@ export const App = () => {
 					element={<Profile
 						params={params}
 						NeoFSContract={NeoFSContract}
-						formatBytes={formatBytes}
 						activeNet={activeNet}
 						onAuth={onAuth}
 						walletData={walletData}

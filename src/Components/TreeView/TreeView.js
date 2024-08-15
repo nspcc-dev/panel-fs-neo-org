@@ -3,6 +3,7 @@ import {
 	Heading,
 	Section,
 } from 'react-bulma-components';
+import { formatBytes } from '../../Functions/handle';
 import api from '../../api';
 
 const Tree = ({ children }) => {
@@ -11,7 +12,6 @@ const Tree = ({ children }) => {
 
 const Branch = ({
 		params,
-		formatBytes,
 		objectPath,
 		containerItem,
 		containerChildren,
@@ -31,7 +31,6 @@ const Branch = ({
 				<Tree.Branch
 					key={objectPathNew}
 					params={params}
-					formatBytes={formatBytes}
 					objectPath={objectPathNew}
 					walletData={walletData}
 					onModal={onModal}
@@ -50,7 +49,6 @@ const Branch = ({
 				<Tree.File
 					key={`${objectItem.name}-${objectIndex}`}
 					params={params}
-					formatBytes={formatBytes}
 					name={objectItem.name}
 					containerItem={containerItem}
 					objectItem={objectItem}
@@ -95,7 +93,6 @@ const Folder = ({ name, children }) => {
 
 const File = ({
 		params,
-		formatBytes,
 		name,
 		containerItem,
 		objectItem,
@@ -305,7 +302,6 @@ Tree.Branch = Branch;
 
 export default function TreeView({
 	params,
-	formatBytes,
 	containerItem,
 	walletData,
 	onModal,
@@ -325,7 +321,6 @@ export default function TreeView({
 					{objectPath !== '/' && (
 						<Tree.Branch
 							params={params}
-							formatBytes={formatBytes}
 							objectPath={objectPath}
 							walletData={walletData}
 							onModal={onModal}
@@ -344,7 +339,6 @@ export default function TreeView({
 						<Tree.File
 							key={`${objectItem.name}-${objectIndex}`}
 							params={params}
-							formatBytes={formatBytes}
 							name={objectItem.name}
 							containerItem={containerItem}
 							objectItem={objectItem}

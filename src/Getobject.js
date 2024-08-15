@@ -6,11 +6,11 @@ import {
 	Heading,
 	Box,
 } from 'react-bulma-components';
+import { formatBytes } from './Functions/handle';
 import api from './api';
 
 const Getobject = ({
 		onModal,
-		formatBytes,
 		ContentTypeHeader,
 		AuthorizationHeader,
 	}) => {

@@ -18,7 +18,6 @@ function formatAddress(address) {
 
 const Profile = ({
 		params,
-		formatBytes,
 		NeoFSContract,
 		activeNet,
 		walletData,
@@ -289,7 +288,6 @@ const Profile = ({
 							<ContainerItem
 								key={containerItem.containerId}
 								params={params}
-								formatBytes={formatBytes}
 								setWalletData={setWalletData}
 								walletData={walletData}
 								onModal={onModal}
