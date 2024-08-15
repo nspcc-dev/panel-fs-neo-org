@@ -19,11 +19,6 @@ const Branch = ({
 		onGetObjects,
 		containerIndex,
 		onModal,
-		ContentTypeHeader,
-		AuthorizationHeader,
-		BearerOwnerIdHeader,
-		BearerSignatureHeader,
-		BearerSignatureKeyHeader,
 	}) => {
 	return (
 		<Tree.Folder name={objectPath}>
@@ -38,27 +33,16 @@ const Branch = ({
 					containerChildren={containerChildren[objectPath]}
 					containerIndex={containerIndex}
 					onGetObjects={onGetObjects}
-					ContentTypeHeader={ContentTypeHeader}
-					AuthorizationHeader={AuthorizationHeader}
-					BearerOwnerIdHeader={BearerOwnerIdHeader}
-					BearerSignatureHeader={BearerSignatureHeader}
-					BearerSignatureKeyHeader={BearerSignatureKeyHeader}
 				/>
 			)))}
 			{containerChildren[objectPath]['/'] && containerChildren[objectPath]['/'].map((objectItem, objectIndex) => (
 				<Tree.File
 					key={`${objectItem.name}-${objectIndex}`}
-					params={params}
 					name={objectItem.name}
 					containerItem={containerItem}
 					objectItem={objectItem}
 					walletData={walletData}
 					onModal={onModal}
-					ContentTypeHeader={ContentTypeHeader}
-					AuthorizationHeader={AuthorizationHeader}
-					BearerOwnerIdHeader={BearerOwnerIdHeader}
-					BearerSignatureHeader={BearerSignatureHeader}
-					BearerSignatureKeyHeader={BearerSignatureKeyHeader}
 				/>
 			))}
 		</Tree.Folder>
@@ -92,17 +76,11 @@ const Folder = ({ name, children }) => {
 };
 
 const File = ({
-		params,
 		name,
 		containerItem,
 		objectItem,
 		walletData,
 		onModal,
-		ContentTypeHeader,
-		AuthorizationHeader,
-		BearerOwnerIdHeader,
-		BearerSignatureHeader,
-		BearerSignatureKeyHeader,
 	}) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [objectDate, setObjectDate] = useState(null);
@@ -110,12 +88,8 @@ const File = ({
 	const handleToggle = e => {
 		setIsOpen(!isOpen);
 		if (!isOpen) {
-			api('GET', `/objects/${containerItem.containerId}/${objectItem.address.objectId}?walletConnect=true`, {}, {
-				[ContentTypeHeader]: "application/json",
-				[AuthorizationHeader]: `Bearer ${walletData.tokens.object.token}`,
-				[BearerOwnerIdHeader]: walletData.account.address,
-				[BearerSignatureHeader]: walletData.tokens.object.signature,
-				[BearerSignatureKeyHeader]: walletData.publicKey,
+			api('HEAD', `/objects/${containerItem.containerId}/by_id/${objectItem.address.objectId}`, {}, {
+				"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 			}).then((e) => {
 				setObjectDate(e);
 			});
@@ -168,12 +142,20 @@ const File = ({
 							</Section>
 							<Section style={{ paddingTop: 0 }}>
 								<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Attributes</Heading>
-								{objectDate.attributes.map((attribute) => (
-									<Heading size={6} weight="light" key={attribute.key}>
-										<span>{`${attribute.key}: `}</span>
-										{attribute.value}
-									</Heading>
-								))}
+								{objectDate ? (
+									<>
+										{Object.keys(objectDate.attributes).map((attributeKey) => (
+											<Heading size={6} weight="light" key={attributeKey}>
+												<span>{`${attributeKey}: `}</span>
+												{objectDate.attributes[attributeKey]}
+											</Heading>
+										))}
+										<Heading size={6} weight="light">
+											<span>Content-Type: </span>
+											{objectDate.contentType}
+										</Heading>
+									</>
+								) : '-'}
 							</Section>
 							<Section style={{ paddingTop: 0 }}>
 								<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Manage</Heading>
@@ -184,9 +166,8 @@ const File = ({
 											className="manage_icon"
 											onClick={() => {
 												onModal('loading');
-												api('GET', `/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
-													[ContentTypeHeader]: "application/json",
-													[AuthorizationHeader]: `Bearer ${walletData.tokens.object.bearer}`,
+												api('GET', `/objects/${containerItem.containerId}/by_id/${objectItem.address.objectId}`, {}, {
+													"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 												}).then((data) => {
 													if (data.message) {
 														onModal('failed', data.message);
@@ -220,9 +201,8 @@ const File = ({
 											className="manage_icon"
 											onClick={() => {
 												onModal('loading');
-												api('GET', `/get/${containerItem.containerId}/${objectItem.address.objectId}`, {}, {
-													[ContentTypeHeader]: "application/json",
-													[AuthorizationHeader]: `Bearer ${walletData.tokens.object.bearer}`,
+												api('GET', `/objects/${containerItem.containerId}/by_id/${objectItem.address.objectId}`, {}, {
+													"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 												}).then((data) => {
 													if (data.message) {
 														onModal('failed', data.message);
@@ -254,7 +234,9 @@ const File = ({
 									className="manage_icon"
 									onClick={() => {
 										onModal('loading');
-										api('HEAD', `/get/${containerItem.containerId}/${objectItem.address.objectId}`).then((e) => {
+										api('HEAD', `/objects/${containerItem.containerId}/by_id/${objectItem.address.objectId}`, {}, {
+											"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
+										}).then((e) => {
 											onModal('shareObjectLink', {
 												type: e === 200 ? 'public' : 'private',
 												containerId: containerItem.containerId,
@@ -301,18 +283,12 @@ Tree.Folder = Folder;
 Tree.Branch = Branch;
 
 export default function TreeView({
-	params,
 	containerItem,
 	walletData,
 	onModal,
 	containerIndex,
 	onGetObjects,
 	objects,
-	ContentTypeHeader,
-	AuthorizationHeader,
-	BearerOwnerIdHeader,
-	BearerSignatureHeader,
-	BearerSignatureKeyHeader,
 }) {
 	return (
 		<Tree>
@@ -320,7 +296,6 @@ export default function TreeView({
 				<div key={objectPath}>
 					{objectPath !== '/' && (
 						<Tree.Branch
-							params={params}
 							objectPath={objectPath}
 							walletData={walletData}
 							onModal={onModal}
@@ -328,27 +303,16 @@ export default function TreeView({
 							containerChildren={objects}
 							containerIndex={containerIndex}
 							onGetObjects={onGetObjects}
-							ContentTypeHeader={ContentTypeHeader}
-							AuthorizationHeader={AuthorizationHeader}
-							BearerOwnerIdHeader={BearerOwnerIdHeader}
-							BearerSignatureHeader={BearerSignatureHeader}
-							BearerSignatureKeyHeader={BearerSignatureKeyHeader}
 						/>
 					)}
 					{Object.keys(objects).length === (index + 1) && objects['/'] && objects['/'].map((objectItem, objectIndex) => (
 						<Tree.File
 							key={`${objectItem.name}-${objectIndex}`}
-							params={params}
 							name={objectItem.name}
 							containerItem={containerItem}
 							objectItem={objectItem}
 							walletData={walletData}
 							onModal={onModal}
-							ContentTypeHeader={ContentTypeHeader}
-							AuthorizationHeader={AuthorizationHeader}
-							BearerOwnerIdHeader={BearerOwnerIdHeader}
-							BearerSignatureHeader={BearerSignatureHeader}
-							BearerSignatureKeyHeader={BearerSignatureKeyHeader}
 						/>
 					))}
 				</div>

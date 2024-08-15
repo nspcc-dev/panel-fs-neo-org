@@ -5,9 +5,8 @@ async function serverRequest(method, url, params, headers) {
 		method,
 		headers,
 	}
-	if (json['headers']['Content-Type'] === 'multipart/form-data') {
+	if (json['headers']['Content-Type']) {
 		json['body'] = params;
-		delete json['headers']['Content-Type'];
 	} else if (Object.keys(params).length > 0) {
 		json['body'] = JSON.stringify(params);
 		json['headers']['Content-Type'] = 'application/json';
@@ -30,10 +29,22 @@ export default function api(method, url, params = {}, headers = {}) {
 				});
 			} else {
 				let res = response;
-				if (method === 'GET' && url.indexOf(`/get/`) !== -1 && response.status === 200) {
+				if (method === 'GET' && url.indexOf(`/by_id/`) !== -1 && response.status === 200) {
 					res = await response.blob();
 					const header = response.headers.get('Content-Type');
 					resolve({ header, res, status: response.status });
+				} else if (method === 'HEAD' && url.indexOf(`/by_id/`) !== -1 && response.status === 200) {
+					const attributes = response.headers.get('x-attributes') ? JSON.parse(response.headers.get('x-attributes')) : {};
+					const res = {
+						'containerId': response.headers.get('x-container-Id'),
+						'objectId': response.headers.get('x-object-id'),
+						'ownerId': response.headers.get('x-owner-Id'),
+						'filename': attributes['FileName'],
+						'attributes': attributes,
+						'contentType': response.headers.get('Content-Type'),
+						'objectSize': response.headers.get('Content-Length') ? response.headers.get('Content-Length') : response.headers.get('x-neofs-payload-length'),
+					}
+					resolve(res);
 				} else if (method === 'HEAD') {
 					resolve(response.status);
 				} else if (response.status === 413) {
