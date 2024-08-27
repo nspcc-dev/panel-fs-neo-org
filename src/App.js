@@ -158,6 +158,7 @@ export const App = () => {
 		preset: 'forbid',
 	});
 	const [walletData, setWalletData] = useState(null);
+	const [isNeoLineSupport, setNeoLineSupport] = useState(false);
 
 	const [modal, setModal] = useState({
 		current: null,
@@ -179,6 +180,12 @@ export const App = () => {
 			setPopup({ current: null, text: null });
 		}, 2000);
 	};
+
+	useEffect(() => {
+		window.addEventListener('NEOLine.NEO.EVENT.READY', () => {
+			setNeoLineSupport(true);
+		});
+	}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
 		if (wcSdk.isConnected() && location.pathname.indexOf('/getobject') === -1) {
@@ -1817,6 +1824,7 @@ export const App = () => {
 					element={<Home
 						onModal={onModal}
 						dapi={dapi}
+						isNeoLineSupport={isNeoLineSupport}
 						onConnectWallet={onConnectWallet}
 					/>}
 				/>
