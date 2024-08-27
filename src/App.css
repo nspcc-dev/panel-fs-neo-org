@@ -189,6 +189,22 @@ ul {
     /* background: #00e599; */
 }
 
+.btns_group {
+    margin: 15px 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btns_group button,
+.btns_group a {
+    width: 100%;
+}
+
+.btns_group a:first-child {
+    margin-right: 10px;
+}
+
 .btn_connect_wallet {
     display: flex;
     align-items: center;
