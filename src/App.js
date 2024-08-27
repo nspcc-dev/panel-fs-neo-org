@@ -788,7 +788,56 @@ export const App = () => {
 							/>
 						</div>
 						<Heading align="center" size={5} weight="bold">{modal.current === 'success' ? 'Success' : 'Failed'}</Heading>
-						<Heading align="center" size={6} weight="normal">{modal.text}</Heading>
+						{modal.text.indexOf('0x') !== -1 && (
+							<>
+								<Heading align="center" size={6} weight="normal">Transaction id:</Heading>
+								<CopyToClipboard
+									text={modal.text}
+									className="modal_highlighted_copy"
+									style={{ marginBottom: 0 }}
+									onCopy={() => {
+										setCopy(true);
+										setTimeout(() => {
+											setCopy(false);
+										}, 700);
+									}}
+								>
+									<div>
+										{modal.text}
+										{isCopied && (
+											<div className="tooltip">Copied!</div>
+										)}
+									</div>
+								</CopyToClipboard>
+								<div className='btns_group'>
+									{console.log()}
+									<a
+										href={`https://dora.coz.io/transaction/neo3/${activeNet.toLowerCase()}/${modal.text}`}
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										<Button
+											color="primary"
+											size="small"
+										>
+											Dora
+										</Button>
+									</a>
+									<a
+										href={activeNet.toLowerCase() === 'mainnet' ? `https://neotube.io/transaction/${modal.text}` : `https://${activeNet.toLowerCase()}.neotube.io/transaction/${modal.text}`}
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										<Button
+											color="primary"
+											size="small"
+										>
+											NeoTube
+										</Button>
+									</a>
+								</div>
+							</>
+						)}
 					</div>
 				</div>
 			)}
