@@ -181,54 +181,44 @@ const Profile = ({
 							<span style={{ margin: '0 15px 0 0' }}>{formatAddress(walletData.account.address)}</span>
 							<Tag style={{ margin: '5px 0 10px' }}>{walletData.name}</Tag>
 						</Heading>
-						<Heading size={6} weight="light" style={{ display: 'flex', marginBottom: 15 }}>
-							<span style={{ fontWeight: 600, marginRight: 5 }}>{`${activeNet}:`}</span>
-							<span>{neoBalance ? `${(neoBalance * 0.00000001).toFixed(8)} GAS` : '-'}</span>
-							{!isNotAvailableNeoFS && (
-								<img
-									src="/img/icons/sync.svg"
-									alt="sync"
-									style={isLoadingNeoBalance ? {
-										margin: '2px 0 0 5px',
-										cursor: 'pointer',
-										animation: 'spin 1.5s infinite linear',
-										width: 15,
-										height: 15,
-									} : {
-										margin: '2px 0 0 5px',
-										cursor: 'pointer',
-										width: 15,
-										height: 15,
-									}}
-									onClick={onNeoBalance}
-								/>
-							)}
-						</Heading>
-						<Heading size={6} weight="light" style={{ display: 'flex' }}>
-							<span style={{ fontWeight: 600, marginRight: 5 }}>NeoFS:</span>
-							<span>{neoFSBalance ? `${(neoFSBalance * 0.000000000001).toFixed(12)} GAS` : '-'}</span>
-							{!isNotAvailableNeoFS && (
-								<img
-									src="/img/icons/sync.svg"
-									width={20}
-									height={20}
-									alt="sync"
-									style={isLoadingNeoFSBalance ? {
-										margin: '2px 0 0 5px',
-										cursor: 'pointer',
-										animation: 'spin 1.5s infinite linear',
-										width: 15,
-										height: 15,
-									} : {
-										margin: '2px 0 0 5px',
-										cursor: 'pointer',
-										width: 15,
-										height: 15,
-									}}
-									onClick={onNeoFSBalance}
-								/>
-							)}
-						</Heading>
+						<table>
+								<tr>
+									<td>{`${activeNet}:`}</td>
+									<td>{Math.trunc(neoBalance * 0.00000001)}</td>
+									<td>
+										{`.${((neoBalance * 0.00000001).toFixed(8) + '').split(".")[1]} GAS`}
+										{!isNotAvailableNeoFS && (
+											<img
+												src="/img/icons/sync.svg"
+												alt="sync"
+												style={isLoadingNeoBalance ? {
+													animation: 'spin 1.5s infinite linear',
+												} : {}}
+												onClick={onNeoBalance}
+											/>
+										)}
+									</td>
+								</tr>
+								<tr>
+									<td>NeoFS:</td>
+									<td>{Math.trunc(neoFSBalance * 0.000000000001)}</td>
+									<td>
+										{`.${((neoFSBalance * 0.000000000001).toFixed(12) + '').split(".")[1]} GAS`}
+										{!isNotAvailableNeoFS && (
+											<img
+												src="/img/icons/sync.svg"
+												width={20}
+												height={20}
+												alt="sync"
+												style={isLoadingNeoFSBalance ? {
+													animation: 'spin 1.5s infinite linear',
+												} : {}}
+												onClick={onNeoFSBalance}
+											/>
+										)}
+									</td>
+								</tr>
+						</table>
 						<div style={{ display: 'flex', flexWrap: 'wrap' }}>
 							<Button
 								color="primary"
