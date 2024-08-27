@@ -18,7 +18,6 @@ function formatAddress(address) {
 
 const Profile = ({
 		params,
-		formatBytes,
 		NeoFSContract,
 		activeNet,
 		walletData,
@@ -31,11 +30,6 @@ const Profile = ({
 		neolineN3,
 		isLoadContainers,
 		setLoadContainers,
-		ContentTypeHeader,
-		AuthorizationHeader,
-		BearerOwnerIdHeader,
-		BearerSignatureHeader,
-		BearerSignatureKeyHeader,
 		onAuth,
 	}) => {
 	const [isLoading, setIsLoading] = useState(false);
@@ -288,8 +282,6 @@ const Profile = ({
 						{containers.map((containerItem, index) => (
 							<ContainerItem
 								key={containerItem.containerId}
-								params={params}
-								formatBytes={formatBytes}
 								setWalletData={setWalletData}
 								walletData={walletData}
 								onModal={onModal}
@@ -299,11 +291,6 @@ const Profile = ({
 								onAuth={onAuth}
 								isLoadContainers={isLoadContainers}
 								setLoadContainers={setLoadContainers}
-								ContentTypeHeader={ContentTypeHeader}
-								AuthorizationHeader={AuthorizationHeader}
-								BearerOwnerIdHeader={BearerOwnerIdHeader}
-								BearerSignatureHeader={BearerSignatureHeader}
-								BearerSignatureKeyHeader={BearerSignatureKeyHeader}
 							/>
 						))}
 					</Box>

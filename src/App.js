@@ -34,15 +34,6 @@ function capitalizeFirstLetter(string) {
 	return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function formatBytes(bytes) {
-	const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
-	let i = 0
-	for (i; bytes >= 1024; i += 1) {
-		bytes /= 1024;
-	}
-	return `${bytes === 0 ? bytes : bytes.toFixed(1)} ${units[i]}`;
-}
-
 export const App = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -55,14 +46,6 @@ export const App = () => {
 		account: process.env.REACT_APP_NEOFS_ACCOUNT ? process.env.REACT_APP_NEOFS_ACCOUNT : 'NNxVrKjLsRkWsmGgmuNXLcMswtxTGaNQLk',
 		scriptHash: Neon.create.account(process.env.REACT_APP_NEOFS_ACCOUNT).scriptHash,
 	});
-
-	const [ContentTypeHeader] = useState("Content-Type");
-	const [AuthorizationHeader] = useState("Authorization");
-	const [BearerOwnerIdHeader] = useState("X-Bearer-Owner-Id");
-	const [BearerForAllUsers] = useState("X-Bearer-For-All-Users");
-	const [BearerSignatureHeader] = useState("X-Bearer-Signature");
-	const [BearerSignatureKeyHeader] = useState("X-Bearer-Signature-Key");
-	const [BearerLifetime] = useState("X-Bearer-Lifetime");
 
 	const [params] = useState({
 		rest_gw: process.env.REACT_APP_RESTGW ? process.env.REACT_APP_RESTGW : 'https://rest.t5.fs.neo.org/v1',
@@ -353,10 +336,9 @@ export const App = () => {
 		}
 
 		api('POST', '/auth', body, {
-			[ContentTypeHeader]: "application/json",
-			[BearerOwnerIdHeader]: walletData.account.address,
-			[BearerLifetime]: params.objectId ? 24 : 2,
-			[BearerForAllUsers]: true,
+			"X-Bearer-Owner-Id": walletData.account.address,
+			"X-Bearer-Lifetime": params.objectId ? 24 : 2,
+			"X-Bearer-For-All-Users": true,
 		}).then((e) => {
 			onSignMessage(e[0].token, type, operation, params);
 		});
@@ -396,10 +378,9 @@ export const App = () => {
 
 		if (type === 'object') {
 			api('GET', '/auth/bearer?walletConnect=true', {}, {
-				[ContentTypeHeader]: "application/json",
-				[AuthorizationHeader]: `Bearer ${msg}`,
-				[BearerSignatureHeader]: response.data + response.salt,
-				[BearerSignatureKeyHeader]: response.publicKey,
+				"Authorization": `Bearer ${msg}`,
+				"X-Bearer-Signature": response.data + response.salt,
+				"X-Bearer-Signature-Key": response.publicKey,
 			}).then((e) => {
 				if (params.objectId) {
 					onModal('shareObjectLink', { ...params, token: e.token })
@@ -425,11 +406,10 @@ export const App = () => {
 							"basicAcl": containerForm.basicAcl,
 							"attributes": attributes,
 						}, {
-							[ContentTypeHeader]: "application/json",
-							[AuthorizationHeader]: `Bearer ${walletData.tokens.container.PUT.token}`,
-							[BearerOwnerIdHeader]: walletData.account.address,
-							[BearerSignatureHeader]: walletData.tokens.container.PUT.signature,
-							[BearerSignatureKeyHeader]: walletData.publicKey,
+							"Authorization": `Bearer ${walletData.tokens.container.PUT.token}`,
+							"X-Bearer-Owner-Id": walletData.account.address,
+							"X-Bearer-Signature": walletData.tokens.container.PUT.signature,
+							"X-Bearer-Signature-Key": walletData.publicKey,
 						}).then((e) => {
 							if (e.message && e.message.indexOf('insufficient balance to create container') !== -1) {
 								setLoadingForm(false);
@@ -451,11 +431,10 @@ export const App = () => {
 									api('PUT', `/containers/${e.containerId}/eacl?walletConnect=true`, {
 										"records": containerForm.eACLParams.filter((item) => delete item.isOpen),
 									}, {
-										[ContentTypeHeader]: "application/json",
-										[AuthorizationHeader]: `Bearer ${walletData.tokens.container.SETEACL.token}`,
-										[BearerOwnerIdHeader]: walletData.account.address,
-										[BearerSignatureHeader]: walletData.tokens.container.SETEACL.signature,
-										[BearerSignatureKeyHeader]: walletData.publicKey,
+										"Authorization": `Bearer ${walletData.tokens.container.SETEACL.token}`,
+										"X-Bearer-Owner-Id": walletData.account.address,
+										"X-Bearer-Signature": walletData.tokens.container.SETEACL.signature,
+										"X-Bearer-Signature-Key": walletData.publicKey,
 									}).then(() => {
 										setLoadingForm(false);
 										onPopup('success', 'New container with EACL has been created');
@@ -502,11 +481,10 @@ export const App = () => {
 		setLoadingForm(true);
 		setError({ active: false, type: [], text: '' });
 		api('DELETE', `/containers/${containerName}?walletConnect=true`, {}, {
-			[ContentTypeHeader]: "application/json",
-			[AuthorizationHeader]: `Bearer ${walletData.tokens.container.DELETE.token}`,
-			[BearerOwnerIdHeader]: walletData.account.address,
-			[BearerSignatureHeader]: walletData.tokens.container.DELETE.signature,
-			[BearerSignatureKeyHeader]: walletData.publicKey,
+			"Authorization": `Bearer ${walletData.tokens.container.DELETE.token}`,
+			"X-Bearer-Owner-Id": walletData.account.address,
+			"X-Bearer-Signature": walletData.tokens.container.DELETE.signature,
+			"X-Bearer-Signature-Key": walletData.publicKey,
 		}).then((e) => {
 			setLoadingForm(false);
 			if (e.message) {
@@ -543,16 +521,15 @@ export const App = () => {
 				setError({ active: false, type: [], text: '' });
 				setLoadingForm(true);
 
-				let formdata = new FormData();
-				formdata.append('data', objectForm.file);
-				formdata.append('name', objectForm.name);
-
 				const attributesHeaders = {};
-				attributes.map((attribute) => attributesHeaders[`X-Attribute-${attribute.key}`] = attribute.value);
-				api('POST', `/upload/${containerId}`, formdata, {
-					'Content-Type': "multipart/form-data",
-					[AuthorizationHeader]: `Bearer ${walletData.tokens.object.bearer}`,
-					...attributesHeaders,
+				attributes.map((attribute) => attributesHeaders[attribute.key] = attribute.value);
+				api('POST', `/objects/${containerId}`, objectForm.file, {
+					'Content-Type': objectForm.file.type,
+					"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
+					'X-Attributes': JSON.stringify({
+						'FileName': objectForm.name,
+						...attributesHeaders,
+					}),
 				}).then((e) => {
 					setLoadingForm(false);
 					if (e.message && e.message.indexOf('access to object operation denied') !== -1) {
@@ -583,12 +560,8 @@ export const App = () => {
 	const onDeleteObject = (containerId, objectId) => {
 		setError({ active: false, type: [], text: '' });
 		setLoadingForm(true);
-		api('DELETE', `/objects/${containerId}/${objectId}?walletConnect=true`, {}, {
-			[ContentTypeHeader]: "application/json",
-			[AuthorizationHeader]: `Bearer ${walletData.tokens.object.token}`,
-			[BearerOwnerIdHeader]: walletData.account.address,
-			[BearerSignatureHeader]: walletData.tokens.object.signature,
-			[BearerSignatureKeyHeader]: walletData.publicKey,
+		api('DELETE', `/objects/${containerId}/${objectId}`, {}, {
+			"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 		}).then((e) => {
 			setLoadingForm(false);
 			if (e.message) {
@@ -1851,9 +1824,6 @@ export const App = () => {
 					path="/getobject"
 					element={<Getobject
 						onModal={onModal}
-						formatBytes={formatBytes}
-						ContentTypeHeader={ContentTypeHeader}
-						AuthorizationHeader={AuthorizationHeader}
 					/>}
 				/>
 				<Route
@@ -1861,7 +1831,6 @@ export const App = () => {
 					element={<Profile
 						params={params}
 						NeoFSContract={NeoFSContract}
-						formatBytes={formatBytes}
 						activeNet={activeNet}
 						onAuth={onAuth}
 						walletData={walletData}
@@ -1873,11 +1842,6 @@ export const App = () => {
 						isLoadContainers={isLoadContainers}
 						setLoadContainers={setLoadContainers}
 						onDisconnectWallet={onDisconnectWallet}
-						ContentTypeHeader={ContentTypeHeader}
-						AuthorizationHeader={AuthorizationHeader}
-						BearerOwnerIdHeader={BearerOwnerIdHeader}
-						BearerSignatureHeader={BearerSignatureHeader}
-						BearerSignatureKeyHeader={BearerSignatureKeyHeader}
 						onModal={onModal}
 						onPopup={onPopup}
 					/>}

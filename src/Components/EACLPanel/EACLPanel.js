@@ -16,11 +16,6 @@ export default function EACLPanel({
 	setLoadContainers,
 	eACLParams,
 	setEACLParams,
-	ContentTypeHeader,
-	AuthorizationHeader,
-	BearerOwnerIdHeader,
-	BearerSignatureHeader,
-	BearerSignatureKeyHeader,
 	isEdit = true,
 	isErrorParent,
 }) {
@@ -44,11 +39,10 @@ export default function EACLPanel({
 			api('PUT', `/containers/${containerId}/eacl?walletConnect=true`, {
 				"records": eACLParams.filter((item) => delete item.isOpen),
 			}, {
-				[ContentTypeHeader]: "application/json",
-				[AuthorizationHeader]: `Bearer ${walletData.tokens.container.SETEACL.token}`,
-				[BearerOwnerIdHeader]: walletData.account.address,
-				[BearerSignatureHeader]: walletData.tokens.container.SETEACL.signature,
-				[BearerSignatureKeyHeader]: walletData.publicKey,
+				"Authorization": `Bearer ${walletData.tokens.container.SETEACL.token}`,
+				"X-Bearer-Owner-Id": walletData.account.address,
+				"X-Bearer-Signature": walletData.tokens.container.SETEACL.signature,
+				"X-Bearer-Signature-Key": walletData.publicKey,
 			}).then((e) => {
 				setLoadingForm(false);
 				if (e.message) {

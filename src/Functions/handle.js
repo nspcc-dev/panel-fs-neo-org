@@ -73,3 +73,12 @@ export function formatForContainerName(attributes, containerId) {
 	}
 	return containerId;
 }
+
+export function formatBytes(bytes) {
+	const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+	let i = 0
+	for (i; bytes >= 1024; i += 1) {
+		bytes /= 1024;
+	}
+	return `${bytes === 0 ? bytes : bytes.toFixed(1)} ${units[i]}`;
+}

@@ -15,8 +15,6 @@ import {
 import api from '../../api';
 
 export default function ContainerItem({
-	params,
-	formatBytes,
 	containerItem,
 	onAuth,
 	walletData,
@@ -26,11 +24,6 @@ export default function ContainerItem({
 	index,
 	isLoadContainers,
 	setLoadContainers,
-	ContentTypeHeader,
-	AuthorizationHeader,
-	BearerOwnerIdHeader,
-	BearerSignatureHeader,
-	BearerSignatureKeyHeader,
 }) {
 	const ObjectsPerPage = 40;
 	const [isOpen, setIsOpen] = useState(false);
@@ -90,14 +83,10 @@ export default function ContainerItem({
 	const onGetObjects = (containerId, pageTemp = pagination.page) => {
 		setPagination({ ...pagination, page: pageTemp});
 		setLoadingObjects(true);
-		api('POST', `/objects/${containerId}/search?walletConnect=true&limit=${ObjectsPerPage}&offset=${pageTemp * ObjectsPerPage}`, {
+		api('POST', `/objects/${containerId}/search?limit=${ObjectsPerPage}&offset=${pageTemp * ObjectsPerPage}`, {
 			"filters": [],
 		}, {
-			[ContentTypeHeader]: "application/json",
-			[AuthorizationHeader]: `Bearer ${walletData.tokens.object.token}`,
-			[BearerOwnerIdHeader]: walletData.account.address,
-			[BearerSignatureHeader]: walletData.tokens.object.signature,
-			[BearerSignatureKeyHeader]: walletData.publicKey,
+			"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 		}).then((e) => {
 			setLoadingObjects(false);
 			if (e.message) {
@@ -111,9 +100,8 @@ export default function ContainerItem({
 
 	const onGetEACL = (containerId) => {
 		setLoadingEACL(true);
-		api('GET', `/containers/${containerId}/eacl?walletConnect=true`, {}, {
-			[ContentTypeHeader]: "application/json",
-			[BearerOwnerIdHeader]: walletData.account.address,
+		api('GET', `/containers/${containerId}/eacl`, {}, {
+			"X-Bearer-Owner-Id": walletData.account.address,
 		}).then((e) => {
 			setLoadingEACL(false);
 			if (e.records) {
@@ -240,11 +228,6 @@ export default function ContainerItem({
 																setLoadContainers={setLoadContainers}
 																eACLParams={eACLParams}
 																setEACLParams={setEACLParams}
-																ContentTypeHeader={ContentTypeHeader}
-																AuthorizationHeader={AuthorizationHeader}
-																BearerOwnerIdHeader={BearerOwnerIdHeader}
-																BearerSignatureHeader={BearerSignatureHeader}
-																BearerSignatureKeyHeader={BearerSignatureKeyHeader}
 															/>
 														)}
 													</>
@@ -330,18 +313,11 @@ export default function ContainerItem({
 															<Heading size={6} weight="light" align="center">Objects not found</Heading>
 														)}
 														<TreeView
-															params={params}
-															formatBytes={formatBytes}
 															walletData={walletData}
 															onModal={onModal}
 															containerIndex={index}
 															containerItem={containerItem}
 															objects={objects}
-															ContentTypeHeader={ContentTypeHeader}
-															AuthorizationHeader={AuthorizationHeader}
-															BearerOwnerIdHeader={BearerOwnerIdHeader}
-															BearerSignatureHeader={BearerSignatureHeader}
-															BearerSignatureKeyHeader={BearerSignatureKeyHeader}
 														/>
 														{!(pagination.page === 0 && pagination.objects === 0) && (
 															<div className="pagination">

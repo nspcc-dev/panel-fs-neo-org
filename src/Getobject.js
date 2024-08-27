@@ -6,13 +6,11 @@ import {
 	Heading,
 	Box,
 } from 'react-bulma-components';
+import { formatBytes } from './Functions/handle';
 import api from './api';
 
 const Getobject = ({
 		onModal,
-		formatBytes,
-		ContentTypeHeader,
-		AuthorizationHeader,
 	}) => {
 	const [searchParams] = useSearchParams();
 	const [objectData, setObjectData] = useState(null);
@@ -26,10 +24,9 @@ const Getobject = ({
 
 		const payload = {};
 		if (token) {
-			payload[ContentTypeHeader] = "application/json";
-			payload[AuthorizationHeader] = `Bearer ${token}`;
+			payload["Authorization"] = `Bearer ${token}`;
 		}
-		api('GET', `/objects/${containerId}/${objectId}?fullBearer=true`, {}, payload).then((e) => {
+		api('HEAD', `/objects/${containerId}/by_id/${objectId}`, {}, payload).then((e) => {
 			if (e.message) {
 				onModal('failed', e.message);
 			} else {
@@ -43,10 +40,9 @@ const Getobject = ({
 
 		const payload = {};
 		if (params.token) {
-			payload[ContentTypeHeader] = "application/json";
-			payload[AuthorizationHeader] = `Bearer ${params.token}`;
+			payload["Authorization"] = `Bearer ${params.token}`;
 		}
-		api('GET', `/get/${params.containerId}/${params.objectId}`, {}, payload).then((data) => {
+		api('GET', `/objects/${params.containerId}/by_id/${params.objectId}`, {}, payload).then((data) => {
 			if (data.message) {
 				onModal('failed', data.message);
 			} else {
@@ -54,7 +50,7 @@ const Getobject = ({
 				document.body.appendChild(a);
 				const url = window.URL.createObjectURL(data.res);
 				a.href = url;
-				a.download = objectData['x-attribute-filename'] ? objectData['x-attribute-filename'] : params.objectId;
+				a.download = objectData.filename ? objectData.filename : params.objectId;
 				a.target = '_blank';
 				a.click();
 				setTimeout(() => {
@@ -98,12 +94,20 @@ const Getobject = ({
 							</Section>
 							<Section style={{ paddingTop: 0 }}>
 								<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Attributes</Heading>
-								{objectData ? objectData.attributes.map((attribute) => (
-									<Heading size={6} weight="light" key={attribute.key}>
-										<span>{`${attribute.key}: `}</span>
-										{attribute.value}
-									</Heading>
-								)) : '-'}
+								{objectData ? (
+									<>
+										{Object.keys(objectData.attributes).map((attributeKey) => (
+											<Heading size={6} weight="light" key={attributeKey}>
+												<span>{`${attributeKey}: `}</span>
+												{objectData.attributes[attributeKey]}
+											</Heading>
+										))}
+										<Heading size={6} weight="light">
+											<span>Content-Type: </span>
+											{objectData.contentType}
+										</Heading>
+									</>
+								) : '-'}
 							</Section>
 							<Section style={{ paddingTop: 0 }}>
 								<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Manage</Heading>
