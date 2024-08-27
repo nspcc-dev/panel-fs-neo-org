@@ -12,6 +12,7 @@ import {
 const Home = ({
 		onModal,
 		onConnectWallet,
+		isNeoLineSupport,
 		dapi,
 	}) => {
 
@@ -39,6 +40,7 @@ const Home = ({
 							<Button
 								className="btn_connect_wallet"
 								onClick={() => onConnectWallet('neoline')}
+								style={isNeoLineSupport ? { border: '2px solid #00e599', background: '#00dc9633' } : {}}
 							>
 								NeoLine
 								<img src="/img/icons/wallets/neoline.svg" alt="neoline logo" />
