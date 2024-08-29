@@ -1119,7 +1119,7 @@ export const App = () => {
 									Container creation is a paid operation, make sure you have sufficient NeoFS chain balance
 								</Notification>
 							)}
-							<Heading className="input_caption">{`Container cost is ${networkInfo ? 7 * (networkInfo.containerFee + networkInfo.namedContainerFee) * 1e-12 : '-'} GAS for mainnet now.`}</Heading>
+							<Heading className="input_caption">{`Container cost is ${networkInfo ? 7 * (networkInfo.containerFee + networkInfo.namedContainerFee) * 1e-12 : '-'} GAS for ${activeNet.toLowerCase()} now.`}</Heading>
 							<Form.Field>
 								<Form.Label>Name</Form.Label>
 								<Form.Control>
