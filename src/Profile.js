@@ -182,6 +182,7 @@ const Profile = ({
 							<Tag style={{ margin: '5px 0 10px' }}>{walletData.name}</Tag>
 						</Heading>
 						<table>
+							<tbody>
 								<tr>
 									<td>{`${activeNet}:`}</td>
 									<td>{Math.trunc(neoBalance * 0.00000001)}</td>
@@ -218,6 +219,7 @@ const Profile = ({
 										)}
 									</td>
 								</tr>
+							</tbody>
 						</table>
 						<div style={{ display: 'flex', flexWrap: 'wrap' }}>
 							<Button
