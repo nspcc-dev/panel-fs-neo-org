@@ -810,7 +810,6 @@ export const App = () => {
 									</div>
 								</CopyToClipboard>
 								<div className='btns_group'>
-									{console.log()}
 									<a
 										href={`https://dora.coz.io/transaction/neo3/${activeNet.toLowerCase()}/${modal.text}`}
 										target="_blank"

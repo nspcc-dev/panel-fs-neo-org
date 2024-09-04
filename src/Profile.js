@@ -176,6 +176,12 @@ const Profile = ({
 							<div>Check web app configuration or try later</div>
 						</Box>
 					)}
+					{walletData.net.toLowerCase().indexOf(activeNet.toLowerCase()) === -1 && (
+						<Box style={{ fontSize: 14, wordBreak: 'break-all', background: '#fece0f' }}>
+							<div style={{ fontSize: 20, fontWeight: 'bold' }}>{`Сonnected wallet uses ${walletData.net} network`}</div>
+							<div>{`Panel is configured for ${activeNet}, mismatching networks can lead to incorrect behavior.`}</div>
+						</Box>
+					)}
 					<Box id="account">
 						<Heading style={{ marginBottom: 15 }} weight="bold">
 							<span style={{ margin: '0 15px 0 0' }}>{formatAddress(walletData.account.address)}</span>
