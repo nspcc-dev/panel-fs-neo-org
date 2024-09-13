@@ -4,6 +4,24 @@ Changelog for NeoFS Panel
 
 ## [Unreleased]
 
+## [0.5.3] - 2024-09-13
+
+### Added
+- Open Graph image tag (#213)
+- NeoLine autodetection (#219)
+- Links to transactions (#220)
+- CSP header (#223)
+
+### Changed
+- Cost calculator fetches fee values from the gateway (#215)
+- Obsolete REST object APIs are no longer used (#217)
+- Balance alignment (#221)
+- Handling of wallet misconfiguration (#225)
+
+### Upgrade from 0.5.2
+
+Notice that this version is incompatible with REST gateway <0.11.0 version.
+
 ## [0.5.2] - 2024-04-15
 
 ### Added
@@ -131,4 +149,5 @@ First public review release.
 [0.5.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.5.0
 [0.5.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.5.1
 [0.5.2]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.5.2
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.5.2...master
+[0.5.3]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.5.3
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.5.3...master
