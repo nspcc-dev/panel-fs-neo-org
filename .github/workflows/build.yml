@@ -20,6 +20,10 @@ on:
         description: 'Ref to build [default: latest master; examples: v0.4.0, 9595da7d83efc330ca0bc94bef482e4edfbcf8fd]'
         required: false
         default: ''
+      deploy:
+        description: 'Deploy to production [default: false; examples: true, false]'
+        required: false
+        default: 'false'
 
 jobs:
   build_release:
@@ -48,3 +52,16 @@ jobs:
         run: gh release upload ${{ github.event.release.tag_name }} ./panel.fs.neo.org-*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to NeoFS
+        if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true') }}
+        uses: nspcc-dev/gh-push-to-neofs@master
+        with:
+          NEOFS_WALLET: ${{ secrets.NEOFS_WALLET }}
+          NEOFS_WALLET_PASSWORD: ${{ secrets.NEOFS_WALLET_PASSWORD }}
+          NEOFS_NETWORK_DOMAIN: ${{ vars.NEOFS_NETWORK_DOMAIN }}
+          NEOFS_HTTP_GATE: ${{ vars.NEOFS_HTTP_GATE }}
+          STORE_OBJECTS_CID: ${{ vars.STORE_OBJECTS_CID }}
+          PATH_TO_FILES_DIR: panel.fs.neo.org
+          STRIP_PREFIX: true
+          REPLACE_CONTAINER_CONTENTS: true
