@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
 	Heading,
 	Section,
+	Form,
 	Button,
 	Tile,
 	Notification,
@@ -31,6 +32,7 @@ export default function ContainerItem({
 		page: 0,
 		objects: 0,
 	});
+	const [search, setSearch] = useState(null);
 	const [objects, setObjects] = useState(null);
 	const [isLoadingObjects, setLoadingObjects] = useState(false);
 	const [isLoadingEACL, setLoadingEACL] = useState(false);
@@ -83,8 +85,18 @@ export default function ContainerItem({
 	const onGetObjects = (containerId, pageTemp = pagination.page) => {
 		setPagination({ ...pagination, page: pageTemp});
 		setLoadingObjects(true);
+
+		const filters = [];
+		if (search) {
+			filters.push({
+				"key": "FileName",
+				"match": "MatchCommonPrefix",
+				"value": search,
+			});
+		}
+
 		api('POST', `/objects/${containerId}/search?limit=${ObjectsPerPage}&offset=${pageTemp * ObjectsPerPage}`, {
-			"filters": [],
+			filters,
 		}, {
 			"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 		}).then((e) => {
@@ -292,7 +304,7 @@ export default function ContainerItem({
 												/>
 												Objects
 											</div>
-											{activePanel === 'objects' && !isLoadingObjects && (
+											{activePanel === 'objects' && (
 												<Button
 													size="small"
 													color="primary"
@@ -307,6 +319,22 @@ export default function ContainerItem({
 										</Heading>
 										{activePanel === 'objects' && (
 											<>
+												{objects && (objects.length !== 0 || (objects.length === 0 && search !== null)) && (
+													<Form.Control>
+														<Form.Input
+															placeholder="Search here..."
+															value={search ? search : ''}
+															size='small'
+															style={{ margin: '10px 0' }}
+															onChange={(e) => setSearch(e.target.value)}
+															onKeyDown={(e) => {
+																if(e.key === 'Enter') onGetObjects(containerItem.containerId, 0);
+															}}
+															onBlur={() => onGetObjects(containerItem.containerId, 0)}
+															disabled={isLoadingObjects}
+														/>
+													</Form.Control>
+												)}
 												{!isLoadingObjects ? (
 													<>
 														{objects && objects.length === 0 && (
