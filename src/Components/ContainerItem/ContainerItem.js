@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
 	Heading,
 	Section,
+	Form,
 	Button,
 	Tile,
 	Notification,
@@ -31,6 +32,11 @@ export default function ContainerItem({
 		page: 0,
 		objects: 0,
 	});
+	const [filters, setFilters] = useState([{
+		key: '',
+		match: 'MatchStringEqual',
+		value: '',
+	}]);
 	const [objects, setObjects] = useState(null);
 	const [isLoadingObjects, setLoadingObjects] = useState(false);
 	const [isLoadingEACL, setLoadingEACL] = useState(false);
@@ -84,7 +90,7 @@ export default function ContainerItem({
 		setPagination({ ...pagination, page: pageTemp});
 		setLoadingObjects(true);
 		api('POST', `/objects/${containerId}/search?limit=${ObjectsPerPage}&offset=${pageTemp * ObjectsPerPage}`, {
-			"filters": [],
+			filters: filters.every((item) => item.key !== '' && item.value !== '') ? filters : [],
 		}, {
 			"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 		}).then((e) => {
@@ -292,7 +298,7 @@ export default function ContainerItem({
 												/>
 												Objects
 											</div>
-											{activePanel === 'objects' && !isLoadingObjects && (
+											{activePanel === 'objects' && (
 												<Button
 													size="small"
 													color="primary"
@@ -307,6 +313,124 @@ export default function ContainerItem({
 										</Heading>
 										{activePanel === 'objects' && (
 											<>
+												{objects && (objects.length !== 0 || (objects.length === 0 && filters !== null)) && (
+													<div className="filters_block">
+														<Heading
+															align="center"
+															weight="normal"
+															size={6}
+															style={{
+																display: 'flex',
+																alignItems: 'center',
+																justifyContent: 'space-between',
+																margin: 0,
+															}}
+														>
+															<span style={{ position: 'relative' }}>
+																Filter
+																<div className="tooltip_block">
+																	<img
+																		className="input_icon"
+																		src="/img/icons/info_circle.svg"
+																		height={18}
+																		width={18}
+																		alt="info"
+																	/>
+																	<div className="tooltip">Flexible search allows you to use any attributes to search through the attribute-operation-value formula, you can use attributes such as FilePath, FileName, etc.</div>
+																</div>
+															</span>
+															<Button
+																color="primary"
+																size="small"
+																onClick={() => {
+																	let filtersTemp = [ ...filters ];
+																	filtersTemp.push({
+																		key: '',
+																		match: 'MatchStringEqual',
+																		value: '',
+																	});
+																	setFilters(filtersTemp);
+																}}
+																disabled={isLoadingObjects}
+															>
+																Add filter
+															</Button>
+														</Heading>
+														{filters.map((filterItem, indexFilter) => (
+															<div className="filter_item" key={indexFilter}>
+																<Form.Control>
+																	<Form.Input
+																		size='small'
+																		placeholder="Attribute"
+																		value={filterItem.key}
+																		onChange={(e) => {
+																			let filtersTemp = [ ...filters ];
+																			filtersTemp[indexFilter].key = e.target.value;
+																			setFilters(filtersTemp);
+																		}}
+																		disabled={isLoadingObjects}
+																	/>
+																</Form.Control>
+																<Form.Control className="select_wrapper">
+																	<Form.Select
+																		size='small'
+																		value={filterItem.match}
+																		onChange={(e) => {
+																			let filtersTemp = [ ...filters ];
+																			filtersTemp[indexFilter].match = e.target.value;
+																			setFilters(filtersTemp);
+																		}}
+																		disabled={isLoadingObjects}
+																	>
+																		{[
+																			{ value: 'MatchStringEqual', title: 'equal' },
+																			{ value: 'MatchStringNotEqual', title: 'not equal' },
+																			{ value: 'MatchCommonPrefix', title: 'has prefix' },
+																		].map((item) => (
+																			<option value={item.value} key={item.title}>{item.title}</option>
+																		))}
+																	</Form.Select>
+																</Form.Control>
+																<Form.Control>
+																	<Form.Input
+																		size='small'
+																		placeholder="Value"
+																		value={filterItem.value}
+																		onChange={(e) => {
+																			let filtersTemp = [ ...filters ];
+																			filtersTemp[indexFilter].value = e.target.value;
+																			setFilters(filtersTemp);
+																		}}
+																		disabled={isLoadingObjects}
+																	/>
+																</Form.Control>
+																<img
+																	src="/img/icons/trashbin.svg"
+																	width={14}
+																	height={14}
+																	fill="#f14668"
+																	alt="delete"
+																	style={{ cursor: 'pointer', marginLeft: 8 }}
+																	onClick={() => {
+																		let filtersTemp = [ ...filters ];
+																		filtersTemp.splice(indexFilter, 1);
+																		setFilters(filtersTemp);
+																	}}
+																/>
+															</div>
+														))}
+														<Button
+															fullwidth
+															color="primary"
+															size="small"
+															style={{ marginTop: 8 }}
+															onClick={() => onGetObjects(containerItem.containerId, 0)}
+															disabled={isLoadingObjects || filters.some((item) => item.key === '' || item.value === '')}
+														>
+															Search
+														</Button>
+													</div>
+												)}
 												{!isLoadingObjects ? (
 													<>
 														{objects && objects.length === 0 && (
