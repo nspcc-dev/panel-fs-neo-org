@@ -34,6 +34,10 @@ function capitalizeFirstLetter(string) {
 	return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+function formatDateToHours(date) {
+	return Math.floor((new Date(`${date}T23:59:00`).getTime() - new Date().getTime()) / 1000 / 60 / 60)
+}
+
 export const App = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -51,6 +55,7 @@ export const App = () => {
 		rest_gw: process.env.REACT_APP_RESTGW ? process.env.REACT_APP_RESTGW : 'https://rest.t5.fs.neo.org/v1',
 	});
 
+	const [objectLinkLifetime, setObjectLinkLifetime] = useState(new Date().toLocaleDateString("sv"));
 	const [networkInfo, setNetworkInfo] = useState(null);
 	const [depositQuantity, setDepositQuantity] = useState(0);
 	const [withdrawQuantity, setWithdrawQuantity] = useState(0);
@@ -344,7 +349,7 @@ export const App = () => {
 
 		api('POST', '/auth', body, {
 			"X-Bearer-Owner-Id": walletData.account.address,
-			"X-Bearer-Lifetime": params.objectId ? 24 : 2,
+			"X-Bearer-Lifetime": params.objectId ? formatDateToHours(objectLinkLifetime) : 2,
 			"X-Bearer-For-All-Users": true,
 		}).then((e) => {
 			onSignMessage(e[0].token, type, operation, params);
@@ -1581,18 +1586,27 @@ export const App = () => {
 							/>
 						</div>
 						<Heading align="center" size={5} weight="bold">Sharing object</Heading>
-						<Heading align="center" size={6}>{`You can share a link to this object, it will be available ${modal.text.type === 'private' ? 'for 1 day' : 'until EACL change'} to everyone without authorization`}</Heading>
+						<Heading align="center" size={6} style={{ margin: '1.5rem auto', width: '350px' }}>{`You can share a link to this object, it will be available to everyone without authorization until${modal.text.type === 'private' ? ':' : ' EACL change'}${!modal.text.token && modal.text.type === 'private' ? '' : ` ${new Date(objectLinkLifetime).toLocaleDateString()}`}`}</Heading>
 						{!modal.text.token && modal.text.type === 'private' ? (
-							<div className="token_status_panel">
-								<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to share&nbsp;object</Heading>
-								<Button
-									color="primary"
-									size="small"
-									onClick={() => onAuth('object', null, modal.text)}
-								>
-									Sign
-								</Button>
-							</div>
+							<>
+								<Form.Control style={{ marginBottom: '1.5rem' }}>
+									<Form.Input
+										type="date"
+										value={objectLinkLifetime}
+										onChange={(e) => setObjectLinkLifetime(e.target.value)}
+									/>
+								</Form.Control>
+								<div className="token_status_panel">
+									<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to share&nbsp;object</Heading>
+									<Button
+										color="primary"
+										size="small"
+										onClick={() => onAuth('object', null, modal.text)}
+									>
+										Sign
+									</Button>
+								</div>
+							</>
 						) : (
 							<>
 								<a
