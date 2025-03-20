@@ -16,7 +16,7 @@ import {
 	Tag,
 	Notification,
 } from 'react-bulma-components';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
+import copy from 'copy-to-clipboard';
 import Home from './Home';
 import Profile from './Profile';
 import Getobject from './Getobject';
@@ -44,15 +44,15 @@ export const App = () => {
 	const wcSdk = useWalletConnect();
 	const dapi = window.OneGate ? new BaseDapi(window.OneGate) : null;
 	let [neolineN3, setNeolineN3] = useState(null);
-	const [activeNet] = useState(process.env.REACT_APP_NETWORK ? capitalizeFirstLetter(process.env.REACT_APP_NETWORK) : 'Mainnet');
+	const [activeNet] = useState(import.meta.env.VITE_NETWORK ? capitalizeFirstLetter(import.meta.env.VITE_NETWORK) : 'Mainnet');
 	const [NeoFSContract] = useState({
 		gasToken: '0xd2a4cff31913016155e38e474a2c06d08be276cf',
-		account: process.env.REACT_APP_NEOFS_ACCOUNT ? process.env.REACT_APP_NEOFS_ACCOUNT : 'NNxVrKjLsRkWsmGgmuNXLcMswtxTGaNQLk',
-		scriptHash: Neon.create.account(process.env.REACT_APP_NEOFS_ACCOUNT).scriptHash,
+		account: import.meta.env.VITE_NEOFS_ACCOUNT ? import.meta.env.VITE_NEOFS_ACCOUNT : 'NNxVrKjLsRkWsmGgmuNXLcMswtxTGaNQLk',
+		scriptHash: Neon.create.account(import.meta.env.VITE_NEOFS_ACCOUNT).scriptHash,
 	});
 
 	const [params] = useState({
-		rest_gw: process.env.REACT_APP_RESTGW ? process.env.REACT_APP_RESTGW : 'https://rest.t5.fs.neo.org/v1',
+		rest_gw: import.meta.env.VITE_RESTGW ? import.meta.env.VITE_RESTGW : 'https://rest.t5.fs.neo.org/v1',
 	});
 
 	const [objectLinkLifetime, setObjectLinkLifetime] = useState(new Date().toLocaleDateString("sv"));
@@ -796,24 +796,22 @@ export const App = () => {
 						{modal.text.indexOf('0x') !== -1 && (
 							<>
 								<Heading align="center" size={6} weight="normal">Transaction id:</Heading>
-								<CopyToClipboard
-									text={modal.text}
+								<div
 									className="modal_highlighted_copy"
 									style={{ marginBottom: 0 }}
-									onCopy={() => {
+									onClick={() => {
+										copy(modal.text);
 										setCopy(true);
 										setTimeout(() => {
 											setCopy(false);
 										}, 700);
 									}}
 								>
-									<div>
-										{modal.text}
-										{isCopied && (
-											<div className="tooltip">Copied!</div>
-										)}
-									</div>
-								</CopyToClipboard>
+									{modal.text}
+									{isCopied && (
+										<div className="tooltip">Copied!</div>
+									)}
+								</div>
 								<div className='btns_group'>
 									<a
 										href={`https://dora.coz.io/transaction/neo3/${activeNet.toLowerCase()}/${modal.text}`}
@@ -821,6 +819,7 @@ export const App = () => {
 										rel="noopener noreferrer"
 									>
 										<Button
+											renderAs="button"
 											color="primary"
 											size="small"
 										>
@@ -833,6 +832,7 @@ export const App = () => {
 										rel="noopener noreferrer"
 									>
 										<Button
+											renderAs="button"
 											color="primary"
 											size="small"
 										>
@@ -874,24 +874,21 @@ export const App = () => {
 						</div>
 						<Heading align="center" size={6} style={{ marginBottom: 10 }}>Connection URL</Heading>
 						<Heading align="center" size={7} weight="normal">Copy and paste the connection URL into the Add connection page in your wallet</Heading>
-						<CopyToClipboard
-							text={modal.text}
+						<div
 							className="modal_highlighted_copy"
-							style={{ marginBottom: 0 }}
-							onCopy={() => {
+							onClick={() => {
+								copy(modal.text);
 								setCopy(true);
 								setTimeout(() => {
 									setCopy(false);
 								}, 700);
 							}}
 						>
-							<div>
-								{modal.text}
-								{isCopied && (
-									<div className="tooltip">Copied!</div>
-								)}
-							</div>
-						</CopyToClipboard>
+							{modal.text}
+							{isCopied && (
+								<div className="tooltip">Copied!</div>
+							)}
+						</div>
 					</div>
 				</div>
 			)}
@@ -921,7 +918,7 @@ export const App = () => {
 							rel="noopener noreferrer"
 							target="_blank"
 						>
-							<Button className="btn_connect_wallet">
+							<Button className="btn_connect_wallet" renderAs="button">
 								Install NeoLine
 								<img src="/img/icons/wallets/neoline.svg" alt="neoline logo" />
 							</Button>
@@ -932,7 +929,7 @@ export const App = () => {
 							rel="noopener noreferrer"
 							target="_blank"
 						>
-							<Button className="btn_connect_wallet">
+							<Button className="btn_connect_wallet" renderAs="button">
 								Install O3
 								<img src="/img/icons/wallets/o3.svg" alt="o3 logo" />
 							</Button>
@@ -943,7 +940,7 @@ export const App = () => {
 							rel="noopener noreferrer"
 							target="_blank"
 						>
-							<Button className="btn_connect_wallet">
+							<Button className="btn_connect_wallet" renderAs="button">
 								Install Neon
 								<img src="/img/icons/wallets/neon.svg" alt="neon logo" />
 							</Button>
@@ -954,7 +951,7 @@ export const App = () => {
 							rel="noopener noreferrer"
 							target="_blank"
 						>
-							<Button className="btn_connect_wallet">
+							<Button className="btn_connect_wallet" renderAs="button">
 								Install Onegate
 								<img src="/img/icons/wallets/onegate.svg" alt="onegate logo" />
 							</Button>
@@ -996,6 +993,7 @@ export const App = () => {
 												/>
 											) : (
 												<Button
+													renderAs="button"
 													color="primary"
 													size="small"
 													onClick={() => onAuth('container', 'PUT')}
@@ -1017,6 +1015,7 @@ export const App = () => {
 												/>
 											) : (
 												<Button
+													renderAs="button"
 													color="primary"
 													size="small"
 													onClick={() => onAuth('container', 'DELETE')}
@@ -1038,6 +1037,7 @@ export const App = () => {
 												/>
 											) : (
 												<Button
+													renderAs="button"
 													color="primary"
 													size="small"
 													onClick={() => onAuth('container', 'SETEACL', modal.params)}
@@ -1062,6 +1062,7 @@ export const App = () => {
 											/>
 										) : (
 											<Button
+												renderAs="button"
 												color="primary"
 												size="small"
 												onClick={() => onAuth('object', null, modal.params)}
@@ -1076,6 +1077,7 @@ export const App = () => {
 						{walletData && walletData.tokens.container.PUT && walletData.tokens.container.DELETE && walletData.tokens.container.SETEACL
 							&& walletData.tokens.object && (
 							<Button
+								renderAs="button"
 								color="primary"
 								onClick={onModal}
 								style={{ margin: '20px auto 0', display: 'flex' }}
@@ -1128,6 +1130,7 @@ export const App = () => {
 								<Form.Label>Name</Form.Label>
 								<Form.Control>
 									<Form.Input
+										renderAs="input"
 										type="text"
 										value={containerForm.containerName}
 										className={isError.active && isError.type.indexOf('containerName') !== -1 ? 'is-error' : ""}
@@ -1140,6 +1143,7 @@ export const App = () => {
 								<Form.Label>Placement policy</Form.Label>
 								<Form.Control>
 									<Form.Input
+										renderAs="input"
 										type="text"
 										value={containerForm.placementPolicy}
 										className={isError.active && isError.type.indexOf('placementPolicy') !== -1 ? 'is-error' : ""}
@@ -1166,6 +1170,7 @@ export const App = () => {
 										<Form.Field kind="group" key={index}>
 											<Form.Control>
 												<Form.Input
+													renderAs="input"
 													placeholder="Key"
 													value={attribute.key}
 													className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.key.length === 0 ? 'is-error' : ""}
@@ -1179,6 +1184,7 @@ export const App = () => {
 											</Form.Control>
 											<Form.Control>
 												<Form.Input
+													renderAs="input"
 													placeholder="Value"
 													value={attribute.value}
 													className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.value.length === 0 ? 'is-error' : ""}
@@ -1210,6 +1216,7 @@ export const App = () => {
 									))}
 								</div>
 								<Button
+									renderAs="button"
 									color="primary"
 									size="small"
 									className={isLoadingForm ? "button_disabled" : ""}
@@ -1233,6 +1240,7 @@ export const App = () => {
 								<Form.Label size="small">Basic ACL</Form.Label>
 								<Form.Control>
 									<Form.Input
+										renderAs="input"
 										type="text"
 										value={containerForm.basicAcl}
 										className={isError.active && isError.type.indexOf('basicAcl') !== -1 ? 'is-error' : ""}
@@ -1285,6 +1293,7 @@ export const App = () => {
 										<div className="token_status_panel" style={{ margin: '25px 0 10px', maxWidth: 'unset' }}>
 											<Heading size={6} style={{ margin: '0 10px 0 0', maxWidth: 290 }}>Sign token to unlock create&nbsp;operation</Heading>
 											<Button
+												renderAs="button"
 												color="primary"
 												size="small"
 												onClick={() => onAuth('container', 'PUT')}
@@ -1297,6 +1306,7 @@ export const App = () => {
 										<div className="token_status_panel" style={{ margin: '10px 0', maxWidth: 'unset' }}>
 											<Heading size={6} style={{ margin: '0 10px 0 0', maxWidth: 300 }}>Sign token to unlock eACL&nbsp;management</Heading>
 											<Button
+												renderAs="button"
 												color="primary"
 												size="small"
 												onClick={() => onAuth('container', 'SETEACL')}
@@ -1308,6 +1318,7 @@ export const App = () => {
 								</>
 							) : (
 								<Button
+									renderAs="button"
 									color="primary"
 									onClick={onCreateContainer}
 									style={isLoadingForm ? {
@@ -1370,6 +1381,7 @@ export const App = () => {
 							<div className="token_status_panel">
 								<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock delete&nbsp;operation</Heading>
 								<Button
+									renderAs="button"
 									color="primary"
 									size="small"
 									onClick={() => onAuth('container', 'DELETE')}
@@ -1381,6 +1393,7 @@ export const App = () => {
 							<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
 								{!isLoadingForm && (
 									<Button
+										renderAs="button"
 										color="gray"
 										onClick={() => {
 											onModal();
@@ -1392,6 +1405,7 @@ export const App = () => {
 									</Button>
 								)}
 								<Button
+									renderAs="button"
 									color="danger"
 									onClick={() => onDeleteContainer(modal.text.containerId)}
 								>
@@ -1476,6 +1490,7 @@ export const App = () => {
 									<Form.Field kind="group" key={index}>
 										<Form.Control>
 											<Form.Input
+												renderAs="input"
 												placeholder="Key"
 												value={attribute.key}
 												className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.key.length === 0 ? 'is-error' : ""}
@@ -1489,6 +1504,7 @@ export const App = () => {
 										</Form.Control>
 										<Form.Control>
 											<Form.Input
+												renderAs="input"
 												placeholder="Value"
 												value={attribute.value}
 												className={isError.active && isError.type.indexOf('attributes') !== -1 && attribute.value.length === 0 ? 'is-error' : ""}
@@ -1520,6 +1536,7 @@ export const App = () => {
 								))}
 							</div>
 							<Button
+								renderAs="button"
 								color="primary"
 								size="small"
 								className={isLoadingForm ? "button_disabled" : ""}
@@ -1542,6 +1559,7 @@ export const App = () => {
 							</Notification>
 						)}
 						<Button
+							renderAs="button"
 							color="primary"
 							onClick={() => onCreateObject(modal.text.containerId)}
 							style={isLoadingForm ? {
@@ -1591,6 +1609,7 @@ export const App = () => {
 							<>
 								<Form.Control style={{ marginBottom: '1.5rem' }}>
 									<Form.Input
+										renderAs="input"
 										type="date"
 										value={objectLinkLifetime}
 										onChange={(e) => setObjectLinkLifetime(e.target.value)}
@@ -1599,6 +1618,7 @@ export const App = () => {
 								<div className="token_status_panel">
 									<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to share&nbsp;object</Heading>
 									<Button
+										renderAs="button"
 										color="primary"
 										size="small"
 										onClick={() => onAuth('object', null, modal.text)}
@@ -1619,10 +1639,10 @@ export const App = () => {
 										{`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}${modal.text.token ? `&token=${modal.text.token}` : ''}`}
 									</span>
 								</a>
-								<CopyToClipboard
-									text={`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}${modal.text.token ? `&token=${modal.text.token}` : ''}`}
+								<div
 									className="copy_text"
-									onCopy={() => {
+									onClick={() => {
+										copy(`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}${modal.text.token ? `&token=${modal.text.token}` : ''}`);
 										setCopy(true);
 										setTimeout(() => {
 											setCopy(false);
@@ -1630,6 +1650,7 @@ export const App = () => {
 									}}
 								>
 									<Button
+										renderAs="button"
 										color="primary"
 										size="small"
 										style={{ margin: 'auto', display: 'flex' }}
@@ -1639,7 +1660,7 @@ export const App = () => {
 											<div className="tooltip">Copied!</div>
 										)}
 									</Button>
-								</CopyToClipboard>
+								</div>
 							</>
 						)}
 					</div>
@@ -1679,6 +1700,7 @@ export const App = () => {
 						<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
 							{!isLoadingForm && (
 								<Button
+									renderAs="button"
 									color="gray"
 									onClick={() => {
 										onModal();
@@ -1690,6 +1712,7 @@ export const App = () => {
 								</Button>
 							)}
 							<Button
+								renderAs="button"
 								color="danger"
 								onClick={() => onDeleteObject(modal.text.containerId, modal.text.objectId)}
 							>
@@ -1730,6 +1753,7 @@ export const App = () => {
 							<Form.Label size="small" weight="light">Quantity (GAS)</Form.Label>
 							<Form.Control>
 								<Form.Input
+									renderAs="input"
 									type="number"
 									value={depositQuantity}
 									onChange={(e) => setDepositQuantity(e.target.value)}
@@ -1737,6 +1761,7 @@ export const App = () => {
 							</Form.Control>
 						</Form.Field>
 						<Button
+							renderAs="button"
 							color="primary"
 							onClick={() => onDeposit(modal.text.neoBalance)}
 							size="small"
@@ -1771,6 +1796,7 @@ export const App = () => {
 							<Form.Label size="small" weight="light">Quantity (GAS)</Form.Label>
 							<Form.Control>
 								<Form.Input
+									renderAs="input"
 									type="number"
 									value={withdrawQuantity}
 									onChange={(e) => setWithdrawQuantity(e.target.value)}
@@ -1783,6 +1809,7 @@ export const App = () => {
 							</Form.Control>
 						</Form.Field>
 						<Button
+							renderAs="button"
 							color="primary"
 							onClick={() => onWithdraw(modal.text.neoFSBalance)}
 							size="small"
@@ -1870,6 +1897,7 @@ export const App = () => {
 					{walletData && (
 						<Navbar.Item renderAs="div" align="end">
 							<Button
+								renderAs="button"
 								color="secondary"
 								size="small"
 								onClick={onDisconnectWallet}
@@ -1991,7 +2019,7 @@ export const App = () => {
 					subtitle
 					align="center"
 				>
-					{process.env.REACT_APP_VERSION}
+					{import.meta.env.VITE_VERSION}
 				</Heading>
 			</Footer>
 		</>

@@ -23,14 +23,14 @@ const Home = ({
 		>
 			<Section>
 				<Box style={{ maxWidth: 600, margin: 'auto' }}>
-					{!process.env.REACT_APP_WC_PROJECT_ID ? (
+					{!import.meta.env.VITE_WC_PROJECT_ID ? (
 						<Tile kind="parent">
 							<Tile
 								kind="child"
 								renderAs={Notification}
 								color="danger"
 							>
-								Error: Global variable REACT_APP_WC_PROJECT_ID is not set. Obtain the <span style={{ fontWeight: 600 }}>WalletConnect project id</span> on the website <a href="https://cloud.walletconnect.com/app" style={{ textDecoration: 'underline' }} target="_blank" rel="noreferrer">cloud.walletconnect.com/app</a> and set in the .env file.
+								Error: Global variable VITE_WC_PROJECT_ID is not set. Obtain the <span style={{ fontWeight: 600 }}>WalletConnect project id</span> on the website <a href="https://cloud.walletconnect.com/app" style={{ textDecoration: 'underline' }} target="_blank" rel="noreferrer">cloud.walletconnect.com/app</a> and set in the .env file.
 							</Tile>
 						</Tile>
 					) : (
@@ -38,6 +38,7 @@ const Home = ({
 							<Heading align="center" size={6}>Welcome to NeoFS Panel, it allows you to move funds from/to NeoFS and manage containers and objects via web UI</Heading>
 							<Heading align="center" size={6} weight="normal">Connect your wallet to log&nbsp;in</Heading>
 							<Button
+								renderAs="button"
 								className="btn_connect_wallet"
 								onClick={() => onConnectWallet('neoline')}
 								style={isNeoLineSupport ? { border: '2px solid #00e599', background: '#00dc9633' } : {}}
@@ -46,6 +47,7 @@ const Home = ({
 								<img src="/img/icons/wallets/neoline.svg" alt="neoline logo" />
 							</Button>
 							<Button
+								renderAs="button"
 								className="btn_connect_wallet"
 								onClick={() => onConnectWallet('o3')}
 							>
@@ -53,6 +55,7 @@ const Home = ({
 								<img src="/img/icons/wallets/o3.svg" alt="o3 logo" />
 							</Button>
 							<Button
+								renderAs="button"
 								className="btn_connect_wallet"
 								onClick={() => onConnectWallet('neon')}
 							>
@@ -60,6 +63,7 @@ const Home = ({
 								<img src="/img/icons/wallets/neon.svg" alt="neon logo" />
 							</Button>
 							<Button
+								renderAs="button"
 								className="btn_connect_wallet"
 								onClick={() => onConnectWallet('onegate')}
 							>

@@ -114,6 +114,7 @@ export default function EACLPanel({
 							<Form.Field kind="group">
 								<Form.Control>
 									<Form.Select
+										renderAs="select"
 										value={eACLItem.operation}
 										className={isError.active && isError.type.indexOf('eacl') !== -1 && eACLItem.operation.length === 0 ? 'is-error' : ""}
 										onChange={(e) => {
@@ -131,6 +132,7 @@ export default function EACLPanel({
 								</Form.Control>
 								<Form.Control>
 									<Form.Select
+										renderAs="select"
 										value={eACLItem.action}
 										className={isError.active && isError.type.indexOf('eacl') !== -1 && eACLItem.action.length === 0 ? 'is-error' : ""}
 										onChange={(e) => {
@@ -148,6 +150,7 @@ export default function EACLPanel({
 								</Form.Control>
 								<Form.Control>
 									<Form.Select
+										renderAs="select"
 										value={eACLItem.targets[0].role}
 										className={isError.active && isError.type.indexOf('eacl') !== -1 && eACLItem.targets[0].role.length === 0 ? 'is-error' : ""}
 										onChange={(e) => {
@@ -178,6 +181,7 @@ export default function EACLPanel({
 								>
 									Filters
 									<Button
+										renderAs="button"
 										color="primary"
 										size="small"
 										onClick={() => {
@@ -201,6 +205,7 @@ export default function EACLPanel({
 								<Form.Field className="panel-block-content" kind="group" key={filterIndex}>
 									<Form.Control>
 										<Form.Select
+											renderAs="select"
 											value={filterItem.headerType}
 											className={isError.active && isError.type.indexOf('eacl') !== -1 && filterItem.headerType.length === 0 ? 'is-error' : ""}
 											onChange={(e) => {
@@ -218,6 +223,7 @@ export default function EACLPanel({
 									</Form.Control>
 									<Form.Control>
 										<Form.Select
+											renderAs="select"
 											value={filterItem.matchType}
 											className={isError.active && isError.type.indexOf('eacl') !== -1 && filterItem.matchType.length === 0 ? 'is-error' : ""}
 											onChange={(e) => {
@@ -235,6 +241,7 @@ export default function EACLPanel({
 									</Form.Control>
 									<Form.Control>
 										<Form.Input
+											renderAs="input"
 											placeholder="Key"
 											value={filterItem.key}
 											className={isError.active && isError.type.indexOf('eacl') !== -1 && filterItem.key.length === 0 ? 'is-error' : ""}
@@ -248,6 +255,7 @@ export default function EACLPanel({
 									</Form.Control>
 									<Form.Control>
 										<Form.Input
+											renderAs="input"
 											placeholder="Value"
 											value={filterItem.value}
 											className={isError.active && isError.type.indexOf('eacl') !== -1 && filterItem.value.length === 0 ? 'is-error' : ""}
@@ -284,6 +292,7 @@ export default function EACLPanel({
 			{isEdit && (
 				<Panel.Block>
 					<Button
+						renderAs="button"
 						fullwidth
 						color="primary"
 						size="small"
@@ -318,6 +327,7 @@ export default function EACLPanel({
 						<div className="token_status_panel" style={{ margin: '15px auto' }}>
 							<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock eACL&nbsp;management</Heading>
 							<Button
+								renderAs="button"
 								color="primary"
 								size="small"
 								onClick={() => onAuth('container', 'SETEACL')}
@@ -327,6 +337,7 @@ export default function EACLPanel({
 						</div>
 					) : (
 						<Button
+							renderAs="button"
 							color="primary"
 							onClick={() => onSetEACL(containerItem.containerId)}
 							style={isLoadingForm ? {

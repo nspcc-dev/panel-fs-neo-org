@@ -14,20 +14,22 @@ $(SITE_DIR):
 	docker run \
 	-v $$(pwd)/src:/usr/src/app/src \
 	-v $$(pwd)/public:/usr/src/app/public \
+	-v $$(pwd)/index.html:/usr/src/app/index.html \
+	-v $$(pwd)/vite.config.mjs:/usr/src/app/vite.config.mjs \
 	-v $$(pwd)/package.json:/usr/src/app/package.json \
 	-v $$(pwd)/.env:/usr/src/app/.env \
 	-v $$(pwd)/$(SITE_DIR):/usr/src/app/$(SITE_DIR) \
 	-e CURRENT_UID=$(CURRENT_UID) \
-	-w /usr/src/app node:14-alpine \
-	sh -c 'npm install && REACT_APP_VERSION=$(VERSION) npm run build && chown -R $$CURRENT_UID: $(SITE_DIR)'
+	-w /usr/src/app node:18-alpine \
+	sh -c 'apk add --no-cache python3 make g++ && npm install && VITE_VERSION=$(VERSION) npm run build && chown -R $$CURRENT_UID: $(SITE_DIR)'
 
 .PHONY: start
 start:
 	docker run \
 	-p $(PORT):3000 \
 	-v `pwd`:/usr/src/app \
-	-w /usr/src/app node:14-alpine \
-	sh -c 'npm install --silent && npm run build && npm install -g serve && serve -s $(SITE_DIR) -p 3000'
+	-w /usr/src/app node:18-alpine \
+	sh -c 'apk add --no-cache python3 make g++ && npm install --silent && npm run build && npm install -g serve && serve -s $(SITE_DIR) -p 3000'
 
 .PHONY: release
 release: $(SITE_DIR)

@@ -1,4 +1,4 @@
-const rest_gw = process.env.REACT_APP_RESTGW ? process.env.REACT_APP_RESTGW : 'https://rest.t5.fs.neo.org/v1';
+const rest_gw = import.meta.env.VITE_RESTGW ? import.meta.env.VITE_RESTGW : 'https://rest.t5.fs.neo.org/v1';
 
 async function serverRequest(method, url, params, headers) {
 	const json = {
@@ -50,8 +50,12 @@ export default function api(method, url, params = {}, headers = {}) {
 				} else if (response.status === 413) {
 					reject('413 Request Entity Too Large');
 				} else if (response) {
-					res = await response.json();
-					resolve(res);
+					try {
+						res = await response.json();
+						resolve(res);
+					} catch (err) {
+						resolve(err);
+					}
 				} else {
 					reject(res);
 				}
