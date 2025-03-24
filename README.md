@@ -25,7 +25,7 @@ framework under the hood and includes:
 
 - docker
 - make
-- node (`14+`)
+- node (`18+`)
 
 # Quick Start
 
@@ -37,13 +37,13 @@ $ git clone https://github.com/nspcc-dev/panel-fs-neo-org.git
 
 Set variables in `.env` file
 
-- `REACT_APP_WC_PROJECT_ID` - WalletConnect project id (Can be obtained on WalletConnect website,
+- `VITE_WC_PROJECT_ID` - WalletConnect project id (Can be obtained on WalletConnect website,
   see https://cloud.walletconnect.com/app)
-- `REACT_APP_URL` - Web application url
-- `REACT_APP_RESTGW` - [NeoFS REST Gateway](https://github.com/nspcc-dev/neofs-rest-gw), which we use to manage
+- `VITE_URL` - Web application url
+- `VITE_RESTGW` - [NeoFS REST Gateway](https://github.com/nspcc-dev/neofs-rest-gw), which we use to manage
   containers and object in neofs (control path)
-- `REACT_APP_NETWORK` - Network of the Neo (might be `mainnet`, `testnet`)
-- `REACT_APP_NEOFS_ACCOUNT` - Neo3 address of the NeoFS contract
+- `VITE_NETWORK` - Network of the Neo (might be `mainnet`, `testnet`)
+- `VITE_NEOFS_ACCOUNT` - Neo3 address of the NeoFS contract
 
 Run next commands from project's root:
 
@@ -66,7 +66,7 @@ You can easily run the node locally in a docker container using [@nspcc-dev/neof
 You need to update the parameters in the `.env` file to make it work:
 
 ```env
-REACT_APP_RESTGW=http://localhost:8090/v1
+VITE_RESTGW=http://localhost:8090/v1
 ```
 
 # Make instructions

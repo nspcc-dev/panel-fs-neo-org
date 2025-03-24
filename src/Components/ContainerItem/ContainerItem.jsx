@@ -300,6 +300,7 @@ export default function ContainerItem({
 											</div>
 											{activePanel === 'objects' && (
 												<Button
+													renderAs="button"
 													size="small"
 													color="primary"
 													onClick={(e) => {
@@ -340,6 +341,7 @@ export default function ContainerItem({
 																</div>
 															</span>
 															<Button
+																renderAs="button"
 																color="primary"
 																size="small"
 																onClick={() => {
@@ -360,6 +362,7 @@ export default function ContainerItem({
 															<div className="filter_item" key={indexFilter}>
 																<Form.Control>
 																	<Form.Input
+																		renderAs="input"
 																		size='small'
 																		placeholder="Attribute"
 																		value={filterItem.key}
@@ -373,6 +376,7 @@ export default function ContainerItem({
 																</Form.Control>
 																<Form.Control className="select_wrapper">
 																	<Form.Select
+																		renderAs="select"
 																		size='small'
 																		value={filterItem.match}
 																		onChange={(e) => {
@@ -393,6 +397,7 @@ export default function ContainerItem({
 																</Form.Control>
 																<Form.Control>
 																	<Form.Input
+																		renderAs="input"
 																		size='small'
 																		placeholder="Value"
 																		value={filterItem.value}
@@ -420,6 +425,7 @@ export default function ContainerItem({
 															</div>
 														))}
 														<Button
+															renderAs="button"
 															fullwidth
 															color="primary"
 															size="small"

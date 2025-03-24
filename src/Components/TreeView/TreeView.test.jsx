@@ -1,6 +1,8 @@
+import React from 'react';
+import { describe, it, expect, afterEach } from 'vitest';
+import { render, cleanup } from '@testing-library/react';
 import TreeView from './TreeView';
 import { formatForTreeView } from '../../Functions/handle';
-import { cleanup, render } from '@testing-library/react';
 
 afterEach(cleanup);
 

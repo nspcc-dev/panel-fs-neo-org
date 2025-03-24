@@ -165,7 +165,7 @@ ul {
     color: #003;
 }
 
-#containers .notification>h1::after {
+#containers .notification>.title::after {
     display: inline-block;
     position: absolute;
     right: 0;
@@ -180,7 +180,7 @@ ul {
     border-left: 0.4em solid transparent;
 }
 
-#containers .notification>h1.active::after {
+#containers .notification>.title.active::after {
     display: none;
 }
 
@@ -188,7 +188,7 @@ ul {
     padding: 0;
 }
 
-#containers .tile.is-parent>.notification>h1 {
+#containers .tile.is-parent>.notification>.title {
     padding: 1.25rem 1.5rem 1.25rem;
 }
 
@@ -792,7 +792,7 @@ label.panel-block:hover {
         padding: 1rem;
     }
 
-    #containers .tile.is-parent>.notification>h1 {
+    #containers .tile.is-parent>.notification>.title {
         padding: 0.75rem 1rem 0.75rem;
     }
 
@@ -806,7 +806,7 @@ label.panel-block:hover {
         margin-bottom: 0.25rem;
     }
 
-    #containers .notification>h1::after {
+    #containers .notification>.title::after {
         margin: 18px;
     }
 

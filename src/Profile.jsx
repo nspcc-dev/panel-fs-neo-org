@@ -229,6 +229,7 @@ const Profile = ({
 						</table>
 						<div style={{ display: 'flex', flexWrap: 'wrap' }}>
 							<Button
+								renderAs="button"
 								color="primary"
 								size="small"
 								onClick={() => onModal('deposit', { neoBalance })}
@@ -237,6 +238,7 @@ const Profile = ({
 								{`Deposit from ${activeNet} to NeoFS`}
 							</Button>
 							<Button
+								renderAs="button"
 								color="primary"
 								size="small"
 								onClick={() => onModal('withdraw', { neoFSBalance })}
@@ -269,6 +271,7 @@ const Profile = ({
 								)}
 							</span>
 							<Button
+								renderAs="button"
 								color="primary"
 								size="small"
 								onClick={() => onModal('createContainer', { neoFSBalance })}

@@ -137,7 +137,7 @@ const File = ({
 								</Heading>
 								<Heading size={6} weight="light">
 									<span>{`Object size: `}</span>
-									{formatBytes(objectDate.objectSize)}
+									{objectDate.objectSize ? formatBytes(objectDate.objectSize) : ''}
 								</Heading>
 							</Section>
 							<Section style={{ paddingTop: 0 }}>
