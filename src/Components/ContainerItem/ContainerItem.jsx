@@ -89,7 +89,7 @@ export default function ContainerItem({
 	const onGetObjects = (containerId, pageTemp = pagination.page) => {
 		setPagination({ ...pagination, page: pageTemp});
 		setLoadingObjects(true);
-		api('POST', `/objects/${containerId}/search?limit=${ObjectsPerPage}&offset=${pageTemp * ObjectsPerPage}`, {
+		api('POST', `/v1/objects/${containerId}/search?limit=${ObjectsPerPage}&offset=${pageTemp * ObjectsPerPage}`, {
 			filters: filters.every((item) => item.key !== '' && item.value !== '') ? filters : [],
 		}, {
 			"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
@@ -106,7 +106,7 @@ export default function ContainerItem({
 
 	const onGetEACL = (containerId) => {
 		setLoadingEACL(true);
-		api('GET', `/containers/${containerId}/eacl`, {}, {
+		api('GET', `/v1/containers/${containerId}/eacl`, {}, {
 			"X-Bearer-Owner-Id": walletData.account.address,
 		}).then((e) => {
 			setLoadingEACL(false);

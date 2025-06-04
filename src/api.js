@@ -1,4 +1,4 @@
-const rest_gw = import.meta.env.VITE_RESTGW ? import.meta.env.VITE_RESTGW : 'https://rest.t5.fs.neo.org/v1';
+const rest_gw = import.meta.env.VITE_RESTGW ? import.meta.env.VITE_RESTGW : 'https://rest.t5.fs.neo.org';
 
 async function serverRequest(method, url, params, headers) {
 	const json = {

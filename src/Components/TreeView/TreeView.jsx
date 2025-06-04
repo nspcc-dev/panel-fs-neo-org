@@ -88,7 +88,7 @@ const File = ({
 	const handleToggle = e => {
 		setIsOpen(!isOpen);
 		if (!isOpen) {
-			api('HEAD', `/objects/${containerItem.containerId}/by_id/${objectItem.address.objectId}`, {}, {
+			api('HEAD', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.address.objectId}`, {}, {
 				"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 			}).then((e) => {
 				setObjectDate(e);
@@ -166,7 +166,7 @@ const File = ({
 											className="manage_icon"
 											onClick={() => {
 												onModal('loading');
-												api('GET', `/objects/${containerItem.containerId}/by_id/${objectItem.address.objectId}`, {}, {
+												api('GET', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.address.objectId}`, {}, {
 													"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 												}).then((data) => {
 													if (data.message) {
@@ -201,7 +201,7 @@ const File = ({
 											className="manage_icon"
 											onClick={() => {
 												onModal('loading');
-												api('GET', `/objects/${containerItem.containerId}/by_id/${objectItem.address.objectId}`, {}, {
+												api('GET', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.address.objectId}`, {}, {
 													"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 												}).then((data) => {
 													if (data.message) {
@@ -234,7 +234,7 @@ const File = ({
 									className="manage_icon"
 									onClick={() => {
 										onModal('loading');
-										api('HEAD', `/objects/${containerItem.containerId}/by_id/${objectItem.address.objectId}`, {}, {
+										api('HEAD', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.address.objectId}`, {}, {
 											"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 										}).then((e) => {
 											onModal('shareObjectLink', {

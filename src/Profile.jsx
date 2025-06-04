@@ -70,7 +70,7 @@ const Profile = ({
 
 	const onNeoFSBalance = async () => {
 		setIsLoadingNeoFSBalance(true);
-		api('GET', `/accounting/balance/${walletData.account.address}`).then((e) => {
+		api('GET', `/v1/accounting/balance/${walletData.account.address}`).then((e) => {
 			if (e.message) {
 				onPopup('failed', e.message);
 			} else {
@@ -135,7 +135,7 @@ const Profile = ({
 
 	const onGetContainers = () => {
 		setIsLoadingContainers(true);
-		api('GET', `/containers?ownerId=${walletData.account.address}`).then((e) => {
+		api('GET', `/v1/containers?ownerId=${walletData.account.address}`).then((e) => {
 			if (e.message) {
 				onPopup('failed', e.message);
 			} else {

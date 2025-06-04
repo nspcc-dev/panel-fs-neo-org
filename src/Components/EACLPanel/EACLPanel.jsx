@@ -36,7 +36,7 @@ export default function EACLPanel({
 		if (eACLParams.every((eACLItem) => eACLItem.operation !== '' && eACLItem.action !== '' && eACLItem.targets[0].role !== '' && eACLItem.filters.every((filterItem) => filterItem.headerType !== '' && filterItem.matchType !== '' && filterItem.key !== '' && filterItem.value !== ''))) {
 			setError({ active: false, type: [], text: '' });
 			setLoadingForm(true);
-			api('PUT', `/containers/${containerId}/eacl?walletConnect=true`, {
+			api('PUT', `/v1/containers/${containerId}/eacl?walletConnect=true`, {
 				"records": eACLParams.filter((item) => delete item.isOpen),
 			}, {
 				"Authorization": `Bearer ${walletData.tokens.container.SETEACL.token}`,
