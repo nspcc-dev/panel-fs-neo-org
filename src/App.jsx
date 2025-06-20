@@ -52,7 +52,7 @@ export const App = () => {
 	});
 
 	const [params] = useState({
-		rest_gw: import.meta.env.VITE_RESTGW ? import.meta.env.VITE_RESTGW : 'https://rest.t5.fs.neo.org/v1',
+		rest_gw: import.meta.env.VITE_RESTGW ? import.meta.env.VITE_RESTGW : 'https://rest.t5.fs.neo.org',
 	});
 
 	const [objectLinkLifetime, setObjectLinkLifetime] = useState(new Date().toLocaleDateString("sv"));
@@ -210,7 +210,7 @@ export const App = () => {
 			onPopup('success', 'Wallet connected');
 			onModal();
 
-			api('GET', '/network-info').then((e) => {
+			api('GET', '/v1/network-info').then((e) => {
 				if (!e.message) {
 					setNetworkInfo(e);
 				}
@@ -347,7 +347,7 @@ export const App = () => {
 			}]
 		}
 
-		api('POST', '/auth', body, {
+		api('POST', '/v1/auth', body, {
 			"X-Bearer-Owner-Id": walletData.account.address,
 			"X-Bearer-Lifetime": params.objectId ? formatDateToHours(objectLinkLifetime) : 2,
 			"X-Bearer-For-All-Users": true,
@@ -389,7 +389,7 @@ export const App = () => {
 		}
 
 		if (type === 'object') {
-			api('GET', '/auth/bearer?walletConnect=true', {}, {
+			api('GET', '/v1/auth/bearer?walletConnect=true', {}, {
 				"Authorization": `Bearer ${msg}`,
 				"X-Bearer-Signature": response.data + response.salt,
 				"X-Bearer-Signature-Key": response.publicKey,
@@ -412,7 +412,7 @@ export const App = () => {
 					if (containerForm.containerName.length >= 3) {
 						setError({ active: false, type: [], text: '' });
 						setLoadingForm(true);
-						api('PUT', '/containers?walletConnect=true&name-scope-global=true', {
+						api('PUT', '/v1/containers?walletConnect=true&name-scope-global=true', {
 							"containerName": containerForm.containerName,
 							"placementPolicy": containerForm.placementPolicy,
 							"basicAcl": containerForm.basicAcl,
@@ -440,7 +440,7 @@ export const App = () => {
 								setError({ active: true, type: [], text: e.message });
 							} else {
 								if (containerForm.eACLParams.length > 0) {
-									api('PUT', `/containers/${e.containerId}/eacl?walletConnect=true`, {
+									api('PUT', `/v1/containers/${e.containerId}/eacl?walletConnect=true`, {
 										"records": containerForm.eACLParams.filter((item) => delete item.isOpen),
 									}, {
 										"Authorization": `Bearer ${walletData.tokens.container.SETEACL.token}`,
@@ -492,7 +492,7 @@ export const App = () => {
 	const onDeleteContainer = (containerName) => {
 		setLoadingForm(true);
 		setError({ active: false, type: [], text: '' });
-		api('DELETE', `/containers/${containerName}?walletConnect=true`, {}, {
+		api('DELETE', `/v1/containers/${containerName}?walletConnect=true`, {}, {
 			"Authorization": `Bearer ${walletData.tokens.container.DELETE.token}`,
 			"X-Bearer-Owner-Id": walletData.account.address,
 			"X-Bearer-Signature": walletData.tokens.container.DELETE.signature,
@@ -535,7 +535,7 @@ export const App = () => {
 
 				const attributesHeaders = {};
 				attributes.map((attribute) => attributesHeaders[attribute.key] = attribute.value);
-				api('POST', `/objects/${containerId}`, objectForm.file, {
+				api('POST', `/v1/objects/${containerId}`, objectForm.file, {
 					'Content-Type': objectForm.file.type,
 					"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 					'X-Attributes': JSON.stringify({
@@ -572,7 +572,7 @@ export const App = () => {
 	const onDeleteObject = (containerId, objectId) => {
 		setError({ active: false, type: [], text: '' });
 		setLoadingForm(true);
-		api('DELETE', `/objects/${containerId}/${objectId}`, {}, {
+		api('DELETE', `/v1/objects/${containerId}/${objectId}`, {}, {
 			"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 		}).then((e) => {
 			setLoadingForm(false);
@@ -1485,6 +1485,7 @@ export const App = () => {
 						</Form.Field>
 						<Form.Field>
 							<Form.Label>Attributes</Form.Label>
+						<Heading className="input_caption">Attributes are key value pairs (string:string) that are attached to the metadata of objects. You can specify anything as an attribute.<br/><br/>If you set the FileName attribute, you can also see the file name in the object list. The FilePath attribute allows you to present the list of objects as a tree in the panel interface.</Heading>
 							<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
 								{attributes.map((attribute, index) => (
 									<Form.Field kind="group" key={index}>

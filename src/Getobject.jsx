@@ -26,7 +26,7 @@ const Getobject = ({
 		if (token) {
 			payload["Authorization"] = `Bearer ${token}`;
 		}
-		api('HEAD', `/objects/${containerId}/by_id/${objectId}`, {}, payload).then((e) => {
+		api('HEAD', `/v1/objects/${containerId}/by_id/${objectId}`, {}, payload).then((e) => {
 			if (e.message) {
 				onModal('failed', e.message);
 			} else {
@@ -42,7 +42,7 @@ const Getobject = ({
 		if (params.token) {
 			payload["Authorization"] = `Bearer ${params.token}`;
 		}
-		api('GET', `/objects/${params.containerId}/by_id/${params.objectId}`, {}, payload).then((data) => {
+		api('GET', `/v1/objects/${params.containerId}/by_id/${params.objectId}`, {}, payload).then((data) => {
 			if (data.message) {
 				onModal('failed', data.message);
 			} else {

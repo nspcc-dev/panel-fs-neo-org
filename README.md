@@ -66,7 +66,7 @@ You can easily run the node locally in a docker container using [@nspcc-dev/neof
 You need to update the parameters in the `.env` file to make it work:
 
 ```env
-VITE_RESTGW=http://localhost:8090/v1
+VITE_RESTGW=http://localhost:8090
 ```
 
 # Make instructions

@@ -1,40 +1,36 @@
 
 export function formatForTreeView(objects) {
-	const getTreeView = objectsList => (
-		objectsList.reduce((root, item) => {
-			const parts = item.filePath ? item.filePath.split('/') : [''];
-			const lastPart = parts[parts.length - 1];
-			if (parts.length === 1 && lastPart === '') {
-				let childrenTemp = [];
-				if (root['/']) {
-					childrenTemp = root['/'];
+	for (let i = 0; i < objects.length; i++) {
+		objects[i].fileName = objects[i].attributes.FileName ? objects[i].attributes.FileName : '';
+		objects[i].filePath = objects[i].attributes.FilePath ? objects[i].attributes.FilePath : '';
+	}
+
+	const getTreeView = (objectsList) => {
+		return objectsList.reduce((root, item) => {
+			const path = item.filePath || '';
+			const parts = path.split('/').filter(Boolean);
+			let current = root;
+
+			for (const part of parts) {
+				if (!current[part]) {
+					current[part] = {};
 				}
-				root = { ...root, '/': [...childrenTemp, item] };
+				if (!current[part]['/']) {
+					current[part]['/'] = [];
+				}
+				current = current[part];
 			}
-			parts.filter((n) => n !== '').reduce((acc, part) => {
-				let children = [];
-				if (part === lastPart) {
-					let childrenTemp = [];
-					if (acc[part]) {
-						childrenTemp = acc[part]['/'];
-					}
-					children = [...childrenTemp, item];
-				} else if (acc[part]) {
-					let childrenTemp = [];
-					childrenTemp = acc[part]['/'];
-					children = [...childrenTemp];
-				}
-				return (acc[part] && (acc[part] = { ...acc[part], '/': children })) || (acc[part] = { '/': children });
-			}, root);
+
+			if (!current['/']) {
+				current['/'] = [];
+			}
+			current['/'].push(item);
+
 			return root;
-		}, Object.create(null))
-	);
+		}, {});
+	};
 
 	for (let i = 0; i < objects.length; i++) {
-		if (!objects[i].filePath) {
-			objects[i].filePath = '';
-		}
-
 		const path = objects[i].filePath.replace(/\/+/g, '/').replace(/\\\\/g, '\\').split('/');
 		if (path[path.length - 1] === '') {
 			objects[i].filePath = '';
@@ -44,7 +40,7 @@ export function formatForTreeView(objects) {
 		}
 
 		if (!objects[i].name) {
-			objects[i].name = objects[i].address.objectId;
+			objects[i].name =  objects[i].attributes.FileName ? objects[i].attributes.FileName : objects[i].objectId;
 		}
 
 		objects[i].fullName = `${objects[i].filePath ? `${objects[i].filePath.trim()}/` : ''}${objects[i].name.trim()}`;

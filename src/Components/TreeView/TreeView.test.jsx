@@ -32,15 +32,14 @@ function getAllFileNames(obj) {
 describe('testTreeView', () => {
   it('DOM display correct TreeView #1', () => {
     const objects = [{
-      "address": { "containerId": "123", "objectId": "456" },
-      "name": "cat.jpg",
-      "filePath": "/root/id",
+      "attributes": { "FileName": "cat.jpg", "FilePath": "/root/id" },
+      "objectId": "123",
     }, {
-      "address": { "containerId": "123", "objectId": "456" },
-      "name": "cat.jpg",
+      "attributes": { "FileName": "cat.jpg" },
+      "objectId": "456",
     }, {
-      "address": { "containerId": "789", "objectId": "012" },
-      "name": "cat.jpg",
+      "attributes": { "FileName": "cat.jpg" },
+      "objectId": "789",
     }];
     const objectsTreeView = formatForTreeView(objects);
     const { container, queryAllByText } = render(<TreeView objects={objectsTreeView} />);
@@ -61,12 +60,11 @@ describe('testTreeView', () => {
 describe('testTreeView', () => {
   it('DOM display correct TreeView #2', () => {
     const objects = [{
-      "address": { "containerId": "123", "objectId": "456" },
-      "name": "cat.jpg",
-      "filePath": "my/folder/children//photos//photo2",
+      "attributes": { "FileName": "cat.jpg", "FilePath": "my/folder/children//photos//photo2" },
+      "objectId": "123",
     }, {
-      "address": { "containerId": "789", "objectId": "012" },
-      "filePath": "345/ё\\ferkln/kmper/\\\\v////4345fk/-~s\\%<dp>20q\]%r",
+      "attributes": { "FileName": "", "FilePath": "345/ё\\ferkln/kmper/\\\\v////4345fk/-~s\\%<dp>20q\]%r" },
+      "objectId": "456",
     }];
     const objectsTreeView = formatForTreeView(objects);
     const { container, queryAllByText } = render(<TreeView objects={objectsTreeView} />);
@@ -87,21 +85,17 @@ describe('testTreeView', () => {
 describe('testTreeView', () => {
   it('DOM display correct TreeView #3', () => {
     const objects = [{
-      "address": { "containerId": "123", "objectId": "456" },
-      "name": "cat.jpg",
-      "filePath": "/root",
+      "attributes": { "FileName": "cat.jpg", "FilePath": "/root" },
+      "objectId": "123",
     }, {
-      "address": { "containerId": "789", "objectId": "012" },
-      "name": "cat.jpg",
-      "filePath": "/root/",
+      "attributes": { "FileName": "cat.jpg", "FilePath": "/root/" },
+      "objectId": "456",
     }, {
-      "address": { "containerId": "345", "objectId": "678" },
-      "name": "cat.jpg",
-      "filePath": "/root/usr",
+      "attributes": { "FileName": "cat.jpg", "FilePath": "/root/usr" },
+      "objectId": "789",
     }, {
-      "address": { "containerId": "901", "objectId": "234" },
-      "name": "cat.jpg",
-      "filePath": "/root/obj.txt",
+      "attributes": { "FileName": "cat.jpg", "FilePath": "/root/obj.txt" },
+      "objectId": "012",
     }];
     const objectsTreeView = formatForTreeView(objects);
     const { container, queryAllByText } = render(<TreeView objects={objectsTreeView} />);

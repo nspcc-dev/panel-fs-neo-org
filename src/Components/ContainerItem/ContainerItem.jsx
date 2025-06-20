@@ -29,8 +29,8 @@ export default function ContainerItem({
 	const ObjectsPerPage = 40;
 	const [isOpen, setIsOpen] = useState(false);
 	const [pagination, setPagination] = useState({
-		page: 0,
-		objects: 0,
+		history: [],
+		cursor: '',
 	});
 	const [filters, setFilters] = useState([{
 		key: '',
@@ -42,10 +42,11 @@ export default function ContainerItem({
 	const [isLoadingEACL, setLoadingEACL] = useState(false);
 	const [eACLParams, setEACLParams] = useState([]);
 	const [activePanel, setActivePanel] = useState('');
+	const [isTreeViewObjects, setTreeViewObjects] = useState(false);
 
 	useEffect(() => {
 		if (isLoadContainers === containerItem.containerId) {
-			onGetObjects(isLoadContainers);
+			onGetObjects(isLoadContainers, '', { history: [], cursor: '' });
 			setLoadContainers(false);
 			onModal();
 		}
@@ -54,7 +55,7 @@ export default function ContainerItem({
 	useEffect(() => {
 		if (walletData.tokens.object && walletData.tokens.object.containerId === containerItem.containerId) {
 			setActivePanel('objects');
-			onGetObjects(containerItem.containerId);
+			onGetObjects(containerItem.containerId, '', { history: [], cursor: '' });
 			onModal();
 			setWalletData({
 				...walletData,
@@ -86,11 +87,17 @@ export default function ContainerItem({
 		}
 	}, [walletData]); // eslint-disable-line react-hooks/exhaustive-deps
 
-	const onGetObjects = (containerId, pageTemp = pagination.page) => {
-		setPagination({ ...pagination, page: pageTemp});
+	const onGetObjects = (containerId, cursor = '', paginationTemp = pagination, isTreeViewObjectsTemp = isTreeViewObjects) => {
 		setLoadingObjects(true);
-		api('POST', `/objects/${containerId}/search?limit=${ObjectsPerPage}&offset=${pageTemp * ObjectsPerPage}`, {
-			filters: filters.every((item) => item.key !== '' && item.value !== '') ? filters : [],
+		let filtersApplied = filters.filter(item => item.key !== '' && item.value !== '');
+		if (isTreeViewObjectsTemp) {
+			const hasFilePath = filtersApplied.some(item => item.key === 'FilePath');
+			filtersApplied = hasFilePath ? filtersApplied : [{ key: "FilePath", match: "MatchCommonPrefix", value: "" }, ...filtersApplied];
+		}
+
+		api('POST', `/v2/objects/${containerId}/search?limit=${ObjectsPerPage}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`, {
+			attributes: [...new Set(filtersApplied.map(item => item.key))],
+			filters: filtersApplied,
 		}, {
 			"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 		}).then((e) => {
@@ -98,15 +105,21 @@ export default function ContainerItem({
 			if (e.message) {
 				onPopup('failed', e.message);
 			} else {
-				setPagination({ objects: e.objects ? e.objects.length : 0, page: pageTemp});
-				setObjects(e.objects ? formatForTreeView(e.objects) : []);
+				const pos = paginationTemp.history.indexOf(e.cursor);
+				if (pos !== -1) {
+					paginationTemp.history.splice(pos, 1);
+				} else if (paginationTemp.cursor !== '') {
+					paginationTemp.history.push(paginationTemp.cursor);
+				}
+				setPagination({ history: paginationTemp.history, cursor: e.cursor });
+				setObjects(e.objects && e.objects.length > 0 ? formatForTreeView(e.objects) : []);
 			}
 		});
 	};
 
 	const onGetEACL = (containerId) => {
 		setLoadingEACL(true);
-		api('GET', `/containers/${containerId}/eacl`, {}, {
+		api('GET', `/v1/containers/${containerId}/eacl`, {}, {
 			"X-Bearer-Owner-Id": walletData.account.address,
 		}).then((e) => {
 			setLoadingEACL(false);
@@ -282,7 +295,7 @@ export default function ContainerItem({
 												} else if (activePanel === 'objects') {
 													setActivePanel('');
 												} else {
-													onGetObjects(containerItem.containerId, 0);
+													onGetObjects(containerItem.containerId, '', { history: [], cursor: '' });
 													setActivePanel('objects');
 												}
 											}}
@@ -299,17 +312,40 @@ export default function ContainerItem({
 												Objects
 											</div>
 											{activePanel === 'objects' && (
-												<Button
-													renderAs="button"
-													size="small"
-													color="primary"
-													onClick={(e) => {
-														onModal('createObject', { containerId: containerItem.containerId })
-														e.stopPropagation();
-													}}
-												>
-													New object
-												</Button>
+												<div>
+													<Button
+														renderAs="button"
+														size="small"
+														color="primary"
+														style={{ marginRight: 10 }}
+														onClick={(e) => {
+															setTreeViewObjects(!isTreeViewObjects);
+															onGetObjects(containerItem.containerId, '', { history: [], cursor: '' }, !isTreeViewObjects);
+															e.stopPropagation();
+														}}
+														disabled={!isTreeViewObjects && objects?.length === 0 || isLoadingObjects}
+													>
+														<img
+															src={`/img/icons/${isTreeViewObjects ? 'tree' : 'list'}_view.svg`}
+															height={12}
+															width={12}
+															style={{ marginRight: 5 }}
+															alt="view"
+														/>
+														{isTreeViewObjects ? 'Tree view' : 'List view'}
+													</Button>
+													<Button
+														renderAs="button"
+														size="small"
+														color="primary"
+														onClick={(e) => {
+															onModal('createObject', { containerId: containerItem.containerId })
+															e.stopPropagation();
+														}}
+													>
+														New object
+													</Button>
+												</div>
 											)}
 										</Heading>
 										{activePanel === 'objects' && (
@@ -430,7 +466,7 @@ export default function ContainerItem({
 															color="primary"
 															size="small"
 															style={{ marginTop: 8 }}
-															onClick={() => onGetObjects(containerItem.containerId, 0)}
+															onClick={() => onGetObjects(containerItem.containerId, '', { history: [], cursor: '' })}
 															disabled={isLoadingObjects || filters.some((item) => item.key === '' || item.value === '')}
 														>
 															Search
@@ -449,18 +485,18 @@ export default function ContainerItem({
 															containerItem={containerItem}
 															objects={objects}
 														/>
-														{!(pagination.page === 0 && pagination.objects === 0) && (
+														{objects.length !== 0 && (
 															<div className="pagination">
 																<div
 																	className="pagination-previous"
-																	onClick={() => onGetObjects(containerItem.containerId, pagination.page - 1)}
-																	style={pagination.page === 0 ? { pointerEvents: 'none', borderColor: '#e9e9e9' } : {}}
+																	onClick={() => onGetObjects(containerItem.containerId, pagination.history.length > 1 ? pagination.history[pagination.history.length - 2] : '')}
+																	style={pagination.history.length === 0 ? { pointerEvents: 'none', borderColor: '#e9e9e9', color: '#9f9f9f' } : {}}
 																>{`<`}</div>
-																<div className="pagination-text">{pagination.page + 1}</div>
+																<div className="pagination-text">{pagination.history.length + 1}</div>
 																<div
 																	className="pagination-next"
-																	onClick={() => onGetObjects(containerItem.containerId, pagination.page + 1)}
-																	style={pagination.objects < ObjectsPerPage ? { pointerEvents: 'none', borderColor: '#e9e9e9' } : {}}
+																	onClick={() => onGetObjects(containerItem.containerId, pagination.cursor)}
+																	style={pagination.cursor === '' ? { pointerEvents: 'none', borderColor: '#e9e9e9', color: '#9f9f9f' } : {}}
 																>{`>`}</div>
 															</div>
 														)}
