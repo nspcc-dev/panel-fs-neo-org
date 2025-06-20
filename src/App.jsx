@@ -1485,6 +1485,7 @@ export const App = () => {
 						</Form.Field>
 						<Form.Field>
 							<Form.Label>Attributes</Form.Label>
+						<Heading className="input_caption">Attributes are key value pairs (string:string) that are attached to the metadata of objects. You can specify anything as an attribute.<br/><br/>If you set the FileName attribute, you can also see the file name in the object list. The FilePath attribute allows you to present the list of objects as a tree in the panel interface.</Heading>
 							<div style={attributes.length >= 3 ? { overflow: 'scroll', maxHeight: 180 } : {}}>
 								{attributes.map((attribute, index) => (
 									<Form.Field kind="group" key={index}>

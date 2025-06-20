@@ -88,7 +88,7 @@ const File = ({
 	const handleToggle = e => {
 		setIsOpen(!isOpen);
 		if (!isOpen) {
-			api('HEAD', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.address.objectId}`, {}, {
+			api('HEAD', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.objectId}`, {}, {
 				"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 			}).then((e) => {
 				setObjectDate(e);
@@ -129,7 +129,7 @@ const File = ({
 								<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Information</Heading>
 								<Heading size={6} weight="light">
 									<span>{`Object id: `}</span>
-									{objectItem.address.objectId}
+									{objectItem.objectId}
 								</Heading>
 								<Heading size={6} weight="light">
 									<span>{`Owner id: `}</span>
@@ -166,7 +166,7 @@ const File = ({
 											className="manage_icon"
 											onClick={() => {
 												onModal('loading');
-												api('GET', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.address.objectId}`, {}, {
+												api('GET', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.objectId}`, {}, {
 													"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 												}).then((data) => {
 													if (data.message) {
@@ -201,7 +201,7 @@ const File = ({
 											className="manage_icon"
 											onClick={() => {
 												onModal('loading');
-												api('GET', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.address.objectId}`, {}, {
+												api('GET', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.objectId}`, {}, {
 													"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 												}).then((data) => {
 													if (data.message) {
@@ -234,13 +234,13 @@ const File = ({
 									className="manage_icon"
 									onClick={() => {
 										onModal('loading');
-										api('HEAD', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.address.objectId}`, {}, {
+										api('HEAD', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.objectId}`, {}, {
 											"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 										}).then((e) => {
 											onModal('shareObjectLink', {
 												type: e === 200 ? 'public' : 'private',
 												containerId: containerItem.containerId,
-												objectId: objectItem.address.objectId,
+												objectId: objectItem.objectId,
 											});
 										});
 									}}
@@ -253,7 +253,7 @@ const File = ({
 									src="/img/icons/manage/delete.png"
 									className="manage_icon"
 									onClick={(e) => {
-										onModal('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.address.objectId });
+										onModal('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.objectId });
 										e.stopPropagation();
 									}}
 									width={40}
