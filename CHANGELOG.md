@@ -4,6 +4,12 @@ Changelog for NeoFS Panel
 
 ## [Unreleased]
 
+## [0.7.0] - 2025-07-21
+
+### Changed
+- Migrate to vite (#232)
+- Upgrade to searchv2 in objects pagination (#234)
+
 ## [0.6.0] - 2024-12-10
 
 ### Added
@@ -159,4 +165,5 @@ First public review release.
 [0.5.2]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.5.2
 [0.5.3]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.5.3
 [0.6.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.6.0
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.6.0...master
+[0.6.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.7.0
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.7.0...master
