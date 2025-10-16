@@ -76,5 +76,5 @@ export function formatBytes(bytes) {
 	for (i; bytes >= 1024; i += 1) {
 		bytes /= 1024;
 	}
-	return `${bytes === 0 ? bytes : bytes.toFixed(1)} ${units[i]}`;
+	return `${(bytes === 0 || bytes === '0') ? bytes : bytes.toFixed(1)} ${units[i]}`;
 }

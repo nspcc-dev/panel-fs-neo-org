@@ -43,6 +43,7 @@ export default function ContainerItem({
 	const [eACLParams, setEACLParams] = useState([]);
 	const [activePanel, setActivePanel] = useState('');
 	const [isTreeViewObjects, setTreeViewObjects] = useState(false);
+	const [isShowHiddenFiles, setShowFilesActive] = useState(false);
 
 	useEffect(() => {
 		if (isLoadContainers === containerItem.containerId) {
@@ -87,12 +88,17 @@ export default function ContainerItem({
 		}
 	}, [walletData]); // eslint-disable-line react-hooks/exhaustive-deps
 
-	const onGetObjects = (containerId, cursor = '', paginationTemp = pagination, isTreeViewObjectsTemp = isTreeViewObjects) => {
+	const onGetObjects = (containerId, cursor = '', paginationTemp = pagination, isTreeViewObjectsTemp = isTreeViewObjects, isShowHiddenFilesTemp = false) => {
 		setLoadingObjects(true);
 		let filtersApplied = filters.filter(item => item.key !== '' && item.value !== '');
 		if (isTreeViewObjectsTemp) {
 			const hasFilePath = filtersApplied.some(item => item.key === 'FilePath');
 			filtersApplied = hasFilePath ? filtersApplied : [{ key: "FilePath", match: "MatchCommonPrefix", value: "" }, ...filtersApplied];
+		}
+
+		if (!isShowHiddenFilesTemp) {
+			const hasObjectType = filtersApplied.some(item => item.key === '$Object:objectType');
+			filtersApplied = hasObjectType ? filtersApplied : [{ key: "$Object:ROOT", match: "", value: "" }, ...filtersApplied];
 		}
 
 		api('POST', `/v2/objects/${containerId}/search?limit=${ObjectsPerPage}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`, {
@@ -465,12 +471,23 @@ export default function ContainerItem({
 															fullwidth
 															color="primary"
 															size="small"
-															style={{ marginTop: 8 }}
+															style={{ margin: '8px 0' }}
 															onClick={() => onGetObjects(containerItem.containerId, '', { history: [], cursor: '' })}
 															disabled={isLoadingObjects || filters.some((item) => item.key === '' || item.value === '')}
 														>
 															Search
 														</Button>
+														<Form.Control>
+															<Form.Checkbox
+																renderAs="input"
+																onChange={(e) => {
+																	setShowFilesActive(!isShowHiddenFiles);
+																	onGetObjects(containerItem.containerId, '', { history: [], cursor: '' }, isTreeViewObjects, !isShowHiddenFiles);
+																	e.stopPropagation();
+																}}
+																disabled={isLoadingObjects}
+															>Show hidden files</Form.Checkbox>
+														</Form.Control>
 													</div>
 												)}
 												{!isLoadingObjects ? (
