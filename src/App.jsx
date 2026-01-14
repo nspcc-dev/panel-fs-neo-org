@@ -27,6 +27,9 @@ import { useWalletConnect } from "@cityofzion/wallet-connect-sdk-react";
 import { BaseDapi } from '@neongd/neo-dapi';
 import neo3Dapi from "neo3-dapi";
 import QRCode from "react-qr-code";
+import {
+	invokeFunction,
+} from './Functions/handle';
 import 'bulma/css/bulma.min.css';
 import './App.css';
 
@@ -45,10 +48,12 @@ export const App = () => {
 	const dapi = window.OneGate ? new BaseDapi(window.OneGate) : null;
 	let [neolineN3, setNeolineN3] = useState(null);
 	const [activeNet] = useState(import.meta.env.VITE_NETWORK ? capitalizeFirstLetter(import.meta.env.VITE_NETWORK) : 'Mainnet');
-	const [NeoFSContract] = useState({
+	const [NeoFSContract, setNeoFSContract] = useState({
 		gasToken: '0xd2a4cff31913016155e38e474a2c06d08be276cf',
 		account: import.meta.env.VITE_NEOFS_ACCOUNT ? import.meta.env.VITE_NEOFS_ACCOUNT : 'NNxVrKjLsRkWsmGgmuNXLcMswtxTGaNQLk',
 		scriptHash: Neon.create.account(import.meta.env.VITE_NEOFS_ACCOUNT).scriptHash,
+		sidechain: import.meta.env.VITE_SIDECHAIN_RPC,
+		sidechainContract: null,
 	});
 
 	const [params] = useState({
@@ -216,6 +221,8 @@ export const App = () => {
 				}
 			});
 
+			onGetSidechainContract();
+
 			if (location.pathname.indexOf('/profile') === -1 && location.pathname.indexOf('/getobject') === -1) {
 				navigate('/profile');
 			}
@@ -223,6 +230,27 @@ export const App = () => {
 			document.location.href = "/";
 		}
 	}, [wcSdk]); // eslint-disable-line react-hooks/exhaustive-deps
+
+	const onGetSidechainContract = async (containerId) => {
+		const response_nns = await invokeFunction(
+			NeoFSContract.sidechain,
+			[1],
+			"getcontractstate",
+		);
+
+		const response = await invokeFunction(
+			NeoFSContract.sidechain,
+			[
+				response_nns.hash,
+				"resolve",
+				[
+					{ type: "String", value: "container.neofs" },
+					{ type: "Integer", value: "16" },
+				]
+			],
+		);
+		setNeoFSContract({ ...NeoFSContract, sidechainContract: atob(response.stack[0].value[0].value) })
+	};
 
 	const onResetContainerForm = () => {
 		setContainerForm({
@@ -1929,6 +1957,7 @@ export const App = () => {
 					path="/profile"
 					element={<Profile
 						params={params}
+						networkInfo={networkInfo}
 						NeoFSContract={NeoFSContract}
 						activeNet={activeNet}
 						onAuth={onAuth}

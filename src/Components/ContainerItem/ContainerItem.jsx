@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Neon from "@cityofzion/neon-js";
 import {
 	Heading,
 	Section,
@@ -12,11 +13,18 @@ import EACLPanel from '../EACLPanel/EACLPanel';
 import {
 	formatForTreeView,
 	formatForContainerName,
+	base58ToBase64,
+	invokeFunction,
+	formatBytes,
+	formatGasPerMonth,
 } from '../../Functions/handle';
 import api from '../../api';
 
 export default function ContainerItem({
+	NeoFSContract,
+	networkInfo,
 	containerItem,
+	setObjectsTotalSize,
 	onAuth,
 	walletData,
 	setWalletData,
@@ -38,6 +46,7 @@ export default function ContainerItem({
 		value: '',
 	}]);
 	const [objects, setObjects] = useState(null);
+	const [objectsWithCopies, setObjectsWithCopies] = useState(null);
 	const [isLoadingObjects, setLoadingObjects] = useState(false);
 	const [isLoadingEACL, setLoadingEACL] = useState(false);
 	const [eACLParams, setEACLParams] = useState([]);
@@ -52,6 +61,12 @@ export default function ContainerItem({
 			onModal();
 		}
 	}, [isLoadContainers]); // eslint-disable-line react-hooks/exhaustive-deps
+
+	useEffect(() => {
+		if (NeoFSContract.sidechainContract) {
+			onGetContainerReportSummary(containerItem.containerId);
+		}
+	}, [NeoFSContract.sidechainContract]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
 		if (walletData.tokens.object && walletData.tokens.object.containerId === containerItem.containerId) {
@@ -123,6 +138,23 @@ export default function ContainerItem({
 		});
 	};
 
+	const onGetContainerReportSummary = async (containerId) => {
+		const response = await invokeFunction(
+			NeoFSContract.sidechain,
+			[
+				NeoFSContract.sidechainContract,
+				"getNodeReportSummary",
+				[{ type: "ByteString", value: base58ToBase64(containerId) }]
+			],
+		);
+		setObjectsWithCopies({
+			size: response.stack[0].value[0].value,
+			count: response.stack[0].value[1].value,
+		});
+
+		setObjectsTotalSize((prevState) => prevState + parseInt(response.stack[0].value[0].value));
+	};
+
 	const onGetEACL = (containerId) => {
 		setLoadingEACL(true);
 		api('GET', `/v1/containers/${containerId}/eacl`, {}, {
@@ -160,8 +192,19 @@ export default function ContainerItem({
 							setIsOpen(!isOpen);
 						}}
 					>
-						{formatForContainerName(containerItem.attributes, containerItem.containerId)}
-						{isOpen && (
+						<div>
+							<div>{formatForContainerName(containerItem.attributes, containerItem.containerId)}</div>
+							<Heading
+								size={6}
+								weight="light"
+								style={{
+									margin: '0',
+									fontSize: '14px',
+									color: 'rgba(0,0,0,.7)',
+								}}
+							>{objectsWithCopies && networkInfo ? `${formatGasPerMonth(objectsWithCopies.size, networkInfo)} GAS per month (${formatBytes(objectsWithCopies.size)})` : '-'}</Heading>
+						</div>
+						{isOpen ? (
 							<img
 								src="/img/icons/trashbin.svg"
 								width={18}
@@ -173,6 +216,13 @@ export default function ContainerItem({
 									onModal('deleteContainer', { containerId: containerItem.containerId });
 									e.stopPropagation();
 								}}
+							/>
+						) : (
+							<img
+								src="/img/icons/chevron_down.svg"
+								width={26}
+								height={26}
+								alt="open"
 							/>
 						)}
 					</Heading>
@@ -192,6 +242,10 @@ export default function ContainerItem({
 										<Heading size={6} weight="light">
 											<span>{`Placement policy: `}</span>
 											{containerItem.placementPolicy}
+										</Heading>
+										<Heading size={6} weight="light">
+											<span>{`Objects (physical copies): `}</span>
+											{objectsWithCopies ? `${objectsWithCopies.count} object${objectsWithCopies.count === '1' ? '' : 's'}` : '-'}
 										</Heading>
 										<Heading size={6} weight="light">
 											<span>{`Version: `}</span>
