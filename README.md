@@ -44,6 +44,7 @@ Set variables in `.env` file
   containers and object in neofs (control path)
 - `VITE_NETWORK` - Network of the Neo (might be `mainnet`, `testnet`)
 - `VITE_NEOFS_ACCOUNT` - Neo3 address of the NeoFS contract
+- `VITE_SIDECHAIN_RPC` - NeoFS side chain RPC node
 
 Run next commands from project's root:
 

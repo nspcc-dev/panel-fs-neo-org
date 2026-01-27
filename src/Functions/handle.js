@@ -1,3 +1,4 @@
+import bs58 from "bs58";
 
 export function formatForTreeView(objects) {
 	for (let i = 0; i < objects.length; i++) {
@@ -77,4 +78,31 @@ export function formatBytes(bytes) {
 		bytes /= 1024;
 	}
 	return `${(bytes === 0 || bytes === '0') ? bytes : bytes.toFixed(1)} ${units[i]}`;
+}
+
+export function formatGasPerMonth(bytes, networkParams) {
+	return ((bytes / (1024 ** 3)) * networkParams.storagePrice * (30 * 24 * 60 * 60) / networkParams.epochDuration / 1e12).toFixed(8);
+}
+
+export function base58ToBase64(b58) {
+  const bytes = bs58.decode(b58);
+
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 1) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+
+  return btoa(binary);
+}
+
+export async function invokeFunction(rpcUrl, params, method = "invokefunction") {
+  const response = await fetch(rpcUrl, {
+    method: "POST",
+    headers: {
+			"Content-Type": "application/json",
+		},
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+  });
+  const res = await response.json();
+  return res.error ? res.error : res.result;
 }

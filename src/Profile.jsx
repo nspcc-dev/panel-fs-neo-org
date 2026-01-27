@@ -10,6 +10,10 @@ import {
 	Tag,
 } from 'react-bulma-components';
 import ContainerItem from './Components/ContainerItem/ContainerItem';
+import {
+	formatBytes,
+	formatGasPerMonth,
+} from './Functions/handle';
 import api from './api';
 
 function formatAddress(address) {
@@ -18,6 +22,7 @@ function formatAddress(address) {
 
 const Profile = ({
 		params,
+		networkInfo,
 		NeoFSContract,
 		activeNet,
 		walletData,
@@ -43,6 +48,8 @@ const Profile = ({
 	const [isLoadingNeoFSBalance, setIsLoadingNeoFSBalance] = useState(false);
 
 	const [isNotAvailableNeoFS, setNotAvailableNeoFS] = useState(false);
+
+	const [objectsTotalSize, setObjectsTotalSize] = useState(0);
 
 	useEffect(() => {
 		if (params.rest_gw.indexOf('http://') !== 0 && params.rest_gw.indexOf('https://') !== 0) {
@@ -250,26 +257,37 @@ const Profile = ({
 					</Box>
 					<Box id="containers">
 						<Heading style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} weight="bold">
-							<span style={{ display: 'flex', alignItems: 'center' }}>
-								{`Containers`}
-								{!isNotAvailableNeoFS && (
-									<img
-										src="/img/icons/sync.svg"
-										width={20}
-										height={20}
-										alt="sync"
-										style={isLoadingContainers ? {
-											marginLeft: 10,
-											cursor: 'pointer',
-											animation: 'spin 1.5s infinite linear',
-										} : {
-											marginLeft: 10,
-											cursor: 'pointer',
-										}}
-										onClick={onGetContainers}
-									/>
-								)}
-							</span>
+							<div>
+								<span style={{ display: 'flex', alignItems: 'center' }}>
+									{`Containers`}
+									{!isNotAvailableNeoFS && (
+										<img
+											src="/img/icons/sync.svg"
+											width={20}
+											height={20}
+											alt="sync"
+											style={isLoadingContainers ? {
+												marginLeft: 10,
+												cursor: 'pointer',
+												animation: 'spin 1.5s infinite linear',
+											} : {
+												marginLeft: 10,
+												cursor: 'pointer',
+											}}
+											onClick={onGetContainers}
+										/>
+									)}
+								</span>
+								<Heading
+									size={6}
+									weight="light"
+									style={{
+										margin: '0',
+										fontSize: '14px',
+										color: 'rgba(0,0,0,.7)',
+									}}
+								>{objectsTotalSize && networkInfo ? `${formatGasPerMonth(objectsTotalSize, networkInfo)} GAS per month (${formatBytes(objectsTotalSize)})` : '-'}</Heading>
+							</div>
 							<Button
 								renderAs="button"
 								color="primary"
@@ -283,7 +301,10 @@ const Profile = ({
 						{containers.map((containerItem, index) => (
 							<ContainerItem
 								key={containerItem.containerId}
+								NeoFSContract={NeoFSContract}
+								networkInfo={networkInfo}
 								setWalletData={setWalletData}
+								setObjectsTotalSize={setObjectsTotalSize}
 								walletData={walletData}
 								onModal={onModal}
 								onPopup={onPopup}
