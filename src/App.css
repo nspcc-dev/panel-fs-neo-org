@@ -305,6 +305,12 @@ tr img {
     position: relative;
 }
 
+.panel-block-header .drag2drop {
+    margin-right: 5px;
+    pointer-events: none;
+    width: 13px;
+}
+
 .panel-block-content {
     margin: 10px 0;
     cursor: default;
@@ -795,6 +801,10 @@ label.panel-block:hover {
 
     .panel-block-content {
         width: 100%;
+    }
+
+    .panel-block-header .drag2drop {
+        display: none;
     }
 
     .panel-block-content .field.is-grouped {
