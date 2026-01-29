@@ -21,6 +21,13 @@ export default function EACLPanel({
 }) {
 	const [isError, setError] = useState(false);
 	const [isLoadingForm, setLoadingForm] = useState(false);
+	const [dragAndDropEACLParams, setDragAndDropEACLParams] = useState({
+		draggedFrom: null,
+		draggedTo: null,
+		isDragging: false,
+		originalOrder: [],
+		updatedOrder: [],
+	});
 
 	useEffect(() => {
 		setError({ active: false, type: [], text: '' });
@@ -56,6 +63,47 @@ export default function EACLPanel({
 		}
 	};
 
+	const onDragStart = (event) => {
+		setDragAndDropEACLParams({
+		 ...dragAndDropEACLParams,
+		 draggedFrom: Number(event.currentTarget.dataset.position),
+		 isDragging: true,
+		 originalOrder: eACLParams,
+		});
+		event.dataTransfer.setData("text/html", '');
+	 }
+
+	const onDragOver = (event) => {
+		event.preventDefault();
+
+		const draggedTo = Number(event.currentTarget.dataset.position);
+		if (draggedTo !== dragAndDropEACLParams.draggedTo) {
+			let newList = dragAndDropEACLParams.originalOrder;
+			const draggedFrom = dragAndDropEACLParams.draggedFrom;
+			const remainingItems = newList.filter((item, index) => index !== draggedFrom);
+			newList = [
+				...remainingItems.slice(0, draggedTo),
+				newList[draggedFrom],
+				...remainingItems.slice(draggedTo),
+			];
+
+			setDragAndDropEACLParams({
+				...dragAndDropEACLParams,
+				updatedOrder: newList,
+				draggedTo: draggedTo,
+			});
+			setEACLParams(newList);
+		}
+	}
+
+	const onDrop = () => {
+		setDragAndDropEACLParams({ ...dragAndDropEACLParams, draggedFrom: null, draggedTo: null, isDragging: false });
+	}
+
+	const onDragLeave = () => {
+		setDragAndDropEACLParams({ ...dragAndDropEACLParams, draggedTo: null });
+	}
+
 	return (
 		<Box
 			style={{
@@ -70,6 +118,13 @@ export default function EACLPanel({
 					active
 					renderAs="a"
 					key={index}
+					data-position={index}
+					className={dragAndDropEACLParams && dragAndDropEACLParams.draggedTo === Number(index) ? "drop_area" : ""}
+					onDragStart={onDragStart}
+					onDragOver={onDragOver}
+					onDragLeave={onDragLeave}
+					onDrop={onDrop}
+					draggable
 				>
 					<div
 						className="panel-block-header"
@@ -79,6 +134,11 @@ export default function EACLPanel({
 							setEACLParams(aECLParamsTemp);
 						}}
 					>
+						<img
+							src="/img/icons/drag2drop.svg"
+							className="drag2drop"
+							alt="drag and drop"
+						/>
 						<Panel.Icon>
 							<img
 								src={eACLItem.isOpen ? '/img/icons/chevron_down.svg' : '/img/icons/chevron_right.svg'}
@@ -88,7 +148,7 @@ export default function EACLPanel({
 								alt="chevron"
 							/>
 						</Panel.Icon>
-						{`Rule #${index + 1}`}
+						{`Rule #${index + 1} ${eACLItem.operation && eACLItem.action && eACLItem.targets[0].role ? `(${eACLItem.operation}-${eACLItem.action}-${eACLItem.targets[0].role})` : ''}`}
 						{eACLItem.isOpen && isEdit && (
 							<Panel.Icon>
 								<img
