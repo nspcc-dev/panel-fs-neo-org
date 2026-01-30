@@ -14,6 +14,7 @@ const Getobject = ({
 	}) => {
 	const [searchParams] = useSearchParams();
 	const [objectData, setObjectData] = useState(null);
+	const [objectStatus, setObjectStatus] = useState('Loading');
 	const [params, setParams] = useState(null);
 
 	useEffect(() => {
@@ -27,9 +28,15 @@ const Getobject = ({
 			payload["Authorization"] = `Bearer ${token}`;
 		}
 		api('HEAD', `/v1/objects/${containerId}/by_id/${objectId}`, {}, payload).then((e) => {
-			if (e.message) {
+			if (e === 400 || e === 404) {
+				setObjectStatus('Not found');
+			} else if (e === 403) {
+				setObjectStatus('Forbidden');
+			} else if (e.message) {
+				setObjectStatus('Available');
 				onModal('failed', e.message);
 			} else {
+				setObjectStatus('Available');
 				setObjectData(e);
 			}
 		});
@@ -64,67 +71,73 @@ const Getobject = ({
 
 	return (
 		<Container style={{ minHeight: 'calc(100vh - 212px)' }}>
-			{params && params.containerId && params.objectId ? (
+			{params && params.containerId && params.objectId && objectStatus !== 'Loading' ? (
 				<Section>
-					<Box id="share">
-						<Heading weight="bold">Sharing object</Heading>
-						<div className="objects_tree_file_content">
-							<Section>
-								<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Information</Heading>
-								<Heading size={6} weight="light">
-									<span>{`Container id: `}</span>
-									{params.containerId}
-								</Heading>
-								<Heading size={6} weight="light">
-									<span>{`Object id: `}</span>
-									{params.objectId}
-								</Heading>
-								{objectData && (
-									<>
-										<Heading size={6} weight="light">
-											<span>{`Owner id: `}</span>
-											{objectData.ownerId}
-										</Heading>
-										<Heading size={6} weight="light">
-											<span>{`Object size: `}</span>
-											{formatBytes(objectData.objectSize)}
-										</Heading>
-									</>
-								)}
-							</Section>
-							<Section style={{ paddingTop: 0 }}>
-								<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Attributes</Heading>
-								{objectData ? (
-									<>
-										{Object.keys(objectData.attributes).map((attributeKey) => (
-											<Heading size={6} weight="light" key={attributeKey}>
-												<span>{`${attributeKey}: `}</span>
-												{objectData.attributes[attributeKey]}
+					{objectStatus !== 'Available' ? (
+						<Box id="share">
+							<Heading weight="bold">{objectStatus}</Heading>
+						</Box>
+					) : (
+						<Box id="share">
+							<Heading weight="bold">Sharing object</Heading>
+							<div className="objects_tree_file_content">
+								<Section>
+									<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Information</Heading>
+									<Heading size={6} weight="light">
+										<span>{`Container id: `}</span>
+										{params.containerId}
+									</Heading>
+									<Heading size={6} weight="light">
+										<span>{`Object id: `}</span>
+										{params.objectId}
+									</Heading>
+									{objectData && (
+										<>
+											<Heading size={6} weight="light">
+												<span>{`Owner id: `}</span>
+												{objectData.ownerId}
 											</Heading>
-										))}
-										<Heading size={6} weight="light">
-											<span>Content-Type: </span>
-											{objectData.contentType}
-										</Heading>
-									</>
-								) : '-'}
-							</Section>
-							<Section style={{ paddingTop: 0 }}>
-								<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Manage</Heading>
-								{objectData ? (
-									<img
-										src="/img/icons/manage/download.png"
-										className="manage_icon"
-										onClick={onDownload}
-										width={40}
-										height={40}
-										alt="download an object"
-										title="download an object"
-									/>
-								) : '-'}
-							</Section>
-						</div>
-					</Box>
+											<Heading size={6} weight="light">
+												<span>{`Object size: `}</span>
+												{formatBytes(objectData.objectSize)}
+											</Heading>
+										</>
+									)}
+								</Section>
+								<Section style={{ paddingTop: 0 }}>
+									<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Attributes</Heading>
+									{objectData ? (
+										<>
+											{Object.keys(objectData.attributes || {}).map((attributeKey) => (
+												<Heading size={6} weight="light" key={attributeKey}>
+													<span>{`${attributeKey}: `}</span>
+													{objectData.attributes[attributeKey]}
+												</Heading>
+											))}
+											<Heading size={6} weight="light">
+												<span>Content-Type: </span>
+												{objectData.contentType}
+											</Heading>
+										</>
+									) : '-'}
+								</Section>
+								<Section style={{ paddingTop: 0 }}>
+									<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Manage</Heading>
+									{objectData ? (
+										<img
+											src="/img/icons/manage/download.png"
+											className="manage_icon"
+											onClick={onDownload}
+											width={40}
+											height={40}
+											alt="download an object"
+											title="download an object"
+										/>
+									) : '-'}
+								</Section>
+							</div>
+						</Box>
+					)}
 				</Section>
 			) : (
 				<Section>
