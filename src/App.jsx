@@ -54,6 +54,7 @@ export const App = () => {
 		scriptHash: Neon.create.account(import.meta.env.VITE_NEOFS_ACCOUNT).scriptHash,
 		sidechain: import.meta.env.VITE_SIDECHAIN_RPC,
 		sidechainContract: null,
+		nnsHash: null,
 	});
 
 	const [params] = useState({
@@ -249,7 +250,11 @@ export const App = () => {
 				]
 			],
 		);
-		setNeoFSContract({ ...NeoFSContract, sidechainContract: atob(response.stack[0].value[0].value) })
+		setNeoFSContract({
+			...NeoFSContract,
+			sidechainContract: atob(response.stack[0].value[0].value),
+			nnsHash: response_nns.hash,
+		})
 	};
 
 	const onResetContainerForm = () => {
