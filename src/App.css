@@ -165,17 +165,18 @@ ul {
     color: #003;
 }
 
-
-
-#containers .tile.is-parent>.notification {
+#containers .tile.is-parent>.notification,
+#domains .tile.is-parent>.notification {
     padding: 0;
 }
 
-#containers .tile.is-parent>.notification>.title {
+#containers .tile.is-parent>.notification>.title,
+#domains .tile.is-parent>.notification>.title {
     padding: 1.25rem 1.5rem 1.25rem;
 }
 
-#containers .tile.is-parent>.notification:hover {
+#containers .tile.is-parent>.notification:hover,
+#domains .tile.is-parent>.notification:hover {
     /* background: #00e599; */
 }
 
@@ -606,6 +607,29 @@ label.panel-block:hover {
     }
 }
 
+.table_container {
+    overflow-x: auto;
+    margin: 0 0 20px;
+}
+
+.table {
+    width: 100%;
+    margin: 0;
+    /* border-collapse: collapse; */
+}
+
+.table td,
+.table th {
+    background: #fff;
+    text-align: left !important;
+    white-space: pre;
+}
+
+.table thead th {
+    border-width: 0 0 1px;
+    /* border-bottom: 2px solid #dee2e6; */
+}
+
 /* popup */
 .popup {
     position: fixed;
@@ -781,15 +805,18 @@ label.panel-block:hover {
         padding: 1rem;
     }
 
-    #containers .tile.is-parent>.notification>.title {
+    #containers .tile.is-parent>.notification>.title,
+    #domains .tile.is-parent>.notification>.title {
         padding: 0.75rem 1rem 0.75rem;
     }
 
-    #containers .title.is-5 {
+    #containers .title.is-5,
+    #domains .title.is-5 {
         font-size: 1rem;
     }
 
-    #containers .objects_tree_file_content .title.is-6 {
+    #containers .objects_tree_file_content .title.is-6,
+    #domains .objects_tree_file_content .title.is-6 {
         font-size: 0.75rem;
         line-height: 1rem;
         margin-bottom: 0.25rem;
@@ -824,13 +851,15 @@ label.panel-block:hover {
         max-width: 290px;
     }
 
-    #containers .token_status_panel {
+    #containers .token_status_panel,
+    #domains .token_status_panel {
         flex-direction: column;
         text-align: center;
         max-width: 200px;
     }
 
-    #containers .token_status_panel .title.is-6 {
+    #containers .token_status_panel .title.is-6,
+    #domains .token_status_panel .title.is-6 {
         margin: 0 0 10px 0 !important;
         font-size: 0.9rem;
     }
@@ -839,7 +868,8 @@ label.panel-block:hover {
         padding: 0 10px;
     }
 
-    #containers .active.title img {
+    #containers .active.title img,
+    #domains .active.title img {
         width: 14px;
     }
 
