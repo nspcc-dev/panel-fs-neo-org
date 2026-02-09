@@ -40,7 +40,7 @@ export default function EACLPanel({
 	}, [isErrorParent]);
 
 	const onSetEACL = (containerId) => {
-		if (eACLParams.every((eACLItem) => eACLItem.operation !== '' && eACLItem.action !== '' && eACLItem.targets[0].role !== '' && eACLItem.filters.every((filterItem) => filterItem.headerType !== '' && filterItem.matchType !== '' && filterItem.key !== '' && filterItem.value !== ''))) {
+		if (eACLParams.every((eACLItem) => eACLItem.operation !== '' && eACLItem.action !== '' && (eACLItem.targets[0]?.role !== '' || eACLItem.targets[0].accounts?.length > 0) && eACLItem.filters.every((filterItem) => filterItem.headerType !== '' && filterItem.matchType !== '' && filterItem.key !== '' && filterItem.value !== ''))) {
 			setError({ active: false, type: [], text: '' });
 			setLoadingForm(true);
 			api('PUT', `/v1/containers/${containerId}/eacl?walletConnect=true`, {
@@ -148,7 +148,7 @@ export default function EACLPanel({
 								alt="chevron"
 							/>
 						</Panel.Icon>
-						{`Rule #${index + 1} ${eACLItem.operation && eACLItem.action && eACLItem.targets[0].role ? `(${eACLItem.operation}-${eACLItem.action}-${eACLItem.targets[0].role})` : ''}`}
+						{`Rule #${index + 1} ${eACLItem.operation && eACLItem.action && (eACLItem.targets[0].role || eACLItem.targets[0].accounts) ? `(${eACLItem.operation}-${eACLItem.action}-${eACLItem.targets[0].role ? eACLItem.targets[0].role : 'ACCOUNTS'})` : ''}`}
 						{eACLItem.isOpen && isEdit && (
 							<Panel.Icon>
 								<img
@@ -211,22 +211,40 @@ export default function EACLPanel({
 								<Form.Control>
 									<Form.Select
 										renderAs="select"
-										value={eACLItem.targets[0].role}
-										className={isError.active && isError.type.indexOf('eacl') !== -1 && eACLItem.targets[0].role.length === 0 ? 'is-error' : ""}
+										value={eACLItem.targets[0].role ? eACLItem.targets[0].role : 'ACCOUNTS'}
+										className={isError.active && isError.type.indexOf('eacl') !== -1 && eACLItem.targets[0].role?.length === 0 ? 'is-error' : ""}
 										onChange={(e) => {
 											const aECLParamsTemp = [...eACLParams];
-											aECLParamsTemp[index].targets[0].role = e.target.value;
+											aECLParamsTemp[index].targets = [e.target.value === 'ACCOUNTS' ? { accounts: [] } : { role: e.target.value }];
 											setEACLParams(aECLParamsTemp);
 										}}
 										disabled={!isEdit || isLoadingForm}
 									>
 										<option value="" disabled>Role</option>
-										{['USER', 'SYSTEM', 'OTHERS'].map((item) => (
+										{['USER', 'SYSTEM', 'OTHERS', 'ACCOUNTS'].map((item) => (
 											<option value={item} key={item}>{item}</option>
 										))}
 									</Form.Select>
 								</Form.Control>
 							</Form.Field>
+							{eACLItem.targets[0].accounts && (
+								<Form.Field>
+									<Form.Control>
+										<Form.Input
+											renderAs="input"
+											placeholder="Enter comma separated account addresses"
+											value={eACLItem.targets[0]?.accounts?.join(',')}
+											className={isError.active && isError.type.indexOf('eacl') !== -1 && eACLItem.targets[0].accounts.length === 0 ? 'is-error' : ""}
+											onChange={(e) => {
+												const aECLParamsTemp = [...eACLParams];
+												aECLParamsTemp[index].targets[0].accounts = e.target.value.split(',').map(item => item.trim());
+												setEACLParams(aECLParamsTemp);
+											}}
+											disabled={!isEdit || isLoadingForm}
+										/>
+									</Form.Control>
+								</Form.Field>
+							)}
 							{isEdit && (
 								<Heading
 									align="center"
@@ -364,7 +382,6 @@ export default function EACLPanel({
 								isOpen: true,
 								filters: [],
 								targets: [{
-									keys: [],
 									role: '',
 								}],
 							});
