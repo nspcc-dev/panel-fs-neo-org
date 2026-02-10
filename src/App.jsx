@@ -29,6 +29,7 @@ import neo3Dapi from "neo3-dapi";
 import QRCode from "react-qr-code";
 import {
 	invokeFunction,
+	hexToBytesToBase64,
 } from './Functions/handle';
 import 'bulma/css/bulma.min.css';
 import './App.css';
@@ -62,6 +63,7 @@ export const App = () => {
 
 	const [objectLinkLifetime, setObjectLinkLifetime] = useState(new Date().toLocaleDateString("sv"));
 	const [networkInfo, setNetworkInfo] = useState(null);
+	const [gatewayInfo, setGatewayInfo] = useState(null);
 	const [depositQuantity, setDepositQuantity] = useState(0);
 	const [withdrawQuantity, setWithdrawQuantity] = useState(0);
 	const [attributes, setAttributes] = useState([]);
@@ -221,6 +223,12 @@ export const App = () => {
 				}
 			});
 
+			api('GET', '/v1/gateway').then((e) => {
+				if (!e.message) {
+					setGatewayInfo(e);
+				}
+			});
+
 			onGetSidechainContract();
 
 			if (location.pathname.indexOf('/profile') === -1 && location.pathname.indexOf('/getobject') === -1) {
@@ -272,7 +280,8 @@ export const App = () => {
 					...walletData.tokens[type],
 					[operation]: {
 						...params,
-						token: msg,
+						token: bearer,
+						lock: msg.lock,
 						signature: response.data + response.salt,
 					}
 				}
@@ -281,7 +290,8 @@ export const App = () => {
 		if (type === 'object') {
 			walletDataTemp.tokens[type] = {
 				...params,
-				token: msg,
+				token: msg.token,
+				lock: msg.lock,
 				signature: response.data + response.salt,
 			};
 		}
@@ -297,11 +307,13 @@ export const App = () => {
 	const onAuth = async (type, operation, params = {}) => {
 		let body = {};
 		if (type === 'container') {
-			body = [{
-				"container": {
-					"verb": operation,
-				}
-			}]
+			body = {
+				"contexts": [{
+					"verbs": [operation],
+				}],
+				"issuer": walletData.account.address,
+				"targets": [gatewayInfo.address],
+			}
 		} else if (type === 'object' && params.objectId) {
 			body = [{
 				"object": [{
@@ -375,12 +387,12 @@ export const App = () => {
 			}]
 		}
 
-		api('POST', '/v1/auth', body, {
+		api('POST', type === 'container' ? '/v2/auth/session' : '/v1/auth', body, type === 'container' ? {} : {
 			"X-Bearer-Owner-Id": walletData.account.address,
 			"X-Bearer-Lifetime": params.objectId ? formatDateToHours(objectLinkLifetime) : 2,
 			"X-Bearer-For-All-Users": true,
 		}).then((e) => {
-			onSignMessage(e[0].token, type, operation, params);
+			onSignMessage(e, type, operation, params);
 		});
 	};
 
@@ -406,19 +418,19 @@ export const App = () => {
 		let response = '';
 
 		if (walletData.name === 'o3-desktop') {
-			response = await neo3Dapi.signMessage({ message: msg }).catch((err) => handleError(err));
+			response = await neo3Dapi.signMessage({ message: msg.token }).catch((err) => handleError(err));
 		} else if (neolineN3) {
-			response = await neolineN3.signMessage({ message: msg }).catch((err) => handleError(err));
+			response = await neolineN3.signMessage({ message: msg.token }).catch((err) => handleError(err));
 		} else if (dapi) {
-			response = await dapi.signMessage({ message: msg }).catch((err) => handleError(err));
+			response = await dapi.signMessage({ message: msg.token }).catch((err) => handleError(err));
 			response.data = response.signature;
 		} else {
-			response = await wcSdk.signMessage({ message: msg, version: 1 }).catch((err) => handleError(err));
+			response = await wcSdk.signMessage({ message: msg.token, version: 1 }).catch((err) => handleError(err));
 		}
 
 		if (type === 'object') {
 			api('GET', '/v1/auth/bearer?walletConnect=true', {}, {
-				"Authorization": `Bearer ${msg}`,
+				"Authorization": `Bearer ${msg.token}`,
 				"X-Bearer-Signature": response.data + response.salt,
 				"X-Bearer-Signature-Key": response.publicKey,
 			}).then((e) => {
@@ -429,7 +441,15 @@ export const App = () => {
 				}
 			});
 		} else if (!response.error) {
-			onUpdateWalletData(response, params, operation, type, msg);
+			api('POST', '/v2/auth/session/complete', {
+				"key": response.publicKey,
+				"lock": msg.lock,
+				"scheme": "WALLETCONNECT",
+				"token": msg.token,
+				"signature": hexToBytesToBase64(response.data + response.salt),
+			}).then((e) => {
+				onUpdateWalletData(response, params, operation, type, msg, e.token);
+			});
 		}
 	};
 
@@ -446,10 +466,7 @@ export const App = () => {
 							"basicAcl": containerForm.basicAcl,
 							"attributes": attributes,
 						}, {
-							"Authorization": `Bearer ${walletData.tokens.container.PUT.token}`,
-							"X-Bearer-Owner-Id": walletData.account.address,
-							"X-Bearer-Signature": walletData.tokens.container.PUT.signature,
-							"X-Bearer-Signature-Key": walletData.publicKey,
+							"Authorization": `Bearer ${walletData.tokens.container.CONTAINER_PUT.token}`,
 						}).then((e) => {
 							if (e.message && e.message.indexOf('insufficient balance to create container') !== -1) {
 								setLoadingForm(false);
@@ -471,10 +488,7 @@ export const App = () => {
 									api('PUT', `/v1/containers/${e.containerId}/eacl?walletConnect=true`, {
 										"records": containerForm.eACLParams.filter((item) => delete item.isOpen),
 									}, {
-										"Authorization": `Bearer ${walletData.tokens.container.SETEACL.token}`,
-										"X-Bearer-Owner-Id": walletData.account.address,
-										"X-Bearer-Signature": walletData.tokens.container.SETEACL.signature,
-										"X-Bearer-Signature-Key": walletData.publicKey,
+										"Authorization": `Bearer ${walletData.tokens.container.CONTAINER_SET_EACL.token}`,
 									}).then(() => {
 										setLoadingForm(false);
 										onPopup('success', 'New container with EACL has been created');
@@ -521,10 +535,7 @@ export const App = () => {
 		setLoadingForm(true);
 		setError({ active: false, type: [], text: '' });
 		api('DELETE', `/v1/containers/${containerName}?walletConnect=true`, {}, {
-			"Authorization": `Bearer ${walletData.tokens.container.DELETE.token}`,
-			"X-Bearer-Owner-Id": walletData.account.address,
-			"X-Bearer-Signature": walletData.tokens.container.DELETE.signature,
-			"X-Bearer-Signature-Key": walletData.publicKey,
+			"Authorization": `Bearer ${walletData.tokens.container.CONTAINER_DELETE.token}`,
 		}).then((e) => {
 			setLoadingForm(false);
 			if (e.message) {
@@ -1007,12 +1018,12 @@ export const App = () => {
 						</div>
 						<Heading align="center" size={5} weight="bold">Token signing</Heading>
 						<Columns>
-							{(modal.text === '' || modal.text === 'container.PUT' || modal.text === 'container.DELETE' || modal.text === 'container.SETEACL') && (
+							{(modal.text === '' || modal.text === 'container.CONTAINER_PUT' || modal.text === 'container.CONTAINER_DELETE' || modal.text === 'container.CONTAINER_SET_EACL') && (
 								<Columns.Column>
-									{(modal.text === '' || modal.text === 'container.PUT') && (
+									{(modal.text === '' || modal.text === 'container.CONTAINER_PUT') && (
 										<div className="token_status_panel">
 											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock create&nbsp;operation</Heading>
-											{walletData && walletData.tokens.container.PUT ? (
+											{walletData && walletData.tokens.container.CONTAINER_PUT ? (
 												<img
 													src="/img/icons/success.svg"
 													height={25}
@@ -1024,17 +1035,17 @@ export const App = () => {
 													renderAs="button"
 													color="primary"
 													size="small"
-													onClick={() => onAuth('container', 'PUT')}
+													onClick={() => onAuth('container', 'CONTAINER_PUT')}
 												>
 													Sign
 												</Button>
 											)}
 										</div>
 									)}
-									{(modal.text === '' || modal.text === 'container.DELETE') && (
+									{(modal.text === '' || modal.text === 'container.CONTAINER_DELETE') && (
 										<div className="token_status_panel">
 											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock delete&nbsp;operation</Heading>
-											{walletData && walletData.tokens.container.DELETE ? (
+											{walletData && walletData.tokens.container.CONTAINER_DELETE ? (
 												<img
 													src="/img/icons/success.svg"
 													height={25}
@@ -1046,17 +1057,17 @@ export const App = () => {
 													renderAs="button"
 													color="primary"
 													size="small"
-													onClick={() => onAuth('container', 'DELETE')}
+													onClick={() => onAuth('container', 'CONTAINER_DELETE')}
 												>
 													Sign
 												</Button>
 											)}
 										</div>
 									)}
-									{(modal.text === '' || modal.text === 'container.SETEACL') && (
+									{(modal.text === '' || modal.text === 'container.CONTAINER_SET_EACL') && (
 										<div className="token_status_panel">
 											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock eACL&nbsp;management</Heading>
-											{walletData && walletData.tokens.container.SETEACL ? (
+											{walletData && walletData.tokens.container.CONTAINER_SET_EACL ? (
 												<img
 													src="/img/icons/success.svg"
 													height={25}
@@ -1068,7 +1079,7 @@ export const App = () => {
 													renderAs="button"
 													color="primary"
 													size="small"
-													onClick={() => onAuth('container', 'SETEACL', modal.params)}
+													onClick={() => onAuth('container', 'CONTAINER_SET_EACL', modal.params)}
 												>
 													Sign
 												</Button>
@@ -1102,7 +1113,7 @@ export const App = () => {
 								</Columns.Column>
 							)}
 						</Columns>
-						{walletData && walletData.tokens.container.PUT && walletData.tokens.container.DELETE && walletData.tokens.container.SETEACL
+						{walletData && walletData.tokens.container.CONTAINER_PUT && walletData.tokens.container.CONTAINER_DELETE && walletData.tokens.container.CONTAINER_SET_EACL
 							&& walletData.tokens.object && (
 							<Button
 								renderAs="button"
@@ -1315,29 +1326,29 @@ export const App = () => {
 									{isError.text}
 								</Notification>
 							)}
-							{(!walletData.tokens.container.PUT || (!walletData.tokens.container.SETEACL && containerForm.eACLParams.length > 0)) ? (
+							{(!walletData.tokens.container.CONTAINER_PUT || (!walletData.tokens.container.CONTAINER_SET_EACL && containerForm.eACLParams.length > 0)) ? (
 								<>
-									{!walletData.tokens.container.PUT && (
+									{!walletData.tokens.container.CONTAINER_PUT && (
 										<div className="token_status_panel" style={{ margin: '25px 0 10px', maxWidth: 'unset' }}>
 											<Heading size={6} style={{ margin: '0 10px 0 0', maxWidth: 290 }}>Sign token to unlock create&nbsp;operation</Heading>
 											<Button
 												renderAs="button"
 												color="primary"
 												size="small"
-												onClick={() => onAuth('container', 'PUT')}
+												onClick={() => onAuth('container', 'CONTAINER_PUT')}
 											>
 												Sign
 											</Button>
 										</div>
 									)}
-									{!walletData.tokens.container.SETEACL && containerForm.eACLParams.length > 0 && (
+									{!walletData.tokens.container.CONTAINER_SET_EACL && containerForm.eACLParams.length > 0 && (
 										<div className="token_status_panel" style={{ margin: '10px 0', maxWidth: 'unset' }}>
 											<Heading size={6} style={{ margin: '0 10px 0 0', maxWidth: 300 }}>Sign token to unlock eACL&nbsp;management</Heading>
 											<Button
 												renderAs="button"
 												color="primary"
 												size="small"
-												onClick={() => onAuth('container', 'SETEACL')}
+												onClick={() => onAuth('container', 'CONTAINER_SET_EACL')}
 											>
 												Sign
 											</Button>
@@ -1405,14 +1416,14 @@ export const App = () => {
 								{isError.text}
 							</Notification>
 						)}
-						{!walletData.tokens.container.DELETE ? (
+						{!walletData.tokens.container.CONTAINER_DELETE ? (
 							<div className="token_status_panel">
 								<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock delete&nbsp;operation</Heading>
 								<Button
 									renderAs="button"
 									color="primary"
 									size="small"
-									onClick={() => onAuth('container', 'DELETE')}
+									onClick={() => onAuth('container', 'CONTAINER_DELETE')}
 								>
 									Sign
 								</Button>

@@ -46,10 +46,7 @@ export default function EACLPanel({
 			api('PUT', `/v1/containers/${containerId}/eacl?walletConnect=true`, {
 				"records": eACLParams.filter((item) => delete item.isOpen),
 			}, {
-				"Authorization": `Bearer ${walletData.tokens.container.SETEACL.token}`,
-				"X-Bearer-Owner-Id": walletData.account.address,
-				"X-Bearer-Signature": walletData.tokens.container.SETEACL.signature,
-				"X-Bearer-Signature-Key": walletData.publicKey,
+				"Authorization": `Bearer ${walletData.tokens.container.CONTAINER_SET_EACL.token}`,
 			}).then((e) => {
 				setLoadingForm(false);
 				if (e.message) {
@@ -400,14 +397,14 @@ export default function EACLPanel({
 			)}
 			{walletData && (
 				<>
-					{!walletData.tokens.container.SETEACL ? (
+					{!walletData.tokens.container.CONTAINER_SET_EACL ? (
 						<div className="token_status_panel" style={{ margin: '15px auto' }}>
 							<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock eACL&nbsp;management</Heading>
 							<Button
 								renderAs="button"
 								color="primary"
 								size="small"
-								onClick={() => onAuth('container', 'SETEACL')}
+								onClick={() => onAuth('container', 'CONTAINER_SET_EACL')}
 							>
 								Sign
 							</Button>

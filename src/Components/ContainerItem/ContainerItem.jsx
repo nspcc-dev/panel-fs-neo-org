@@ -83,7 +83,7 @@ export default function ContainerItem({
 					}
 				}
 			});
-		} else if (walletData.tokens.container.SETEACL && walletData.tokens.container.SETEACL.containerId === containerItem.containerId) {
+		} else if (walletData.tokens.container.CONTAINER_SET_EACL && walletData.tokens.container.CONTAINER_SET_EACL.containerId === containerItem.containerId) {
 			onGetEACL(containerItem.containerId);
 			setActivePanel('eACL');
 			onModal();
@@ -93,8 +93,8 @@ export default function ContainerItem({
 					...walletData.tokens,
 					container: {
 						...walletData.tokens.container,
-						SETEACL: {
-							...walletData.tokens.container.SETEACL,
+						CONTAINER_SET_EACL: {
+							...walletData.tokens.container.CONTAINER_SET_EACL,
 							containerId: null,
 						}
 					}
