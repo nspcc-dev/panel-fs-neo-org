@@ -4,6 +4,22 @@ Changelog for NeoFS Panel
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-02-11
+
+### Added
+- Option to hide system objects (#239)
+- Container usage and payment info (#244)
+- Ability to insert EACL rules into existing list (#245)
+- Status for shared object link (#248)
+- Support for account-based EACL rules (#246)
+
+### Changed
+- Session token v2 is used for container operations now (#251)
+
+### Upgrade from 0.7.0
+
+Notice that this version is incompatible with REST gateway <0.16.0 version.
+
 ## [0.7.0] - 2025-07-21
 
 ### Changed
@@ -165,5 +181,6 @@ First public review release.
 [0.5.2]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.5.2
 [0.5.3]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.5.3
 [0.6.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.6.0
-[0.6.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.7.0
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.7.0...master
+[0.7.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.7.0
+[0.8.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.8.0
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.8.0...master
