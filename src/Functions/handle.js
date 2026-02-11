@@ -95,6 +95,17 @@ export function base58ToBase64(b58) {
   return btoa(binary);
 }
 
+export function hexToBytesToBase64(hex) {
+	hex = hex.startsWith("0x") ? hex.slice(2) : hex;
+	return bytesToBase64(Uint8Array.from(hex.match(/.{1,2}/g).map(b => parseInt(b, 16))));
+}
+
+function bytesToBase64(bytes) {
+	let s = "";
+	bytes.forEach(b => s += String.fromCharCode(b));
+	return btoa(s);
+}
+
 export async function invokeFunction(rpcUrl, params, method = "invokefunction") {
   const response = await fetch(rpcUrl, {
     method: "POST",
