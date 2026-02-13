@@ -47,7 +47,7 @@ export default function api(method, url, params = {}, headers = {}) {
 					resolve(res);
 				} else if (method === 'HEAD') {
 					resolve(response.status);
-				} else if (response.status === 413) {
+				} else if (response?.status === 413) {
 					reject('413 Request Entity Too Large');
 				} else if (response) {
 					try {

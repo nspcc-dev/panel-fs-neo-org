@@ -556,7 +556,7 @@ export default function ContainerItem({
 															containerItem={containerItem}
 															objects={objects}
 														/>
-														{objects.length !== 0 && (
+														{objects?.length !== 0 && (
 															<div className="pagination">
 																<div
 																	className="pagination-previous"
