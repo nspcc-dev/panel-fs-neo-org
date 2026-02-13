@@ -103,7 +103,7 @@ export default function ContainerItem({
 		}
 	}, [walletData]); // eslint-disable-line react-hooks/exhaustive-deps
 
-	const onGetObjects = (containerId, cursor = '', paginationTemp = pagination, isTreeViewObjectsTemp = isTreeViewObjects, isShowHiddenFilesTemp = false) => {
+	const onGetObjects = (containerId, cursor = '', paginationTemp = pagination, isTreeViewObjectsTemp = isTreeViewObjects, isShowHiddenFilesTemp = isShowHiddenFiles) => {
 		setLoadingObjects(true);
 		let filtersApplied = filters.filter(item => item.key !== '' && item.value !== '');
 		if (isTreeViewObjectsTemp) {
@@ -122,7 +122,6 @@ export default function ContainerItem({
 		}, {
 			"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 		}).then((e) => {
-			setLoadingObjects(false);
 			if (e.message) {
 				onPopup('failed', e.message);
 			} else {
@@ -135,6 +134,11 @@ export default function ContainerItem({
 				setPagination({ history: paginationTemp.history, cursor: e.cursor });
 				setObjects(e.objects && e.objects.length > 0 ? formatForTreeView(e.objects) : []);
 			}
+		}).catch(() => {
+			onPopup('failed', 'Failed to retrieve objects');
+			setObjects([]);
+		}).finally(() => {
+			setLoadingObjects(false);
 		});
 	};
 
@@ -157,9 +161,7 @@ export default function ContainerItem({
 
 	const onGetEACL = (containerId) => {
 		setLoadingEACL(true);
-		api('GET', `/v1/containers/${containerId}/eacl`, {}, {
-			"X-Bearer-Owner-Id": walletData.account.address,
-		}).then((e) => {
+		api('GET', `/v1/containers/${containerId}/eacl`).then((e) => {
 			setLoadingEACL(false);
 			if (e.records) {
 				setEACLParams(e.records);
@@ -380,7 +382,8 @@ export default function ContainerItem({
 														style={{ marginRight: 10 }}
 														onClick={(e) => {
 															setTreeViewObjects(!isTreeViewObjects);
-															onGetObjects(containerItem.containerId, '', { history: [], cursor: '' }, !isTreeViewObjects);
+															setShowFilesActive(false);
+															onGetObjects(containerItem.containerId, '', { history: [], cursor: '' }, !isTreeViewObjects, false);
 															e.stopPropagation();
 														}}
 														disabled={!isTreeViewObjects && objects?.length === 0 || isLoadingObjects}
@@ -511,7 +514,7 @@ export default function ContainerItem({
 																	height={14}
 																	fill="#f14668"
 																	alt="delete"
-																	style={{ cursor: 'pointer', marginLeft: 8 }}
+																	style={isLoadingObjects ? { cursor: 'pointer', marginLeft: 8, pointerEvents: 'none' } : { cursor: 'pointer', marginLeft: 8 }}
 																	onClick={() => {
 																		let filtersTemp = [ ...filters ];
 																		filtersTemp.splice(indexFilter, 1);
@@ -556,7 +559,7 @@ export default function ContainerItem({
 															containerItem={containerItem}
 															objects={objects}
 														/>
-														{objects.length !== 0 && (
+														{objects?.length !== 0 && (
 															<div className="pagination">
 																<div
 																	className="pagination-previous"

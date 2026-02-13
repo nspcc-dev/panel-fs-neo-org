@@ -290,8 +290,7 @@ export const App = () => {
 		if (type === 'object') {
 			walletDataTemp.tokens[type] = {
 				...params,
-				token: msg.token,
-				lock: msg.lock,
+				token: bearer,
 				signature: response.data + response.salt,
 			};
 		}
@@ -392,7 +391,7 @@ export const App = () => {
 			"X-Bearer-Lifetime": params.objectId ? formatDateToHours(objectLinkLifetime) : 2,
 			"X-Bearer-For-All-Users": true,
 		}).then((e) => {
-			onSignMessage(e, type, operation, params);
+			onSignMessage(type === 'container' ? e : e[0], type, operation, params);
 		});
 	};
 
