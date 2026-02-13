@@ -4,6 +4,19 @@ Changelog for NeoFS Panel
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-02-13
+
+### Fixed
+- Incorrect CSP leading to inability to fetch container statistics (#256)
+- Object size missing in list (#258)
+- Handling of some empty and erroneous replies from REST (#258)
+- Handling hidden files mark when changing views (#258)
+- Using outdated X-Bearer-Owner-Id header (#258)
+- Passing lock independently when it's not needed (#258)
+
+### Changed
+- FS chain endpoint (#256)
+
 ## [0.8.0] - 2026-02-11
 
 ### Added
@@ -183,4 +196,5 @@ First public review release.
 [0.6.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.6.0
 [0.7.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.7.0
 [0.8.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.8.0
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.8.0...master
+[0.8.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.8.1
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.8.1...master
