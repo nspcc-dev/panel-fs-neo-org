@@ -348,13 +348,11 @@ export default function EACLPanel({
 											width={18}
 											height={18}
 											alt="delete"
-											style={{ cursor: 'pointer', right: 0, top: 0 }}
+											style={isLoadingForm ? { cursor: 'pointer', right: 0, top: 0, pointerEvents: 'none' } : { cursor: 'pointer', right: 0, top: 0 }}
 											onClick={() => {
-												if (!isLoadingForm) {
-													const aECLParamsTemp = [...eACLParams];
-													aECLParamsTemp[index].filters.splice(filterIndex, 1);
-													setEACLParams(aECLParamsTemp);
-												}
+												const aECLParamsTemp = [...eACLParams];
+												aECLParamsTemp[index].filters.splice(filterIndex, 1);
+												setEACLParams(aECLParamsTemp);
 											}}
 										/>
 									)}

@@ -511,7 +511,7 @@ export default function ContainerItem({
 																	height={14}
 																	fill="#f14668"
 																	alt="delete"
-																	style={{ cursor: 'pointer', marginLeft: 8 }}
+																	style={isLoadingObjects ? { cursor: 'pointer', marginLeft: 8, pointerEvents: 'none' } : { cursor: 'pointer', marginLeft: 8 }}
 																	onClick={() => {
 																		let filtersTemp = [ ...filters ];
 																		filtersTemp.splice(indexFilter, 1);
