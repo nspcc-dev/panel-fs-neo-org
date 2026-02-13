@@ -103,7 +103,7 @@ export default function ContainerItem({
 		}
 	}, [walletData]); // eslint-disable-line react-hooks/exhaustive-deps
 
-	const onGetObjects = (containerId, cursor = '', paginationTemp = pagination, isTreeViewObjectsTemp = isTreeViewObjects, isShowHiddenFilesTemp = false) => {
+	const onGetObjects = (containerId, cursor = '', paginationTemp = pagination, isTreeViewObjectsTemp = isTreeViewObjects, isShowHiddenFilesTemp = isShowHiddenFiles) => {
 		setLoadingObjects(true);
 		let filtersApplied = filters.filter(item => item.key !== '' && item.value !== '');
 		if (isTreeViewObjectsTemp) {
@@ -381,7 +381,7 @@ export default function ContainerItem({
 														onClick={(e) => {
 															setTreeViewObjects(!isTreeViewObjects);
 															setShowFilesActive(false);
-															onGetObjects(containerItem.containerId, '', { history: [], cursor: '' }, !isTreeViewObjects);
+															onGetObjects(containerItem.containerId, '', { history: [], cursor: '' }, !isTreeViewObjects, false);
 															e.stopPropagation();
 														}}
 														disabled={!isTreeViewObjects && objects?.length === 0 || isLoadingObjects}
