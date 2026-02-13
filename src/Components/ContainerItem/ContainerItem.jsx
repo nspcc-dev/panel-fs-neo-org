@@ -122,7 +122,6 @@ export default function ContainerItem({
 		}, {
 			"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 		}).then((e) => {
-			setLoadingObjects(false);
 			if (e.message) {
 				onPopup('failed', e.message);
 			} else {
@@ -135,6 +134,11 @@ export default function ContainerItem({
 				setPagination({ history: paginationTemp.history, cursor: e.cursor });
 				setObjects(e.objects && e.objects.length > 0 ? formatForTreeView(e.objects) : []);
 			}
+		}).catch(() => {
+			onPopup('failed', 'Failed to retrieve objects');
+			setObjects([]);
+		}).finally(() => {
+			setLoadingObjects(false);
 		});
 	};
 
