@@ -380,6 +380,7 @@ export default function ContainerItem({
 														style={{ marginRight: 10 }}
 														onClick={(e) => {
 															setTreeViewObjects(!isTreeViewObjects);
+															setShowFilesActive(false);
 															onGetObjects(containerItem.containerId, '', { history: [], cursor: '' }, !isTreeViewObjects);
 															e.stopPropagation();
 														}}
