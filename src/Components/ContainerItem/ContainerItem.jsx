@@ -157,9 +157,7 @@ export default function ContainerItem({
 
 	const onGetEACL = (containerId) => {
 		setLoadingEACL(true);
-		api('GET', `/v1/containers/${containerId}/eacl`, {}, {
-			"X-Bearer-Owner-Id": walletData.account.address,
-		}).then((e) => {
+		api('GET', `/v1/containers/${containerId}/eacl`).then((e) => {
 			setLoadingEACL(false);
 			if (e.records) {
 				setEACLParams(e.records);
