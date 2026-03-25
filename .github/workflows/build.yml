@@ -59,9 +59,6 @@ jobs:
         with:
           NEOFS_WALLET: ${{ secrets.NEOFS_WALLET }}
           NEOFS_WALLET_PASSWORD: ${{ secrets.NEOFS_WALLET_PASSWORD }}
-          NEOFS_NETWORK_DOMAIN: ${{ vars.NEOFS_NETWORK_DOMAIN }}
-          NEOFS_HTTP_GATE: ${{ vars.NEOFS_HTTP_GATE }}
           STORE_OBJECTS_CID: ${{ vars.STORE_OBJECTS_CID }}
           PATH_TO_FILES_DIR: panel.fs.neo.org
-          STRIP_PREFIX: true
           REPLACE_CONTAINER_CONTENTS: true
