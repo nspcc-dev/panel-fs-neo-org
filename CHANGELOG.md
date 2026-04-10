@@ -4,6 +4,11 @@ Changelog for NeoFS Panel
 
 ## [Unreleased]
 
+## [0.8.2] - 2026-04-10
+
+### Fixed
+- Using obsolete PUT method for container creation (#263)
+
 ## [0.8.1] - 2026-02-13
 
 ### Fixed
@@ -197,4 +202,5 @@ First public review release.
 [0.7.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.7.0
 [0.8.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.8.0
 [0.8.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.8.1
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.8.1...master
+[0.8.2]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.8.2
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.8.2...master
