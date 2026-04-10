@@ -459,7 +459,7 @@ export const App = () => {
 					if (containerForm.containerName.length >= 3) {
 						setError({ active: false, type: [], text: '' });
 						setLoadingForm(true);
-						api('PUT', '/v1/containers?walletConnect=true&name-scope-global=true', {
+						api('POST', '/v1/containers?walletConnect=true&name-scope-global=true', {
 							"containerName": containerForm.containerName,
 							"placementPolicy": containerForm.placementPolicy,
 							"basicAcl": containerForm.basicAcl,
