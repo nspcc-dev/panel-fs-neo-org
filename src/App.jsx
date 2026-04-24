@@ -598,6 +598,7 @@ export const App = () => {
 					}
 				}).catch((err) => {
 					onModal('failed', `Something went wrong: ${err}`);
+					setLoadingForm(false);
 				});
 			} else {
 				setError({ active: true, type: ['attributes'], text: 'Attributes should not be empty.' });
