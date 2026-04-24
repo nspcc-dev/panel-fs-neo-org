@@ -125,144 +125,150 @@ const File = ({
 				<div className="objects_tree_file_content">
 					{objectDate ? (
 						<>
-							<Section>
-								<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Information</Heading>
-								<Heading size={6} weight="light">
-									<span>{`Object id: `}</span>
-									{objectItem.objectId}
-								</Heading>
-								<Heading size={6} weight="light">
-									<span>{`Owner id: `}</span>
-									{objectDate.ownerId}
-								</Heading>
-								<Heading size={6} weight="light">
-									<span>{`Object size: `}</span>
-									{objectDate.objectSize ? formatBytes(Number(objectDate.objectSize)) : ''}
-								</Heading>
-							</Section>
-							<Section style={{ paddingTop: 0 }}>
-								<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Attributes</Heading>
-								{objectDate ? (
-									<>
-										{Object.keys(objectDate.attributes).map((attributeKey) => (
-											<Heading size={6} weight="light" key={attributeKey}>
-												<span>{`${attributeKey}: `}</span>
-												{objectDate.attributes[attributeKey]}
-											</Heading>
-										))}
+							{typeof objectDate === 'object' ? (
+								<>
+									<Section>
+										<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Information</Heading>
 										<Heading size={6} weight="light">
-											<span>Content-Type: </span>
-											{objectDate.contentType}
+											<span>{`Object id: `}</span>
+											{objectItem.objectId}
 										</Heading>
-									</>
-								) : '-'}
-							</Section>
-							{objectDate.objectSize !== "0" && (
-								<Section style={{ paddingTop: 0 }}>
-									<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Manage</Heading>
-									{!window.OneGate && (
-										<>
+										<Heading size={6} weight="light">
+											<span>{`Owner id: `}</span>
+											{objectDate.ownerId}
+										</Heading>
+										<Heading size={6} weight="light">
+											<span>{`Object size: `}</span>
+											{objectDate.objectSize ? formatBytes(Number(objectDate.objectSize)) : ''}
+										</Heading>
+									</Section>
+									<Section style={{ paddingTop: 0 }}>
+										<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Attributes</Heading>
+										{objectDate ? (
+											<>
+												{objectDate.attributes && Object.keys(objectDate.attributes).map((attributeKey) => (
+													<Heading size={6} weight="light" key={attributeKey}>
+														<span>{`${attributeKey}: `}</span>
+														{objectDate.attributes[attributeKey]}
+													</Heading>
+												))}
+												<Heading size={6} weight="light">
+													<span>Content-Type: </span>
+													{objectDate.contentType}
+												</Heading>
+											</>
+										) : '-'}
+									</Section>
+									{objectDate.objectSize !== "0" && (
+										<Section style={{ paddingTop: 0 }}>
+											<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Manage</Heading>
+											{!window.OneGate && (
+												<>
+													<img
+														src="/img/icons/manage/open.png"
+														className="manage_icon"
+														onClick={() => {
+															onModal('loading');
+															api('GET', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.objectId}`, {}, {
+																"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
+															}).then((data) => {
+																if (data.message) {
+																	onModal('failed', data.message);
+																} else if (data.header.indexOf("image/") !== -1 || data.header === 'text/plain; charset=utf-8') {
+																	const fileURL = URL.createObjectURL(data.res);
+																	window.open(fileURL, '_blank');
+																	onModal();
+																} else {
+																	const a = document.createElement('a');
+																	document.body.appendChild(a);
+																	const url = window.URL.createObjectURL(data.res);
+																	a.href = url;
+																	a.download = name;
+																	a.target = '_blank';
+																	a.click();
+																	setTimeout(() => {
+																		onModal();
+																		window.URL.revokeObjectURL(url);
+																		document.body.removeChild(a);
+																	}, 0);
+																}
+															});
+														}}
+														width={40}
+														height={40}
+														alt="get an object by bearer"
+														title="get an object by bearer"
+													/>
+													<img
+														src="/img/icons/manage/download.png"
+														className="manage_icon"
+														onClick={() => {
+															onModal('loading');
+															api('GET', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.objectId}`, {}, {
+																"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
+															}).then((data) => {
+																if (data.message) {
+																	onModal('failed', data.message);
+																} else {
+																	const a = document.createElement('a');
+																	document.body.appendChild(a);
+																	const url = window.URL.createObjectURL(data.res);
+																	a.href = url;
+																	a.download = name;
+																	a.target = '_blank';
+																	a.click();
+																	setTimeout(() => {
+																		onModal();
+																		window.URL.revokeObjectURL(url);
+																		document.body.removeChild(a);
+																	}, 0);
+																}
+															});
+														}}
+														width={40}
+														height={40}
+														alt="download an object"
+														title="download an object"
+													/>
+												</>
+											)}
 											<img
-												src="/img/icons/manage/open.png"
+												src="/img/icons/manage/share.png"
 												className="manage_icon"
 												onClick={() => {
 													onModal('loading');
-													api('GET', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.objectId}`, {}, {
+													api('HEAD', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.objectId}`, {}, {
 														"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
-													}).then((data) => {
-														if (data.message) {
-															onModal('failed', data.message);
-														} else if (data.header.indexOf("image/") !== -1 || data.header === 'text/plain; charset=utf-8') {
-															const fileURL = URL.createObjectURL(data.res);
-															window.open(fileURL, '_blank');
-															onModal();
-														} else {
-															const a = document.createElement('a');
-															document.body.appendChild(a);
-															const url = window.URL.createObjectURL(data.res);
-															a.href = url;
-															a.download = name;
-															a.target = '_blank';
-															a.click();
-															setTimeout(() => {
-																onModal();
-																window.URL.revokeObjectURL(url);
-																document.body.removeChild(a);
-															}, 0);
-														}
+													}).then((e) => {
+														onModal('shareObjectLink', {
+															type: e === 200 ? 'public' : 'private',
+															containerId: containerItem.containerId,
+															objectId: objectItem.objectId,
+														});
 													});
 												}}
 												width={40}
 												height={40}
-												alt="get an object by bearer"
-												title="get an object by bearer"
+												alt="share an object"
+												title="share an object"
 											/>
 											<img
-												src="/img/icons/manage/download.png"
+												src="/img/icons/manage/delete.png"
 												className="manage_icon"
-												onClick={() => {
-													onModal('loading');
-													api('GET', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.objectId}`, {}, {
-														"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
-													}).then((data) => {
-														if (data.message) {
-															onModal('failed', data.message);
-														} else {
-															const a = document.createElement('a');
-															document.body.appendChild(a);
-															const url = window.URL.createObjectURL(data.res);
-															a.href = url;
-															a.download = name;
-															a.target = '_blank';
-															a.click();
-															setTimeout(() => {
-																onModal();
-																window.URL.revokeObjectURL(url);
-																document.body.removeChild(a);
-															}, 0);
-														}
-													});
+												onClick={(e) => {
+													onModal('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.objectId });
+													e.stopPropagation();
 												}}
 												width={40}
 												height={40}
-												alt="download an object"
-												title="download an object"
+												alt="delete an object"
+												title="delete an object"
 											/>
-										</>
+										</Section>
 									)}
-									<img
-										src="/img/icons/manage/share.png"
-										className="manage_icon"
-										onClick={() => {
-											onModal('loading');
-											api('HEAD', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.objectId}`, {}, {
-												"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
-											}).then((e) => {
-												onModal('shareObjectLink', {
-													type: e === 200 ? 'public' : 'private',
-													containerId: containerItem.containerId,
-													objectId: objectItem.objectId,
-												});
-											});
-										}}
-										width={40}
-										height={40}
-										alt="share an object"
-										title="share an object"
-									/>
-									<img
-										src="/img/icons/manage/delete.png"
-										className="manage_icon"
-										onClick={(e) => {
-											onModal('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.objectId });
-											e.stopPropagation();
-										}}
-										width={40}
-										height={40}
-										alt="delete an object"
-										title="delete an object"
-									/>
-								</Section>
+								</>
+							) : (
+								<Heading size={6} weight="light" align="center" style={{ color: '#000000b3' }}>Something went wrong, try again</Heading>
 							)}
 						</>
 					) : (
