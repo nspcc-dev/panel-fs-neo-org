@@ -162,6 +162,10 @@ export const App = () => {
 			}],
 		}
 	});
+	const [shareObjectForm, setShareObjectForm] = useState({
+		type: '',
+		address: '',
+	});
 	const [containerForm, setContainerForm] = useState({
 		containerName: '',
 		placementPolicy: '',
@@ -200,7 +204,7 @@ export const App = () => {
 	}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
-		if (wcSdk.isConnected() && location.pathname.indexOf('/getobject') === -1) {
+		if (wcSdk.isConnected()) {
 			setWalletData({
 				name:  wcSdk.session.peer.metadata.name,
 				type: wcSdk.session.namespaces.neo3.accounts[0].split(':')[0],
@@ -313,6 +317,82 @@ export const App = () => {
 				"issuer": walletData.account.address,
 				"targets": [gatewayInfo.address],
 			}
+			api('POST', '/v2/auth/session', body).then((e) => {
+				if (e.message) {
+					onPopup('failed', e.message);
+				} else {
+					onSignMessage(e, type, operation, params);
+				}
+			});
+			return;
+		} else if (type === 'sharedObjectAccess') {
+			body = {
+				"contexts": [{
+					"containerID": params.containerId,
+					"verbs": ['OBJECT_GET', 'OBJECT_RANGE', 'OBJECT_HEAD'],
+				}],
+				"issuer": walletData.account.address,
+				"targets": [gatewayInfo.address],
+			}
+			api('POST', '/v2/auth/session', body).then((e) => {
+				if (e.message) {
+					onPopup('failed', e.message);
+				} else {
+					onSignMessage(e, type, operation, params);
+				}
+			});
+			return;
+		} else if (type === 'object' && params.address) {
+			body = {
+				"issuer": walletData.account.address,
+				"owner": params.address,
+				"lifetime": formatDateToHours(objectLinkLifetime),
+				"records": [{
+					"operation": 'GET',
+					"action": "ALLOW",
+					"filters": [{
+						"headerType": "OBJECT",
+						"key": "$Object:objectID",
+						"matchType": "STRING_EQUAL",
+						"value": params.objectId,
+					}],
+					"targets": [{
+						"accounts": [params.address],
+					}]
+				}, {
+					"operation": 'RANGE',
+					"action": "ALLOW",
+					"filters": [{
+						"headerType": "OBJECT",
+						"key": "$Object:objectID",
+						"matchType": "STRING_EQUAL",
+						"value": params.objectId,
+					}],
+					"targets": [{
+						"accounts": [params.address],
+					}]
+				}, {
+					"operation": 'HEAD',
+					"action": "ALLOW",
+					"filters": [{
+						"headerType": "OBJECT",
+						"key": "$Object:objectID",
+						"matchType": "STRING_EQUAL",
+						"value": params.objectId,
+					}],
+					"targets": [{
+						"accounts": [params.address],
+					}]
+				}, ...presets.forbid.eACLParams]
+			}
+			api('POST', '/v2/auth/bearer', body).then((e) => {
+				if (e.message) {
+					onPopup('failed', e.message);
+				} else {
+					onSignMessage(e, type, operation, params);
+				}
+			});
+			return;
 		} else if (type === 'object' && params.objectId) {
 			body = [{
 				"object": [{
@@ -386,12 +466,12 @@ export const App = () => {
 			}]
 		}
 
-		api('POST', type === 'container' ? '/v2/auth/session' : '/v1/auth', body, type === 'container' ? {} : {
+		api('POST', '/v1/auth', body, {
 			"X-Bearer-Owner-Id": walletData.account.address,
 			"X-Bearer-Lifetime": params.objectId ? formatDateToHours(objectLinkLifetime) : 2,
 			"X-Bearer-For-All-Users": true,
 		}).then((e) => {
-			onSignMessage(type === 'container' ? e : e[0], type, operation, params);
+			onSignMessage(e[0], type, operation, params);
 		});
 	};
 
@@ -428,12 +508,17 @@ export const App = () => {
 		}
 
 		if (type === 'object') {
-			api('GET', '/v1/auth/bearer?walletConnect=true', {}, {
+			api(params.address ? 'POST' : 'GET', params.address ? '/v2/auth/bearer/complete' : '/v1/auth/bearer?walletConnect=true', params.address ? {
+				"key": response.publicKey,
+				"scheme": "WALLETCONNECT",
+				"token": msg.token,
+				"signature": response.data + response.salt,
+			} : {}, params.address ? {} : {
 				"Authorization": `Bearer ${msg.token}`,
 				"X-Bearer-Signature": response.data + response.salt,
 				"X-Bearer-Signature-Key": response.publicKey,
 			}).then((e) => {
-				if (params.objectId) {
+				if (params.objectId || params.address) {
 					onModal('shareObjectLink', { ...params, token: e.token })
 				} else {
 					onUpdateWalletData(response, params, operation, type, msg, e.token);
@@ -1629,12 +1714,18 @@ export const App = () => {
 				<div className="modal">
 					<div
 						className="modal_close_panel"
-						onClick={onModal}
+						onClick={() => {
+							setShareObjectForm({ address: '', type: '' });
+							onModal();
+						}}
 					/>
 					<div className="modal_content" style={{ maxWidth: 400 }}>
 						<div
 							className="modal_close"
-							onClick={onModal}
+							onClick={() => {
+								setShareObjectForm({ address: '', type: '' });
+								onModal();
+							}}
 						>
 							<img
 								src="/img/icons/close.svg"
@@ -1643,64 +1734,103 @@ export const App = () => {
 								alt="loader"
 							/>
 						</div>
-						<Heading align="center" size={5} weight="bold">Sharing object</Heading>
-						<Heading align="center" size={6} style={{ margin: '1.5rem auto', width: '350px' }}>{`You can share a link to this object, it will be available to everyone without authorization until${modal.text.type === 'private' ? ':' : ' EACL change'}${!modal.text.token && modal.text.type === 'private' ? '' : ` ${new Date(objectLinkLifetime).toLocaleDateString()}`}`}</Heading>
-						{!modal.text.token && modal.text.type === 'private' ? (
+						{shareObjectForm.type === '' ? (
 							<>
-								<Form.Control style={{ marginBottom: '1.5rem' }}>
-									<Form.Input
+								<Heading align="center" size={5} weight="bold">How do you want to share this object?</Heading>
+								<Form.Control>
+									<Form.Radio
 										renderAs="input"
-										type="date"
-										value={objectLinkLifetime}
-										onChange={(e) => setObjectLinkLifetime(e.target.value)}
-									/>
+										value="everyone"
+										name="radio-everyone"
+										checked={shareObjectForm.type === 'everyone'}
+										onChange={() => setShareObjectForm({ ...shareObjectForm, type: 'everyone' })}
+										style={{ display: 'block', margin: '1rem' }}
+									>Everyone</Form.Radio>
+									<Form.Radio
+										renderAs="input"
+										value="address"
+										name="radio-address"
+										checked={shareObjectForm.type === 'address'}
+										onChange={() => setShareObjectForm({ ...shareObjectForm, type: 'address' })}
+										style={{ display: 'block', margin: '1rem' }}
+									>Selected address</Form.Radio>
 								</Form.Control>
-								<div className="token_status_panel">
-									<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to share&nbsp;object</Heading>
-									<Button
-										renderAs="button"
-										color="primary"
-										size="small"
-										onClick={() => onAuth('object', null, modal.text)}
-									>
-										Sign
-									</Button>
-								</div>
 							</>
 						) : (
 							<>
-								<a
-									href={`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}${modal.text.token ? `&token=${modal.text.token}` : ''}`}
-									className="modal_highlighted_copy"
-									target="_blank"
-									rel="noopener noreferrer"
-								>
-									<span>
-										{`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}${modal.text.token ? `&token=${modal.text.token}` : ''}`}
-									</span>
-								</a>
-								<div
-									className="copy_text"
-									onClick={() => {
-										copy(`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}${modal.text.token ? `&token=${modal.text.token}` : ''}`);
-										setCopy(true);
-										setTimeout(() => {
-											setCopy(false);
-										}, 700);
-									}}
-								>
-									<Button
-										renderAs="button"
-										color="primary"
-										size="small"
-										style={{ margin: 'auto', display: 'flex' }}
-									>
-										Copy link
-										{isCopied && (
-											<div className="tooltip">Copied!</div>
+								<Heading align="center" size={5} weight="bold">Sharing object</Heading>
+								<Heading align="center" size={6} style={{ margin: '1.5rem auto', width: '350px' }}>
+									{`You can share a link to this object, it will be available to ${shareObjectForm.type === 'address' ? 'selected address' : 'everyone'} without authorization until${modal.text.type === 'private' ? ':' : ' EACL change'}${!modal.text.token && modal.text.type === 'private' ? '' : ` ${new Date(objectLinkLifetime).toLocaleDateString()}`}`}
+								</Heading>
+								{!modal.text.token && modal.text.type === 'private' ? (
+									<>
+										{shareObjectForm.type === 'address' && (
+											<Form.Control style={{ margin: '1rem 0' }}>
+												<Form.Input
+													renderAs="input"
+													placeholder="Enter account address"
+													value={shareObjectForm.address}
+													onChange={(e) => setShareObjectForm({ ...shareObjectForm, address: e.target.value })}
+												/>
+											</Form.Control>
 										)}
-									</Button>
-								</div>
+										<Form.Control style={{ marginBottom: '1.5rem' }}>
+											<Form.Input
+												renderAs="input"
+												type="date"
+												value={objectLinkLifetime}
+												onChange={(e) => setObjectLinkLifetime(e.target.value)}
+											/>
+										</Form.Control>
+										<div className="token_status_panel">
+											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to share&nbsp;object</Heading>
+											<Button
+												renderAs="button"
+												color="primary"
+												size="small"
+												disabled={shareObjectForm.type === 'address' && shareObjectForm.address.trim().length === 0}
+												onClick={() => onAuth('object', null, { ...modal.text, address: shareObjectForm.type === 'address' ? shareObjectForm.address : null })}
+											>
+												Sign
+											</Button>
+										</div>
+									</>
+								) : (
+									<>
+										<a
+											href={`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}${modal.text.token ? `&token=${modal.text.token}${shareObjectForm.type === 'address' ? `&auth=true` : ''}` : ''}`}
+											className="modal_highlighted_copy"
+											target="_blank"
+											rel="noopener noreferrer"
+										>
+											<span>
+												{`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}${modal.text.token ? `&token=${modal.text.token}${shareObjectForm.type === 'address' ? `&auth=true` : ''}` : ''}`}
+											</span>
+										</a>
+										<div
+											className="copy_text"
+											onClick={() => {
+												copy(`${document.location.origin}/getobject?cid=${modal.text.containerId}&oid=${modal.text.objectId}${modal.text.token ? `&token=${modal.text.token}${shareObjectForm.type === 'address' ? `&auth=true` : ''}` : ''}`);
+												setCopy(true);
+												setTimeout(() => {
+													setCopy(false);
+												}, 700);
+											}}
+										>
+											<Button
+												renderAs="button"
+												color="primary"
+												size="small"
+												style={{ margin: 'auto', display: 'flex' }}
+											>
+												Copy link
+												{isCopied && (
+													<div className="tooltip">Copied!</div>
+												)}
+											</Button>
+										</div>
+									</>
+								)}
 							</>
 						)}
 					</div>
@@ -1961,7 +2091,9 @@ export const App = () => {
 				<Route
 					path="/getobject"
 					element={<Getobject
+						walletData={walletData}
 						onModal={onModal}
+						onAuth={onAuth}
 					/>}
 				/>
 				<Route

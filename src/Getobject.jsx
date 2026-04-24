@@ -4,28 +4,58 @@ import {
 	Container,
 	Section,
 	Heading,
+	Button,
+	Columns,
 	Box,
 } from 'react-bulma-components';
-import { formatBytes } from './Functions/handle';
+import {
+	formatBytes,
+} from './Functions/handle';
 import api from './api';
 
 const Getobject = ({
 		onModal,
+		walletData,
+		onAuth,
 	}) => {
 	const [searchParams] = useSearchParams();
 	const [objectData, setObjectData] = useState(null);
 	const [objectStatus, setObjectStatus] = useState('Loading');
 	const [params, setParams] = useState(null);
+	const objectAccessData = walletData?.tokens?.sharedObjectAccess?.OBJECT_ACCESS;
+	const objectAccessToken = objectAccessData?.containerId === params?.containerId ? objectAccessData?.token : null;
 
 	useEffect(() => {
 		const token = searchParams.get('token') ? searchParams.get('token').replace(/ /g, '+') : '';
 		const containerId = searchParams.get('cid');
 		const objectId = searchParams.get('oid');
-		setParams({ token, containerId, objectId });
+		const isAuth = searchParams.get('auth');
+		setParams({ token, containerId, objectId, isAuth });
 
+		if (isAuth) {
+			setObjectStatus('Not authorized');
+		} else {
+			onHeadObject(containerId, objectId, token);
+		}
+	}, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+	useEffect(() => {
+		if (walletData && params?.isAuth) {
+			if (objectAccessToken) {
+				onHeadObject(params.containerId, params.objectId, objectAccessToken, params.token);
+			} else {
+				setObjectStatus('Allow access');
+			}
+		}
+	}, [walletData, params, objectAccessToken]); // eslint-disable-line react-hooks/exhaustive-deps
+
+	const onHeadObject = (containerId, objectId, token, bearer = null) => {
 		const payload = {};
 		if (token) {
 			payload["Authorization"] = `Bearer ${token}`;
+		}
+		if (bearer) {
+			payload["NeoFS-Bearer-Token"] = bearer;
 		}
 		api('HEAD', `/v1/objects/${containerId}/by_id/${objectId}`, {}, payload).then((e) => {
 			if (e === 400 || e === 404) {
@@ -33,21 +63,26 @@ const Getobject = ({
 			} else if (e === 403) {
 				setObjectStatus('Forbidden');
 			} else if (e.message) {
-				setObjectStatus('Available');
+				setObjectStatus('Forbidden');
 				onModal('failed', e.message);
 			} else {
 				setObjectStatus('Available');
 				setObjectData(e);
 			}
 		});
-	}, []); // eslint-disable-line react-hooks/exhaustive-deps
+	}
 
 	const onDownload = () => {
 		onModal('loading');
 
 		const payload = {};
-		if (params.token) {
+		if (params.isAuth && objectAccessToken) {
+			payload["Authorization"] = `Bearer ${objectAccessToken}`;
+		} else if (params.token) {
 			payload["Authorization"] = `Bearer ${params.token}`;
+		}
+		if (params.isAuth && params.token) {
+			payload["NeoFS-Bearer-Token"] = params.token;
 		}
 		api('GET', `/v1/objects/${params.containerId}/by_id/${params.objectId}`, {}, payload).then((data) => {
 			if (data.message) {
@@ -75,7 +110,47 @@ const Getobject = ({
 				<Section>
 					{objectStatus !== 'Available' ? (
 						<Box id="share">
-							<Heading weight="bold">{objectStatus}</Heading>
+							<Heading weight="bold" align="center">{objectStatus}</Heading>
+							{objectStatus === 'Not authorized' && (
+								<a
+									href="/"
+									style={{ textDecoration: 'none' }}
+									rel="noopener noreferrer"
+									target="_blank"
+								>
+									<Button
+										renderAs="button"
+										color="primary"
+										style={{ margin: '20px auto 0', display: 'flex' }}
+									>
+										Sign in
+									</Button>
+								</a>
+							)}
+							{objectStatus === 'Allow access' && (
+								<Columns.Column>
+									<div className="token_status_panel">
+										<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock object&nbsp;operations</Heading>
+										{objectAccessToken ? (
+											<img
+												src="/img/icons/success.svg"
+												height={25}
+												width={25}
+												alt="success"
+										/>
+									) : (
+											<Button
+												renderAs="button"
+												color="primary"
+												size="small"
+												onClick={() => onAuth('sharedObjectAccess', 'OBJECT_ACCESS', { containerId: params.containerId })}
+											>
+												Sign
+											</Button>
+										)}
+									</div>
+								</Columns.Column>
+							)}
 						</Box>
 					) : (
 						<Box id="share">
