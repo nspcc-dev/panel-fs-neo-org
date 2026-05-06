@@ -402,7 +402,7 @@ export default function EACLPanel({
 								renderAs="button"
 								color="primary"
 								size="small"
-								onClick={() => onAuth('container', 'CONTAINER_SET_EACL')}
+								onClick={() => onAuth('container', ['CONTAINER_SET_EACL'])}
 							>
 								Sign
 							</Button>

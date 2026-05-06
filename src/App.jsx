@@ -21,6 +21,7 @@ import Home from './Home';
 import Profile from './Profile';
 import Getobject from './Getobject';
 import EACLPanel from './Components/EACLPanel/EACLPanel';
+import TokenSignPanel from './Components/TokenSignPanel/TokenSignPanel';
 import api from './api';
 import Neon from "@cityofzion/neon-js";
 import { useWalletConnect } from "@cityofzion/wallet-connect-sdk-react";
@@ -275,36 +276,56 @@ export const App = () => {
 	}
 
 	const onUpdateWalletData = (response, params, operation, type, msg, bearer) => {
-		const walletDataTemp = {
-			...walletData,
-			publicKey: response.publicKey,
-			tokens: {
-				...walletData.tokens,
-				[type]: {
-					...walletData.tokens[type],
+		setWalletData((prev) => {
+			const next = {
+				...prev,
+				publicKey: response.publicKey,
+				tokens: {
+					...prev.tokens,
+					container: { ...prev.tokens.container },
+					object: prev.tokens.object,
+				},
+			};
+			if (type === 'container') {
+				const objectVerbs = [];
+				operation.forEach((verb) => {
+					if (verb.startsWith('CONTAINER_')) {
+						next.tokens.container[verb] = {
+							...params,
+							token: bearer,
+							lock: msg.lock,
+							signature: response.data + response.salt,
+						};
+					} else if (verb.startsWith('OBJECT_')) {
+						objectVerbs.push(verb);
+					}
+				});
+				if (objectVerbs.length > 0) {
+					next.tokens.object = {
+						...params,
+						token: bearer,
+						bearer,
+						lock: msg.lock,
+						signature: response.data + response.salt,
+						verbs: objectVerbs,
+					};
+				}
+			} else if (type === 'sharedObjectAccess') {
+				next.tokens.sharedObjectAccess = {
+					...prev.tokens.sharedObjectAccess,
 					[operation]: {
 						...params,
 						token: bearer,
 						lock: msg.lock,
 						signature: response.data + response.salt,
-					}
-				}
+					},
+				};
 			}
-		}
-		if (type === 'object') {
-			walletDataTemp.tokens[type] = {
-				...params,
-				token: bearer,
-				signature: response.data + response.salt,
-			};
-		}
-		if (bearer) {
-			walletDataTemp.tokens[type].bearer = bearer;
-		}
-		if (!walletDataTemp.expiry || walletDataTemp.expiry < new Date().getTime()) {
-			walletDataTemp.expiry = new Date().getTime() + 7200000;
-		}
-		setWalletData(walletDataTemp);
+			if (!next.expiry || next.expiry < new Date().getTime()) {
+				next.expiry = new Date().getTime() + 7200000;
+			}
+			return next;
+		});
 	}
 
 	const onAuth = async (type, operation, params = {}) => {
@@ -312,18 +333,17 @@ export const App = () => {
 		if (type === 'container') {
 			body = {
 				"contexts": [{
-					"verbs": [operation],
+					"verbs": operation,
 				}],
 				"issuer": walletData.account.address,
 				"targets": [gatewayInfo.address],
 			}
-			api('POST', '/v2/auth/session', body).then((e) => {
-				if (e.message) {
-					onPopup('failed', e.message);
-				} else {
-					onSignMessage(e, type, operation, params);
-				}
-			});
+			const e = await api('POST', '/v2/auth/session', body);
+			if (e.message) {
+				onPopup('failed', e.message);
+				throw new Error(e.message);
+			}
+			await onSignMessage(e, type, operation, params);
 			return;
 		} else if (type === 'sharedObjectAccess') {
 			body = {
@@ -338,7 +358,7 @@ export const App = () => {
 				if (e.message) {
 					onPopup('failed', e.message);
 				} else {
-					onSignMessage(e, type, operation, params);
+					onSignMessage(e, type, operation, params).catch(() => {});
 				}
 			});
 			return;
@@ -525,15 +545,20 @@ export const App = () => {
 				}
 			});
 		} else if (!response.error) {
-			api('POST', '/v2/auth/session/complete', {
+			const e = await api('POST', '/v2/auth/session/complete', {
 				"key": response.publicKey,
 				"lock": msg.lock,
 				"scheme": "WALLETCONNECT",
 				"token": msg.token,
 				"signature": hexToBytesToBase64(response.data + response.salt),
-			}).then((e) => {
-				onUpdateWalletData(response, params, operation, type, msg, e.token);
 			});
+			if (e.message) {
+				onPopup('failed', e.message);
+				throw new Error(e.message);
+			}
+			onUpdateWalletData(response, params, operation, type, msg, e.token);
+		} else {
+			throw new Error('Signing aborted');
 		}
 	};
 
@@ -1102,112 +1127,38 @@ export const App = () => {
 							/>
 						</div>
 						<Heading align="center" size={5} weight="bold">Token signing</Heading>
-						<Columns>
-							{(modal.text === '' || modal.text === 'container.CONTAINER_PUT' || modal.text === 'container.CONTAINER_DELETE' || modal.text === 'container.CONTAINER_SET_EACL') && (
-								<Columns.Column>
-									{(modal.text === '' || modal.text === 'container.CONTAINER_PUT') && (
-										<div className="token_status_panel">
-											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock create&nbsp;operation</Heading>
-											{walletData && walletData.tokens.container.CONTAINER_PUT ? (
-												<img
-													src="/img/icons/success.svg"
-													height={25}
-													width={25}
-													alt="success"
-												/>
-											) : (
-												<Button
-													renderAs="button"
-													color="primary"
-													size="small"
-													onClick={() => onAuth('container', 'CONTAINER_PUT')}
-												>
-													Sign
-												</Button>
-											)}
-										</div>
-									)}
-									{(modal.text === '' || modal.text === 'container.CONTAINER_DELETE') && (
-										<div className="token_status_panel">
-											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock delete&nbsp;operation</Heading>
-											{walletData && walletData.tokens.container.CONTAINER_DELETE ? (
-												<img
-													src="/img/icons/success.svg"
-													height={25}
-													width={25}
-													alt="success"
-												/>
-											) : (
-												<Button
-													renderAs="button"
-													color="primary"
-													size="small"
-													onClick={() => onAuth('container', 'CONTAINER_DELETE')}
-												>
-													Sign
-												</Button>
-											)}
-										</div>
-									)}
-									{(modal.text === '' || modal.text === 'container.CONTAINER_SET_EACL') && (
-										<div className="token_status_panel">
-											<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock eACL&nbsp;management</Heading>
-											{walletData && walletData.tokens.container.CONTAINER_SET_EACL ? (
-												<img
-													src="/img/icons/success.svg"
-													height={25}
-													width={25}
-													alt="success"
-												/>
-											) : (
-												<Button
-													renderAs="button"
-													color="primary"
-													size="small"
-													onClick={() => onAuth('container', 'CONTAINER_SET_EACL', modal.params)}
-												>
-													Sign
-												</Button>
-											)}
-										</div>
-									)}
-								</Columns.Column>
-							)}
-							{(modal.text === '' || modal.text === 'object') && (
-								<Columns.Column>
-									<div className="token_status_panel">
-										<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock object&nbsp;operations</Heading>
-										{walletData && walletData.tokens.object ? (
-											<img
-												src="/img/icons/success.svg"
-												height={25}
-												width={25}
-												alt="success"
-											/>
-										) : (
-											<Button
-												renderAs="button"
-												color="primary"
-												size="small"
-												onClick={() => onAuth('object', null, modal.params)}
-											>
-												Sign
-											</Button>
-										)}
+						<Heading align="center" size={6} style={{ margin: '0 auto 1rem', maxWidth: 500, color: '#666', fontWeight: 'normal' }}>
+							Sign one master token covering all operations, or expand to choose which permissions to grant.
+						</Heading>
+						{walletData && walletData.tokens.container.CONTAINER_PUT && walletData.tokens.container.CONTAINER_DELETE && walletData.tokens.container.CONTAINER_SET_EACL && walletData.tokens.object ? (
+							<>
+								<div className="token_sign_panel">
+									<div className="token_sign_panel_row">
+										<Heading size={6} style={{ margin: '0 10px 0 0' }}>All permissions signed</Heading>
+										<img
+											src="/img/icons/success.svg"
+											height={25}
+											width={25}
+											alt="success"
+										/>
 									</div>
-								</Columns.Column>
-							)}
-						</Columns>
-						{walletData && walletData.tokens.container.CONTAINER_PUT && walletData.tokens.container.CONTAINER_DELETE && walletData.tokens.container.CONTAINER_SET_EACL
-							&& walletData.tokens.object && (
-							<Button
-								renderAs="button"
-								color="primary"
-								onClick={onModal}
-								style={{ margin: '20px auto 0', display: 'flex' }}
-							>
-								Start
-							</Button>
+								</div>
+								<Button
+									renderAs="button"
+									color="primary"
+									onClick={onModal}
+									style={{ margin: '20px auto 0', display: 'flex' }}
+								>
+									Start
+								</Button>
+							</>
+						) : (
+							<TokenSignPanel
+								walletData={walletData}
+								onAuth={onAuth}
+								title="Sign master token"
+								params={modal.params || {}}
+							/>
 						)}
 					</div>
 				</div>
@@ -1412,34 +1363,15 @@ export const App = () => {
 								</Notification>
 							)}
 							{(!walletData.tokens.container.CONTAINER_PUT || (!walletData.tokens.container.CONTAINER_SET_EACL && containerForm.eACLParams.length > 0)) ? (
-								<>
-									{!walletData.tokens.container.CONTAINER_PUT && (
-										<div className="token_status_panel" style={{ margin: '25px 0 10px', maxWidth: 'unset' }}>
-											<Heading size={6} style={{ margin: '0 10px 0 0', maxWidth: 290 }}>Sign token to unlock create&nbsp;operation</Heading>
-											<Button
-												renderAs="button"
-												color="primary"
-												size="small"
-												onClick={() => onAuth('container', 'CONTAINER_PUT')}
-											>
-												Sign
-											</Button>
-										</div>
-									)}
-									{!walletData.tokens.container.CONTAINER_SET_EACL && containerForm.eACLParams.length > 0 && (
-										<div className="token_status_panel" style={{ margin: '10px 0', maxWidth: 'unset' }}>
-											<Heading size={6} style={{ margin: '0 10px 0 0', maxWidth: 300 }}>Sign token to unlock eACL&nbsp;management</Heading>
-											<Button
-												renderAs="button"
-												color="primary"
-												size="small"
-												onClick={() => onAuth('container', 'CONTAINER_SET_EACL')}
-											>
-												Sign
-											</Button>
-										</div>
-									)}
-								</>
+								<TokenSignPanel
+									walletData={walletData}
+									onAuth={onAuth}
+									title="Sign token to create container"
+									requiredVerbs={containerForm.eACLParams.length > 0
+										? ['CONTAINER_PUT', 'CONTAINER_SET_EACL']
+										: ['CONTAINER_PUT']}
+									style={{ margin: '25px 0 10px', maxWidth: 'unset' }}
+								/>
 							) : (
 								<Button
 									renderAs="button"
@@ -1502,17 +1434,12 @@ export const App = () => {
 							</Notification>
 						)}
 						{!walletData.tokens.container.CONTAINER_DELETE ? (
-							<div className="token_status_panel">
-								<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock delete&nbsp;operation</Heading>
-								<Button
-									renderAs="button"
-									color="primary"
-									size="small"
-									onClick={() => onAuth('container', 'CONTAINER_DELETE')}
-								>
-									Sign
-								</Button>
-							</div>
+							<TokenSignPanel
+								walletData={walletData}
+								onAuth={onAuth}
+								title="Sign token to delete container"
+								requiredVerbs={['CONTAINER_DELETE']}
+							/>
 						) : (
 							<div style={{ margin: '30px 0 0', display: 'flex', justifyContent: 'center' }}>
 								{!isLoadingForm && (
