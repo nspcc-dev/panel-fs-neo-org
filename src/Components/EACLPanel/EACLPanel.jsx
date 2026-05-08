@@ -8,6 +8,7 @@ import {
 	Form,
 } from 'react-bulma-components';
 import api from '../../api';
+import TokenSignPanel from '../TokenSignPanel/TokenSignPanel';
 
 export default function EACLPanel({
 	walletData,
@@ -396,17 +397,13 @@ export default function EACLPanel({
 			{walletData && (
 				<>
 					{!walletData.tokens.container.CONTAINER_SET_EACL ? (
-						<div className="token_status_panel" style={{ margin: '15px auto' }}>
-							<Heading size={6} style={{ margin: '0 10px 0 0' }}>Sign token to unlock eACL&nbsp;management</Heading>
-							<Button
-								renderAs="button"
-								color="primary"
-								size="small"
-								onClick={() => onAuth('container', ['CONTAINER_SET_EACL'])}
-							>
-								Sign
-							</Button>
-						</div>
+						<TokenSignPanel
+							walletData={walletData}
+							onAuth={onAuth}
+							title="Sign token to unlock eACL management"
+							requiredVerbs={['CONTAINER_SET_EACL']}
+							style={{ margin: '15px auto' }}
+						/>
 					) : (
 						<Button
 							renderAs="button"
