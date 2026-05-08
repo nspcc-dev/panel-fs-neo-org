@@ -312,7 +312,7 @@ export default function EACLPanel({
 											disabled={!isEdit || isLoadingForm}
 										>
 											<option value="" disabled>matchType</option>
-											{['STRING_EQUAL', 'STRING_NOT_EQUAL'].map((item) => (
+											{['STRING_EQUAL', 'STRING_NOT_EQUAL', 'NUM_GT', 'NUM_GE', 'NUM_LT', 'NUM_LE'].map((item) => (
 												<option value={item} key={item}>{item}</option>
 											))}
 										</Form.Select>
