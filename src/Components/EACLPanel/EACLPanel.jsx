@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
 	Heading,
 	Button,
@@ -22,6 +22,8 @@ export default function EACLPanel({
 }) {
 	const [isError, setError] = useState(false);
 	const [isLoadingForm, setLoadingForm] = useState(false);
+	const uids = useRef(new WeakMap());
+	const keyOf = (item) => uids.current.get(item) ?? uids.current.set(item, crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`).get(item);
 	const [dragAndDropEACLParams, setDragAndDropEACLParams] = useState({
 		draggedFrom: null,
 		draggedTo: null,
@@ -45,7 +47,7 @@ export default function EACLPanel({
 			setError({ active: false, type: [], text: '' });
 			setLoadingForm(true);
 			api('PUT', `/v1/containers/${containerId}/eacl?walletConnect=true`, {
-				"records": eACLParams.filter((item) => delete item.isOpen),
+				"records": eACLParams.map(({ isOpen, ...rest }) => rest),
 			}, {
 				"Authorization": `Bearer ${walletData.tokens.container.CONTAINER_SET_EACL.token}`,
 			}).then((e) => {
@@ -115,7 +117,7 @@ export default function EACLPanel({
 				<Panel.Block
 					active
 					renderAs="a"
-					key={index}
+					key={keyOf(eACLItem)}
 					data-position={index}
 					className={dragAndDropEACLParams && dragAndDropEACLParams.draggedTo === Number(index) ? "drop_area" : ""}
 					onDragStart={onDragStart}
