@@ -4,6 +4,15 @@ Changelog for NeoFS Panel
 
 ## [Unreleased]
 
+## [0.8.3] - 2026-05-12
+
+### Added
+- Numeric eACL rules (#252)
+- File sharing for specific accounts (#174)
+
+### Changed
+- Improved token model (#254)
+
 ## [0.8.2] - 2026-04-10
 
 ### Fixed
@@ -203,4 +212,5 @@ First public review release.
 [0.8.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.8.0
 [0.8.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.8.1
 [0.8.2]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.8.2
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.8.2...master
+[0.8.3]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.8.3
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.8.3...master
