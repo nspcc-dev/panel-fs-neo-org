@@ -991,6 +991,9 @@ export const App = () => {
 								</div>
 							</>
 						)}
+						{modal.text && modal.text.indexOf('0x') === -1 && (
+							<Heading align="center" size={6} weight="normal">{modal.text}</Heading>
+						)}
 					</div>
 				</div>
 			)}
