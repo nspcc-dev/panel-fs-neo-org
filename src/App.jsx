@@ -177,6 +177,7 @@ export const App = () => {
 	});
 	const [walletData, setWalletData] = useState(null);
 	const [isNeoLineSupport, setNeoLineSupport] = useState(false);
+	const [isNeonReady, setNeonReady] = useState(false);
 
 	const [modal, setModal] = useState({
 		current: null,
@@ -203,6 +204,19 @@ export const App = () => {
 		window.addEventListener('NEOLine.NEO.EVENT.READY', () => {
 			setNeoLineSupport(true);
 		});
+	}, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+	useEffect(() => {
+		const timer = setInterval(() => {
+			try {
+				const chainId = wcSdk.getChainId();
+				if (!chainId) {
+					setNeonReady(true);
+					clearInterval(timer);
+				}
+			} catch {}
+		}, 200);
+		return () => clearInterval(timer);
 	}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
@@ -1138,6 +1152,7 @@ export const App = () => {
 						<Heading align="center" size={6} weight="normal">Choose the authorization method</Heading>
 						<WalletAuthMethods
 							isNeoLineSupport={isNeoLineSupport}
+							isNeonReady={isNeonReady}
 							hasOneGate={Boolean(dapi)}
 							onSelectWallet={(type) => {
 								onModal();

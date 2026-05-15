@@ -6,6 +6,7 @@ import {
 
 const WalletAuthMethods = ({
 		isNeoLineSupport,
+		isNeonReady,
 		hasOneGate,
 		onSelectWallet,
 		onInstallWallet,
@@ -33,6 +34,7 @@ const WalletAuthMethods = ({
 				renderAs="button"
 				className="btn_connect_wallet"
 				onClick={() => onSelectWallet('neon')}
+				disabled={!isNeonReady}
 			>
 				Neon
 				<img src="/img/icons/wallets/neon.svg" alt="neon logo" />
