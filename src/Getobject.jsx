@@ -17,6 +17,7 @@ const Getobject = ({
 		onModal,
 		walletData,
 		onAuth,
+		isGatewayReady,
 	}) => {
 	const [searchParams] = useSearchParams();
 	const [objectData, setObjectData] = useState(null);
@@ -112,20 +113,14 @@ const Getobject = ({
 						<Box id="share">
 							<Heading weight="bold" align="center">{objectStatus}</Heading>
 							{objectStatus === 'Not authorized' && (
-								<a
-									href="/"
-									style={{ textDecoration: 'none' }}
-									rel="noopener noreferrer"
-									target="_blank"
+								<Button
+									renderAs="button"
+									color="primary"
+									style={{ margin: '20px auto 0', display: 'flex' }}
+									onClick={() => onModal('authMethods')}
 								>
-									<Button
-										renderAs="button"
-										color="primary"
-										style={{ margin: '20px auto 0', display: 'flex' }}
-									>
-										Sign in
-									</Button>
-								</a>
+									Sign in
+								</Button>
 							)}
 							{objectStatus === 'Allow access' && (
 								<Columns.Column>
@@ -143,6 +138,7 @@ const Getobject = ({
 												renderAs="button"
 												color="primary"
 												size="small"
+												disabled={!isGatewayReady}
 												onClick={() => onAuth('sharedObjectAccess', 'OBJECT_ACCESS', { containerId: params.containerId })}
 											>
 												Sign
