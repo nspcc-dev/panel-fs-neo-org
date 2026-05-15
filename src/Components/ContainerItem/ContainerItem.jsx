@@ -351,6 +351,7 @@ export default function ContainerItem({
 										<Heading
 											size={6}
 											weight="bolder"
+											className="objects_title"
 											onClick={() => {
 												if (!walletData.tokens.object) {
 													onModal('signTokens', 'object', { containerId: containerItem.containerId });
@@ -374,29 +375,24 @@ export default function ContainerItem({
 												Objects
 											</div>
 											{activePanel === 'objects' && (
-												<div>
-													<Button
-														renderAs="button"
-														size="small"
-														color="primary"
-														style={{ marginRight: 10 }}
+												<div className="objects_actions">
+													<button
+														type="button"
+														className={`view_mode_switch ${isTreeViewObjects ? 'is-tree' : 'is-list'}`}
+														aria-label={isTreeViewObjects ? 'Tree view is active. Switch to list view' : 'List view is active. Switch to tree view'}
+														aria-pressed={isTreeViewObjects}
 														onClick={(e) => {
 															setTreeViewObjects(!isTreeViewObjects);
 															setShowFilesActive(false);
 															onGetObjects(containerItem.containerId, '', { history: [], cursor: '' }, !isTreeViewObjects, false);
 															e.stopPropagation();
 														}}
-														disabled={!isTreeViewObjects && objects?.length === 0 || isLoadingObjects}
+														disabled={(!isTreeViewObjects && objects?.length === 0) || isLoadingObjects}
 													>
-														<img
-															src={`/img/icons/${isTreeViewObjects ? 'tree' : 'list'}_view.svg`}
-															height={12}
-															width={12}
-															style={{ marginRight: 5 }}
-															alt="view"
-														/>
-														{isTreeViewObjects ? 'Tree view' : 'List view'}
-													</Button>
+														<span className="view_mode_switch_thumb" aria-hidden="true" />
+														<span className="view_mode_switch_label" aria-hidden="true">List view</span>
+														<span className="view_mode_switch_label" aria-hidden="true">Tree view</span>
+													</button>
 													<Button
 														renderAs="button"
 														size="small"

@@ -420,6 +420,66 @@ label.panel-block:hover {
     margin: 5px 15px 0 0;
 }
 
+.objects_actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.view_mode_switch {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    min-width: 188px;
+    height: 30px;
+    padding: 2px;
+    margin: 0;
+    border: 1px solid #00e599;
+    background: #f0fffa;
+    color: #1d4f42;
+    font-family: WorkSans, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.view_mode_switch:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.view_mode_switch_thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: calc(50% - 2px);
+    height: calc(100% - 4px);
+    background: #00e599;
+    transition: transform 0.2s ease;
+    z-index: 1;
+}
+
+.view_mode_switch.is-tree .view_mode_switch_thumb {
+    transform: translateX(100%);
+}
+
+.view_mode_switch_label {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    line-height: 1;
+    pointer-events: none;
+    transition: color 0.2s ease;
+}
+
+.view_mode_switch.is-list .view_mode_switch_thumb + .view_mode_switch_label,
+.view_mode_switch.is-tree .view_mode_switch_label:last-of-type {
+    color: #fff;
+}
+
 .copy_text {
     position: relative;
 }
@@ -880,5 +940,18 @@ label.panel-block:hover {
     .tooltip_block .tooltip {
         top: -120px;
         max-width: 220px;
+    }
+
+    .view_mode_switch {
+        min-width: 168px;
+    }
+
+    .objects_title {
+        flex-direction: column;
+    }
+
+    .objects_title .objects_actions {
+        justify-content: space-between;
+        margin-top: 16px;
     }
 }

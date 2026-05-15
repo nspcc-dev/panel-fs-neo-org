@@ -660,11 +660,17 @@ export const App = () => {
 	const onHandleObject = (e) => {
 		const file = e.target.files;
 		if (file.length > 0) {
+			const selectedFileName = file[0].name;
 			setObjectForm({
-				name: file[0].name,
+				name: selectedFileName,
 				file: e.target.files[0],
 				loading: false,
 			});
+			setAttributes((prev) => ([
+				...prev.filter((attribute) => attribute.key !== 'FileName' && attribute.key !== 'FilePath'),
+				{ key: 'FileName', value: selectedFileName },
+				{ key: 'FilePath', value: selectedFileName },
+			]));
 		} else {
 			document.getElementById('upload').value = '';
 			setObjectForm({
@@ -672,6 +678,7 @@ export const App = () => {
 				file: '',
 				loading: false,
 			});
+			setAttributes((prev) => prev.filter((attribute) => attribute.key !== 'FileName' && attribute.key !== 'FilePath'));
 		}
 	};
 
@@ -686,10 +693,7 @@ export const App = () => {
 				api('POST', `/v1/objects/${containerId}`, objectForm.file, {
 					'Content-Type': objectForm.file.type,
 					"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
-					'X-Attributes': JSON.stringify({
-						'FileName': objectForm.name,
-						...attributesHeaders,
-					}),
+					'X-Attributes': JSON.stringify(attributesHeaders),
 				}).then((e) => {
 					setLoadingForm(false);
 					if (e.message && e.message.indexOf('access to object operation denied') !== -1) {
@@ -990,6 +994,9 @@ export const App = () => {
 									</a>
 								</div>
 							</>
+						)}
+						{modal.text && modal.text.indexOf('0x') === -1 && (
+							<Heading align="center" size={6} weight="normal">{modal.text}</Heading>
 						)}
 					</div>
 				</div>
