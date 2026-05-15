@@ -691,7 +691,7 @@ export const App = () => {
 				const attributesHeaders = {};
 				attributes.map((attribute) => attributesHeaders[attribute.key] = attribute.value);
 				api('POST', `/v1/objects/${containerId}`, objectForm.file, {
-					'Content-Type': objectForm.file.type,
+					'Content-Type': objectForm.file.type || 'application/octet-stream',
 					"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 					'X-Attributes': JSON.stringify(attributesHeaders),
 				}).then((e) => {
