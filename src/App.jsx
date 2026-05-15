@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
 	Routes,
 	Route,
@@ -48,7 +48,7 @@ export const App = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const wcSdk = useWalletConnect();
-	const dapi = window.OneGate ? new BaseDapi(window.OneGate) : null;
+	const dapi = useMemo(() => (window.OneGate ? new BaseDapi(window.OneGate) : null), []);
 	let [neolineN3, setNeolineN3] = useState(null);
 	const [activeNet] = useState(import.meta.env.VITE_NETWORK ? capitalizeFirstLetter(import.meta.env.VITE_NETWORK) : 'Mainnet');
 	const [NeoFSContract, setNeoFSContract] = useState({
@@ -200,6 +200,33 @@ export const App = () => {
 		}, 2000);
 	};
 
+	const onLoadWalletSessionData = () => {
+		api('GET', '/v1/network-info').then((e) => {
+			if (!e.message) {
+				setNetworkInfo(e);
+			}
+		});
+
+		api('GET', '/v1/gateway').then((e) => {
+			if (!e.message) {
+				setGatewayInfo(e);
+			}
+		});
+
+		onGetSidechainContract();
+	};
+
+	const onHandleConnectedWallet = (nextWalletData) => {
+		setWalletData(nextWalletData);
+		onPopup('success', 'Wallet connected');
+		onModal();
+		onLoadWalletSessionData();
+
+		if (location.pathname.indexOf('/profile') === -1 && location.pathname.indexOf('/getobject') === -1) {
+			navigate('/profile');
+		}
+	};
+
 	useEffect(() => {
 		window.addEventListener('NEOLine.NEO.EVENT.READY', () => {
 			setNeoLineSupport(true);
@@ -220,44 +247,97 @@ export const App = () => {
 	}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
-		if (wcSdk.isConnected()) {
-			setWalletData({
-				name:  wcSdk.session.peer.metadata.name,
-				type: wcSdk.session.namespaces.neo3.accounts[0].split(':')[0],
-				net: wcSdk.session.namespaces.neo3.accounts[0].split(':')[1],
-				account: {
-					address: wcSdk.session.namespaces.neo3.accounts[0].split(':')[2],
-					publicKey: wcSdk.session.peer.publicKey,
-				},
-				tokens: {
-					container: {},
-					object: null
-				}
-			});
-			onPopup('success', 'Wallet connected');
-			onModal();
+		let isCancelled = false;
 
-			api('GET', '/v1/network-info').then((e) => {
-				if (!e.message) {
-					setNetworkInfo(e);
-				}
-			});
-
-			api('GET', '/v1/gateway').then((e) => {
-				if (!e.message) {
-					setGatewayInfo(e);
-				}
-			});
-
-			onGetSidechainContract();
-
-			if (location.pathname.indexOf('/profile') === -1 && location.pathname.indexOf('/getobject') === -1) {
-				navigate('/profile');
+		const initWalletSession = async () => {
+			if (walletData) {
+				return;
 			}
-		} else if (location.pathname !== '/' && location.pathname.indexOf('/getobject') === -1) {
-			document.location.href = "/";
-		}
-	}, [wcSdk]); // eslint-disable-line react-hooks/exhaustive-deps
+
+			const withTimeout = async (promise, timeout = 1500) => (
+				await Promise.race([
+					promise,
+					new Promise((resolve) => setTimeout(() => resolve(null), timeout)),
+				])
+			);
+
+			const isProtectedRoute = location.pathname !== '/' && location.pathname.indexOf('/getobject') === -1;
+			if (wcSdk.isConnected()) {
+				if (isCancelled) {
+					return;
+				}
+				onHandleConnectedWallet({
+					name: wcSdk.session.peer.metadata.name,
+					type: wcSdk.session.namespaces.neo3.accounts[0].split(':')[0],
+					net: wcSdk.session.namespaces.neo3.accounts[0].split(':')[1],
+					account: {
+						address: wcSdk.session.namespaces.neo3.accounts[0].split(':')[2],
+						publicKey: wcSdk.session.peer.publicKey,
+					},
+					tokens: {
+						container: {},
+						object: null,
+					}
+				});
+			} else if (isProtectedRoute && isNeonReady) {
+				let isWalletConnected = false;
+
+				try {
+					const account = await withTimeout(neo3Dapi.getPublicKey());
+					if (account && !isCancelled) {
+						const provider = await neo3Dapi.getProvider();
+						const networks = await neo3Dapi.getNetworks();
+						if (!isCancelled) {
+							onHandleConnectedWallet({
+								name: provider.name,
+								type: 'neo3',
+								net: networks.defaultNetwork.toLowerCase(),
+								account: account,
+								tokens: {
+									container: {},
+									object: null,
+								}
+							});
+							isWalletConnected = true;
+						}
+					}
+				} catch {}
+
+				if (!isWalletConnected && dapi) {
+					try {
+						const account = await withTimeout(dapi.getAccount());
+						if (account && !isCancelled) {
+							const provider = await dapi.getProvider();
+							const networks = await dapi.getNetworks();
+							if (!isCancelled) {
+								onHandleConnectedWallet({
+									name: provider.name,
+									type: 'neo3',
+									net: networks.defaultNetwork.toLowerCase(),
+									account: account,
+									tokens: {
+										container: {},
+										object: null,
+									}
+								});
+								isWalletConnected = true;
+							}
+						}
+					} catch {}
+				}
+
+				if (!isWalletConnected && !isCancelled) {
+					document.location.href = "/";
+				}
+			}
+		};
+
+		initWalletSession();
+
+		return () => {
+			isCancelled = true;
+		};
+	}, [wcSdk, dapi, location.pathname, walletData, isNeonReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	const onGetSidechainContract = async (containerId) => {
 		const response_nns = await invokeFunction(
@@ -844,7 +924,7 @@ export const App = () => {
 				const networks = await neo3Dapi.getNetworks();
 
 				if (account) {
-					setWalletData({
+					onHandleConnectedWallet({
 						name: provider.name,
 						type: 'neo3',
 						net: networks.defaultNetwork.toLowerCase(),
@@ -854,20 +934,13 @@ export const App = () => {
 							object: null,
 						}
 					});
-
-					onPopup('success', 'Wallet connected');
-					onModal();
-
-					if (location.pathname.indexOf('/profile') === -1) {
-						navigate('/profile');
-					}
 				}
 			} else if (type === 'neoline') {
 				const neolineN3 = new window.NEOLineN3.Init();
 				setNeolineN3(neolineN3);
 				neolineN3.getPublicKey().then((account) => {
 					neolineN3.getNetworks().then((networks) => {
-						setWalletData({
+						onHandleConnectedWallet({
 							name: 'NeoLine',
 							type: 'neo3',
 							net: networks.defaultNetwork.toLowerCase(),
@@ -877,13 +950,6 @@ export const App = () => {
 								object: null,
 							}
 						});
-
-						onPopup('success', 'Wallet connected');
-						onModal();
-
-						if (location.pathname.indexOf('/profile') === -1) {
-							navigate('/profile');
-						}
 					}).catch((err) => handleError(err));
 				}).catch((err) => handleError(err));
 			} else if (type === 'onegate') {
@@ -892,7 +958,7 @@ export const App = () => {
 				const networks = await dapi.getNetworks();
 
 				if (account) {
-					setWalletData({
+					onHandleConnectedWallet({
 						name: provider.name,
 						type: 'neo3',
 						net: networks.defaultNetwork.toLowerCase(),
@@ -902,12 +968,6 @@ export const App = () => {
 							object: null,
 						}
 					});
-					onPopup('success', 'Wallet connected');
-					onModal();
-
-					if (location.pathname.indexOf('/profile') === -1) {
-						navigate('/profile');
-					}
 				}
 			} else {
 				const { uri, approval } = await wcSdk.createConnection(`neo3:${activeNet.toLowerCase()}`, ['invokeFunction', 'testInvoke', 'signMessage', 'verifyMessage']);
@@ -2067,6 +2127,7 @@ export const App = () => {
 						onModal={onModal}
 						dapi={dapi}
 						isNeoLineSupport={isNeoLineSupport}
+						isNeonReady={isNeonReady}
 						onConnectWallet={onConnectWallet}
 					/>}
 				/>
