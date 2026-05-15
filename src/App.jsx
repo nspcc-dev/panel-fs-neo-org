@@ -2061,6 +2061,7 @@ export const App = () => {
 						walletData={walletData}
 						onModal={onModal}
 						onAuth={onAuth}
+						isGatewayReady={!!gatewayInfo?.address}
 					/>}
 				/>
 				<Route

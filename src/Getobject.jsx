@@ -17,6 +17,7 @@ const Getobject = ({
 		onModal,
 		walletData,
 		onAuth,
+		isGatewayReady,
 	}) => {
 	const [searchParams] = useSearchParams();
 	const [objectData, setObjectData] = useState(null);
@@ -137,6 +138,7 @@ const Getobject = ({
 												renderAs="button"
 												color="primary"
 												size="small"
+												disabled={!isGatewayReady}
 												onClick={() => onAuth('sharedObjectAccess', 'OBJECT_ACCESS', { containerId: params.containerId })}
 											>
 												Sign
