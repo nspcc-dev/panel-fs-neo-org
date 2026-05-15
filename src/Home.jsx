@@ -3,11 +3,11 @@ import {
 	Container,
 	Section,
 	Heading,
-	Button,
 	Box,
 	Tile,
 	Notification,
 } from 'react-bulma-components';
+import WalletAuthMethods from './Components/WalletAuthMethods/WalletAuthMethods';
 
 const Home = ({
 		onModal,
@@ -37,44 +37,12 @@ const Home = ({
 						<>
 							<Heading align="center" size={6}>Welcome to NeoFS Panel, it allows you to move funds from/to NeoFS and manage containers and objects via web UI</Heading>
 							<Heading align="center" size={6} weight="normal">Connect your wallet to log&nbsp;in</Heading>
-							<Button
-								renderAs="button"
-								className="btn_connect_wallet"
-								onClick={() => onConnectWallet('neoline')}
-								style={isNeoLineSupport ? { border: '2px solid #00e599', background: '#00dc9633' } : {}}
-							>
-								NeoLine
-								<img src="/img/icons/wallets/neoline.svg" alt="neoline logo" />
-							</Button>
-							<Button
-								renderAs="button"
-								className="btn_connect_wallet"
-								onClick={() => onConnectWallet('o3')}
-							>
-								O3
-								<img src="/img/icons/wallets/o3.svg" alt="o3 logo" />
-							</Button>
-							<Button
-								renderAs="button"
-								className="btn_connect_wallet"
-								onClick={() => onConnectWallet('neon')}
-							>
-								Neon
-								<img src="/img/icons/wallets/neon.svg" alt="neon logo" />
-							</Button>
-							<Button
-								renderAs="button"
-								className="btn_connect_wallet"
-								onClick={() => onConnectWallet('onegate')}
-							>
-								Onegate
-								{dapi ? (
-									<span>Connect</span>
-								) : (
-									<img src="/img/icons/wallets/onegate.svg" alt="onegate logo" />
-								)}
-							</Button>
-							<Heading align="center" size={6} weight="normal" style={{ textDecoration: 'underline', cursor: 'pointer' }} onClick={() => onModal('installWallet')}>I don't have a wallet</Heading>
+							<WalletAuthMethods
+								isNeoLineSupport={isNeoLineSupport}
+								hasOneGate={Boolean(dapi)}
+								onSelectWallet={onConnectWallet}
+								onInstallWallet={() => onModal('installWallet')}
+							/>
 						</>
 					)}
 				</Box>

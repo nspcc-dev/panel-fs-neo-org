@@ -22,6 +22,7 @@ import Profile from './Profile';
 import Getobject from './Getobject';
 import EACLPanel from './Components/EACLPanel/EACLPanel';
 import TokenSignPanel from './Components/TokenSignPanel/TokenSignPanel';
+import WalletAuthMethods from './Components/WalletAuthMethods/WalletAuthMethods';
 import api from './api';
 import Neon from "@cityofzion/neon-js";
 import { useWalletConnect } from "@cityofzion/wallet-connect-sdk-react";
@@ -1112,6 +1113,38 @@ export const App = () => {
 								<img src="/img/icons/wallets/onegate.svg" alt="onegate logo" />
 							</Button>
 						</a>
+					</div>
+				</div>
+			)}
+			{modal.current === 'authMethods' && (
+				<div className="modal">
+					<div
+						className="modal_close_panel"
+						onClick={onModal}
+					/>
+					<div className="modal_content" style={{ maxWidth: 560 }}>
+						<div
+							className="modal_close"
+							onClick={onModal}
+						>
+							<img
+								src="/img/icons/close.svg"
+								height={30}
+								width={30}
+								alt="loader"
+							/>
+						</div>
+						<Heading align="center" size={5} weight="bold">Connect your wallet</Heading>
+						<Heading align="center" size={6} weight="normal">Choose the authorization method</Heading>
+						<WalletAuthMethods
+							isNeoLineSupport={isNeoLineSupport}
+							hasOneGate={Boolean(dapi)}
+							onSelectWallet={(type) => {
+								onModal();
+								onConnectWallet(type);
+							}}
+							onInstallWallet={() => onModal('installWallet')}
+						/>
 					</div>
 				</div>
 			)}
