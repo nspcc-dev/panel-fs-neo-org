@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
 	Routes,
 	Route,
@@ -57,6 +57,7 @@ export const App = () => {
 		scriptHash: Neon.create.account(import.meta.env.VITE_NEOFS_ACCOUNT).scriptHash,
 		sidechain: import.meta.env.VITE_SIDECHAIN_RPC,
 		sidechainContract: null,
+		nnsHash: null,
 	});
 
 	const [params] = useState({
@@ -168,6 +169,8 @@ export const App = () => {
 		type: '',
 		address: '',
 	});
+	const [domainName, setDomainName] = useState('');
+	const [domainsRefreshTick, setDomainsRefreshTick] = useState(0);
 	const [containerForm, setContainerForm] = useState({
 		containerName: '',
 		placementPolicy: '',
@@ -372,7 +375,11 @@ export const App = () => {
 				]
 			],
 		);
-		setNeoFSContract({ ...NeoFSContract, sidechainContract: atob(response.stack[0].value[0].value) })
+		setNeoFSContract({
+			...NeoFSContract,
+			sidechainContract: atob(response.stack[0].value[0].value),
+			nnsHash: response_nns.hash,
+		})
 	};
 
 	const onResetContainerForm = () => {
@@ -848,6 +855,99 @@ export const App = () => {
 		});
 	};
 
+	const onDomainRegister = async () => {
+		if (isLoadingForm) {
+			return;
+		}
+		const normalizedDomainName = domainName.trim().toLowerCase();
+		if (normalizedDomainName.length === 0) {
+			onPopup('failed', 'Insert domain name');
+			return;
+		}
+		if (!walletData?.account?.address) {
+			onPopup('failed', 'Wallet is not connected');
+			return;
+		}
+		if (!NeoFSContract?.nnsHash) {
+			onPopup('failed', 'NNS contract is not initialized yet');
+			return;
+		}
+
+		setLoadingForm(true);
+		try {
+			const availability = await invokeFunction(
+				NeoFSContract.sidechain,
+				[
+					NeoFSContract.nnsHash,
+					"isAvailable",
+					[{ type: "String", value: normalizedDomainName }],
+				],
+			);
+			if (availability?.exception) {
+				onPopup('failed', availability.exception);
+				return;
+			}
+			if (availability?.message) {
+				onPopup('failed', availability.message);
+				return;
+			}
+			const isDomainAvailable = String(availability?.stack?.[0]?.value).toLowerCase() === 'true';
+			if (!isDomainAvailable) {
+				onPopup('failed', `Domain "${normalizedDomainName}" is not available`);
+				return;
+			}
+
+			onModal('approveRequest');
+			const accountScriptHash = Neon.create.account(walletData.account.address).scriptHash;
+			const invocations = [{
+				scriptHash: NeoFSContract.nnsHash,
+				operation: "register",
+				args: [
+					{ type: "String", value: normalizedDomainName },
+					{ type: "Hash160", value: accountScriptHash },
+					{ type: "String", value: walletData.account.address.toLowerCase() },
+					{ type: "Integer", value: "3600" },
+					{ type: "Integer", value: "600" },
+					{ type: "Integer", value: "86400" },
+					{ type: "Integer", value: "3600" },
+				],
+			}];
+			const signers = [{
+				scopes: 'CalledByEntry',
+				account: accountScriptHash,
+			}];
+
+			let response = '';
+			if (walletData.name === 'o3-desktop') {
+				response = await neo3Dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
+			} else if (neolineN3) {
+				response = await neolineN3.invoke({ ...invocations[0], signers: [{ ...signers[0], scopes: 1 }] }).catch((err) => handleError(err));
+			} else if (dapi) {
+				response = await dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
+			} else if (wcSdk) {
+				if (walletData.name === 'CoZ Wallet Prototype') {
+					signers[0].scopes = 1;
+				}
+				response = await wcSdk.invokeFunction({ invocations, signers }).catch((err) => handleError(err));
+			} else {
+				onPopup('failed', 'No wallet provider found');
+				return;
+			}
+
+			if (response?.exception) {
+				handleError(new Error(response.exception));
+				return;
+			}
+			if (response && !response.error && !response.message) {
+				setDomainName('');
+				setDomainsRefreshTick((prev) => prev + 1);
+				onModal('success', response.txid ? response.txid : response);
+			}
+		} finally {
+			setLoadingForm(false);
+		}
+	};
+
 	const onDeposit = async (neoBalanceTemp) => {
 		if (depositQuantity * 1e8 >= 1 && depositQuantity * 1e8 <= neoBalanceTemp) {
 			onModal('approveRequest');
@@ -1304,6 +1404,68 @@ export const App = () => {
 								params={modal.params || {}}
 							/>
 						)}
+					</div>
+				</div>
+			)}
+			{modal.current === 'registerDomain' && (
+				<div className="modal">
+					<div
+						className="modal_close_panel"
+						onClick={onModal}
+					/>
+					<div className="modal_content">
+						<div
+							className="modal_close"
+							onClick={onModal}
+						>
+							<img
+								src="/img/icons/close.svg"
+								height={30}
+								width={30}
+								alt="loader"
+							/>
+						</div>
+						<Heading align="center" size={5} weight="bold">Register domain</Heading>
+						<Heading className="input_caption">More about verified domains of the NeoFS storage nodes: <a href="https://github.com/nspcc-dev/neofs-node/blob/master/docs/verified-node-domains.md" target="_blank" rel="noopener noreferrer" alt="verified-domains">documentation</a>.</Heading>
+						<Form.Field>
+							<Form.Label>Domain name</Form.Label>
+							<Form.Control>
+								<Form.Input
+									renderAs="input"
+									type="text"
+									value={domainName}
+									className={isError.active && isError.type.indexOf('domainName') !== -1 ? 'is-error' : ""}
+									onChange={(e) => setDomainName(e.target.value)}
+									disabled={isLoadingForm}
+								/>
+							</Form.Control>
+						</Form.Field>
+						<Button
+							renderAs="button"
+							color="primary"
+							onClick={() => onDomainRegister()}
+							size="small"
+							disabled={isLoadingForm}
+							style={isLoadingForm ? {
+								display: 'flex',
+								margin: 'auto',
+								pointerEvents: 'none',
+								opacity: 0.8,
+							} : {
+								display: 'flex',
+								margin: 'auto',
+							}}
+						>
+							{isLoadingForm ? (
+								<img
+									src="/img/icons/spinner.svg"
+									className="spinner"
+									width={20}
+									height={20}
+									alt="spinner"
+								/>
+							) : 'Register'}
+						</Button>
 					</div>
 				</div>
 			)}
@@ -2176,6 +2338,8 @@ export const App = () => {
 						networkInfo={networkInfo}
 						NeoFSContract={NeoFSContract}
 						activeNet={activeNet}
+						domainsRefreshTick={domainsRefreshTick}
+						setDomainName={setDomainName}
 						onAuth={onAuth}
 						walletData={walletData}
 						handleError={handleError}

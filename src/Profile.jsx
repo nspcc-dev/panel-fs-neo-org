@@ -9,10 +9,12 @@ import {
 	Box,
 	Tag,
 } from 'react-bulma-components';
+import DomainItem from './Components/DomainItem/DomainItem';
 import ContainerItem from './Components/ContainerItem/ContainerItem';
 import {
 	formatBytes,
 	formatGasPerMonth,
+	invokeFunction,
 } from './Functions/handle';
 import api from './api';
 
@@ -25,6 +27,8 @@ const Profile = ({
 		networkInfo,
 		NeoFSContract,
 		activeNet,
+		domainsRefreshTick,
+		setDomainName,
 		walletData,
 		setWalletData,
 		handleError,
@@ -38,6 +42,10 @@ const Profile = ({
 		onAuth,
 	}) => {
 	const [isLoading, setIsLoading] = useState(false);
+
+	const [domains, setDomains] = useState([]);
+	const [isLoadingDomains, setIsLoadingDomains] = useState(false);
+
 	const [containers, setContainers] = useState([]);
 	const [isLoadingContainers, setIsLoadingContainers] = useState(false);
 
@@ -67,13 +75,14 @@ const Profile = ({
 	}, [isLoadContainers]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
-		if (walletData && walletData.account && !isLoading) {
+		if (walletData && walletData.account && NeoFSContract.sidechainContract && !isLoading) {
 			setTimeout(() => onNeoBalance(), 500);
 			onNeoFSBalance();
 			onGetContainers();
+			onGetDomains();
 			setIsLoading(true);
 		}
-	}, [walletData]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [walletData, NeoFSContract]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	const onNeoFSBalance = async () => {
 		setIsLoadingNeoFSBalance(true);
@@ -139,6 +148,34 @@ const Profile = ({
 			onPopup('failed', 'Something went wrong');
 		}
 	};
+
+	const onGetDomains = async () => {
+		setIsLoadingDomains(true);
+		const response = await invokeFunction(
+			NeoFSContract.sidechain,
+			[
+				NeoFSContract.nnsHash,
+				"tokensOf",
+				[{ type: "Hash160", value: Neon.create.account(walletData.account.address).scriptHash }]
+			],
+		);
+		onPopup('success', 'Domains has been updated');
+		setDomains(response.stack[0]?.iterator.map((item) => atob(item.value)));
+		setTimeout(() => {
+			setIsLoadingDomains(false);
+		}, 1000);
+	};
+
+	const refreshDomains = async () => {
+		await onGetDomains();
+	};
+
+	useEffect(() => {
+		if (!domainsRefreshTick) return;
+		if (!walletData?.account?.address || !NeoFSContract?.sidechainContract) return;
+		refreshDomains();
+	}, [domainsRefreshTick]); // eslint-disable-line react-hooks/exhaustive-deps
+
 
 	const onGetContainers = () => {
 		setIsLoadingContainers(true);
@@ -254,6 +291,56 @@ const Profile = ({
 								{`Withdraw from NeoFS to ${activeNet}`}
 							</Button>
 						</div>
+					</Box>
+					<Box id="domains">
+						<Heading style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} weight="bold">
+							<span style={{ display: 'flex', alignItems: 'center' }}>
+								{`Domains`}
+								<img
+									src="/img/icons/sync.svg"
+									width={20}
+									height={20}
+									alt="sync"
+									style={isLoadingDomains ? {
+										marginLeft: 10,
+										cursor: 'pointer',
+										animation: 'spin 1.5s infinite linear',
+									} : {
+										marginLeft: 10,
+										cursor: 'pointer',
+									}}
+									onClick={onGetDomains}
+								/>
+							</span>
+							<Button
+								renderAs="button"
+								color="primary"
+								size="small"
+								onClick={() => {
+									setDomainName('');
+									onModal('registerDomain');
+								}}
+								style={isNotAvailableNeoFS ? { pointerEvents: 'none', opacity: 0.6 } : {}}
+							>
+								Register domain
+							</Button>
+						</Heading>
+						{domains.map((domainItem) => (
+							<DomainItem
+								key={domainItem}
+								NeoFSContract={NeoFSContract}
+								neolineN3={neolineN3}
+								walletData={walletData}
+								handleError={handleError}
+								dapi={dapi}
+								wcSdk={wcSdk}
+								domainItem={domainItem}
+								setDomainName={setDomainName}
+								onDomainsChanged={refreshDomains}
+								onModal={onModal}
+								onPopup={onPopup}
+							/>
+						))}
 					</Box>
 					<Box id="containers">
 						<Heading style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} weight="bold">
