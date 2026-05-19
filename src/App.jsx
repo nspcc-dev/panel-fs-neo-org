@@ -184,21 +184,36 @@ export const App = () => {
 		text: '',
 		params: '',
 	});
-	const [popup, setPopup] = useState({
-		current: null,
-		text: '',
-	});
+	const [popups, setPopups] = useState([]);
+	const popupTimers = useRef(new Map());
+	const popupCounter = useRef(0);
 
 	const onModal = (current = null, text = null, params = null) => {
 		setModal({ current, text, params });
 	};
 
 	const onPopup = (current = null, text = null) => {
-		setPopup({ current, text });
-		setTimeout(() => {
-			setPopup({ current: null, text: null });
-		}, 2000);
+		if (!current || !text) {
+			return;
+		}
+
+		const id = `${Date.now()}-${popupCounter.current++}`;
+		setPopups((prev) => [...prev, { id, current, text }]);
+
+		const timerId = setTimeout(() => {
+			setPopups((prev) => prev.filter((popupItem) => popupItem.id !== id));
+			popupTimers.current.delete(id);
+		}, 3000);
+
+		popupTimers.current.set(id, timerId);
 	};
+
+	useEffect(() => {
+		return () => {
+			popupTimers.current.forEach((timerId) => clearTimeout(timerId));
+			popupTimers.current.clear();
+		};
+	}, []);
 
 	const onLoadWalletSessionData = () => {
 		api('GET', '/v1/network-info').then((e) => {
@@ -993,13 +1008,27 @@ export const App = () => {
 
 	return (
 		<>
-			{(popup.current === 'success' || popup.current === 'failed') && (
+			{popups.length > 0 && (
 				<div className="popup">
-					<div
-						className={popup.current === 'success' ? "popup_content popup_content_success" : "popup_content popup_content_failed"}
-					>
-						<Heading align="center" size={7}>{popup.text}</Heading>
-					</div>
+					{popups.map((popupItem) => (
+						<div
+							key={popupItem.id}
+							className={popupItem.current === 'success' ? "popup_content popup_content_success" : "popup_content popup_content_failed"}
+						>
+							<div className="popup_badge">
+								{popupItem.current === 'success' ? (
+									<img
+										src="/img/icons/success.svg"
+										width={16}
+										height={16}
+										className="popup_badge_icon"
+										alt="success"
+									/>
+								) : '!'}
+							</div>
+							<Heading size={7} className="popup_message">{popupItem.text}</Heading>
+						</div>
+					))}
 				</div>
 			)}
 			{(modal.current === 'success' || modal.current === 'failed') && (
