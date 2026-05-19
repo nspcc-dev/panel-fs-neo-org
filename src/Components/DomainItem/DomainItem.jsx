@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import Neon from "@cityofzion/neon-js";
-import neo3Dapi from "neo3-dapi";
 import {
 	Heading,
 	Section,
@@ -14,16 +12,10 @@ import {
 
 export default function DomainItem({
 	NeoFSContract,
-	neolineN3,
-	walletData,
-	handleError,
-	dapi,
 	wcSdk,
 	domainItem,
-	setDomainName,
-	onDomainsChanged,
 	onModal,
-	onPopup,
+	openDomainRegister,
 }) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [domainData, setDomainData] = useState(null);
@@ -35,46 +27,14 @@ export default function DomainItem({
 		16: "TXT",
 		28: "AAAA",
 	};
-	const extractInvokeTxId = (response) => {
-		if (!response) return '';
-		if (typeof response === 'string') return response;
-		return response.txid || response.result?.txid || response.transactionHash || '';
-	};
-
-	const invokeWithWallet = async (invocation) => {
-		if (!walletData?.account?.address) {
-			onPopup('failed', 'Wallet is not connected');
-			return null;
-		}
-		const signers = [{
-			scopes: 'CalledByEntry',
-			account: Neon.create.account(walletData.account.address).scriptHash,
-		}];
-
-		if (walletData.name === 'o3-desktop') {
-			return neo3Dapi.invoke({ ...invocation, signers }).catch((err) => handleError(err));
-		}
-		if (neolineN3) {
-			return neolineN3.invoke({ ...invocation, signers: [{ ...signers[0], scopes: 1 }] }).catch((err) => handleError(err));
-		}
-		if (dapi) {
-			return dapi.invoke({ ...invocation, signers }).catch((err) => handleError(err));
-		}
-		if (wcSdk) {
-			if (walletData.name === 'CoZ Wallet Prototype') {
-				signers[0].scopes = 1;
-			}
-			return wcSdk.invokeFunction({ invocations: [invocation], signers }).catch((err) => handleError(err));
-		}
-
-		onModal('failed', 'No wallet provider found');
-		return null;
-	};
-
 	const handleToggle = async e => {
+		e.preventDefault();
 		setIsOpen(!isOpen);
-		if (!isOpen) {
+		if (isOpen || Array.isArray(domainRecords)) {
+			return;
+		}
 
+		try {
 			const response = await invokeFunction(
 				NeoFSContract.sidechain,
 				[
@@ -83,9 +43,21 @@ export default function DomainItem({
 					[{ type: "String", value: domainItem }]
 				],
 			);
-			onPopup('success', 'Domains has been updated');
-			setDomainRecords(response.exception ? response.exception : response.stack[0]?.iterator);
+			if (!response) {
+				setDomainRecords('No response from RPC');
+			} else if (response.exception) {
+				setDomainRecords(response.exception);
+			} else if (!Array.isArray(response.stack)) {
+				setDomainRecords(response.message || 'Failed to load domain records');
+			} else {
+				setDomainRecords(response.stack[0]?.iterator ?? []);
+			}
+		} catch (err) {
+			setDomainRecords(`Failed to load domain records: ${err?.message || 'request failed'}`);
+			return;
+		}
 
+		try {
 			const responseDomainData = await invokeFunction(
 				NeoFSContract.sidechain,
 				[
@@ -94,41 +66,10 @@ export default function DomainItem({
 					[{ type: "ByteString", value: btoa(domainItem) }]
 				],
 			);
-			setDomainData(responseDomainData.stack[0]?.value);
+			setDomainData(responseDomainData?.stack?.[0]?.value);
+		} catch {
+			setDomainData(null);
 		}
-		e.preventDefault();
-	};
-
-	const renewDomain = async e => {
-		e.preventDefault();
-		onModal('approveRequest');
-		const invocation = {
-			scriptHash: NeoFSContract.nnsHash,
-			operation: "renew",
-			args: [
-				{ type: "String", value: domainItem },
-				{ type: "Integer", value: "1" },
-			],
-		};
-		const response = await invokeWithWallet(invocation);
-
-		if (response?.exception) {
-			if (response.exception.indexOf('name has expired') !== -1) {
-				onModal('failed', 'Expired domain cannot be renewed. Re-register this domain instead.');
-				return;
-			}
-			handleError(new Error(response.exception));
-			return;
-		}
-		const txId = extractInvokeTxId(response);
-		if (txId) {
-			onModal('success', txId);
-			if (onDomainsChanged) {
-				await onDomainsChanged();
-			}
-			return;
-		}
-		onModal('failed', 'Wallet returned unexpected response. Please check transaction history.');
 	};
 
 	return (
@@ -179,7 +120,7 @@ export default function DomainItem({
 											</thead>
 											<tbody>
 												{domainRecords && domainRecords.map((record) => (
-													<tr key={record.value[0].value}>
+													<tr key={`${record.value[0].value}-${record.value[1].value}-${record.value[3].value}`}>
 														<td>{atob(record.value[0].value)}</td>
 														<td>{RECORD_TYPE[Number(record.value[1].value)]}</td>
 														<td>{atob(record.value[2].value)}</td>
@@ -209,17 +150,21 @@ export default function DomainItem({
 								<>
 									{typeof domainRecords === 'string' ? (
 										<div>
-											{`Error: ${domainRecords}`}
+											<Notification color="warning" light>
+												{domainRecords.indexOf('name has expired') !== -1
+													? 'This domain has expired. Re-register it to manage its records.'
+													: `Error: ${domainRecords}`}
+											</Notification>
 											{domainRecords.indexOf('name has expired') !== -1 && (
 												<Button
 													renderAs="button"
 													color="primary"
 													size="small"
-													onClick={() => {
-														setDomainName(domainItem.toLowerCase());
-														onModal('registerDomain');
-													}}
-													style={{ display: 'block', margin: '10px 0 0' }}
+													onClick={() => openDomainRegister(domainItem)}
+													disabled={!wcSdk?.session}
+													style={!wcSdk?.session
+														? { display: 'block', margin: '10px 0 0', pointerEvents: 'none', opacity: 0.6 }
+														: { display: 'block', margin: '10px 0 0' }}
 												>
 													Re-register domain
 												</Button>

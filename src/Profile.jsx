@@ -8,6 +8,7 @@ import {
 	Button,
 	Box,
 	Tag,
+	Notification,
 } from 'react-bulma-components';
 import DomainItem from './Components/DomainItem/DomainItem';
 import ContainerItem from './Components/ContainerItem/ContainerItem';
@@ -28,12 +29,12 @@ const Profile = ({
 		NeoFSContract,
 		activeNet,
 		domainsRefreshTick,
-		setDomainName,
 		walletData,
 		setWalletData,
 		handleError,
 		onModal,
 		onPopup,
+		openDomainRegister,
 		wcSdk,
 		dapi,
 		neolineN3,
@@ -150,20 +151,42 @@ const Profile = ({
 	};
 
 	const onGetDomains = async () => {
+		if (!NeoFSContract?.nnsHash) {
+			onPopup('failed', 'NNS contract is not initialized yet');
+			return;
+		}
 		setIsLoadingDomains(true);
-		const response = await invokeFunction(
-			NeoFSContract.sidechain,
-			[
-				NeoFSContract.nnsHash,
-				"tokensOf",
-				[{ type: "Hash160", value: Neon.create.account(walletData.account.address).scriptHash }]
-			],
-		);
-		onPopup('success', 'Domains has been updated');
-		setDomains(response.stack[0]?.iterator.map((item) => atob(item.value)));
-		setTimeout(() => {
-			setIsLoadingDomains(false);
-		}, 1000);
+		try {
+			const response = await invokeFunction(
+				NeoFSContract.sidechain,
+				[
+					NeoFSContract.nnsHash,
+					"tokensOf",
+					[{ type: "Hash160", value: Neon.create.account(walletData.account.address).scriptHash }]
+				],
+			);
+			if (!response) {
+				onPopup('failed', 'No response from RPC');
+				return;
+			}
+			if (response.exception) {
+				onPopup('failed', response.exception);
+				return;
+			}
+			if (!Array.isArray(response.stack)) {
+				onPopup('failed', response.message || 'Failed to load domains');
+				return;
+			}
+			const iterator = response.stack[0]?.iterator ?? [];
+			setDomains(iterator.map((item) => atob(item.value)));
+			onPopup('success', 'Domains have been updated');
+		} catch (error) {
+			onPopup('failed', error?.message || 'Something went wrong');
+		} finally {
+			setTimeout(() => {
+				setIsLoadingDomains(false);
+			}, 1000);
+		}
 	};
 
 	const refreshDomains = async () => {
@@ -316,29 +339,26 @@ const Profile = ({
 								renderAs="button"
 								color="primary"
 								size="small"
-								onClick={() => {
-									setDomainName('');
-									onModal('registerDomain');
-								}}
-								style={isNotAvailableNeoFS ? { pointerEvents: 'none', opacity: 0.6 } : {}}
+								onClick={() => openDomainRegister()}
+								disabled={!wcSdk?.session}
+								style={!wcSdk?.session ? { pointerEvents: 'none', opacity: 0.6 } : {}}
 							>
 								Register domain
 							</Button>
 						</Heading>
+						{!wcSdk?.session && (
+							<Notification color="warning" light>
+								Domain operations are available only with the Neon wallet. Reconnect using Neon to manage domains.
+							</Notification>
+						)}
 						{domains.map((domainItem) => (
 							<DomainItem
 								key={domainItem}
 								NeoFSContract={NeoFSContract}
-								neolineN3={neolineN3}
-								walletData={walletData}
-								handleError={handleError}
-								dapi={dapi}
 								wcSdk={wcSdk}
 								domainItem={domainItem}
-								setDomainName={setDomainName}
-								onDomainsChanged={refreshDomains}
 								onModal={onModal}
-								onPopup={onPopup}
+								openDomainRegister={openDomainRegister}
 							/>
 						))}
 					</Box>

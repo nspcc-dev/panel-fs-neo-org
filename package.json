@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@cityofzion/neon-js": "^5.7.0",
-    "@cityofzion/wallet-connect-sdk-react": "^3.3.5",
+    "@cityofzion/wallet-connect-sdk-core": "^3.3.4",
     "@neongd/neo-dapi": "^1.2.2",
     "bulma": "^0.9.4",
     "copy-to-clipboard": "^3.3.3",
