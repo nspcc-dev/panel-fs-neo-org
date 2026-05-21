@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import Neon from "@cityofzion/neon-js";
-import neo3Dapi from "neo3-dapi";
 import {
 	Container,
 	Section,
@@ -119,9 +118,7 @@ const Profile = ({
 			account: Neon.create.account(walletData.account.address).scriptHash,
 		}];
 
-		if (walletData.name === 'o3-desktop') {
-			response = await neo3Dapi.invokeRead({ ...invocations[0], signers }).catch((err) => handleError(err, 'balance'));
-		} else if (neolineN3) {
+		if (neolineN3) {
 			response = await neolineN3.invokeRead({ ...invocations[0], signers }).catch((err) => handleError(err, 'balance'));
 		} else if (dapi) {
 			response = await dapi.invokeRead({ ...invocations[0] }).catch((err) => handleError(err, 'balance'));
