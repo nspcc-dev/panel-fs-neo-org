@@ -25,14 +25,6 @@ const WalletAuthMethods = ({
 			<Button
 				renderAs="button"
 				className="btn_connect_wallet"
-				onClick={() => onSelectWallet('o3')}
-			>
-				O3
-				<img src="/img/icons/wallets/o3.svg" alt="o3 logo" />
-			</Button>
-			<Button
-				renderAs="button"
-				className="btn_connect_wallet"
 				onClick={() => onSelectWallet('neon')}
 				disabled={!isNeonReady}
 			>

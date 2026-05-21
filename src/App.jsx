@@ -26,7 +26,6 @@ import WalletAuthMethods from './Components/WalletAuthMethods/WalletAuthMethods'
 import api from './api';
 import Neon from "@cityofzion/neon-js";
 import { BaseDapi } from '@neongd/neo-dapi';
-import neo3Dapi from "neo3-dapi";
 import QRCode from "react-qr-code";
 import {
 	invokeFunction,
@@ -322,27 +321,6 @@ export const App = () => {
 				});
 			} else if (isProtectedRoute && isNeonReady) {
 				let isWalletConnected = false;
-
-				try {
-					const account = await withTimeout(neo3Dapi.getPublicKey());
-					if (account && !isCancelled) {
-						const provider = await neo3Dapi.getProvider();
-						const networks = await neo3Dapi.getNetworks();
-						if (!isCancelled) {
-							onHandleConnectedWallet({
-								name: provider.name,
-								type: 'neo3',
-								net: networks.defaultNetwork.toLowerCase(),
-								account: account,
-								tokens: {
-									container: {},
-									object: null,
-								}
-							});
-							isWalletConnected = true;
-						}
-					}
-				} catch {}
 
 				if (!isWalletConnected && dapi) {
 					try {
@@ -677,9 +655,7 @@ export const App = () => {
 	const onSignMessage = async (msg = '', type, operation, params) => {
 		let response = '';
 
-		if (walletData.name === 'o3-desktop') {
-			response = await neo3Dapi.signMessage({ message: msg.token }).catch((err) => handleError(err));
-		} else if (neolineN3) {
+		if (neolineN3) {
 			response = await neolineN3.signMessage({ message: msg.token }).catch((err) => handleError(err));
 		} else if (dapi) {
 			response = await dapi.signMessage({ message: msg.token }).catch((err) => handleError(err));
@@ -1034,9 +1010,7 @@ export const App = () => {
 			}];
 
 			let response = '';
-			if (walletData.name === 'o3-desktop') {
-				response = await neo3Dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
-			} else if (neolineN3) {
+			if (neolineN3) {
 				response = await neolineN3.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
 			} else if (dapi) {
 				response = await dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
@@ -1079,9 +1053,7 @@ export const App = () => {
 			}];
 
 			let response = '';
-			if (walletData.name === 'o3-desktop') {
-				response = await neo3Dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
-			} else if (neolineN3) {
+			if (neolineN3) {
 				response = await neolineN3.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
 			} else if (dapi) {
 				response = await dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
@@ -1099,24 +1071,7 @@ export const App = () => {
 
 	const onConnectWallet = async (type) => {
 		try {
-			if (type === 'o3') {
-				const account = await neo3Dapi.getPublicKey().catch((err) => handleError(err));
-				const provider = await neo3Dapi.getProvider();
-				const networks = await neo3Dapi.getNetworks();
-
-				if (account) {
-					onHandleConnectedWallet({
-						name: provider.name,
-						type: 'neo3',
-						net: networks.defaultNetwork.toLowerCase(),
-						account: account,
-						tokens: {
-							container: {},
-							object: null,
-						}
-					});
-				}
-			} else if (type === 'neoline') {
+			if (type === 'neoline') {
 				const neolineN3 = new window.NEOLineN3.Init();
 				setNeolineN3(neolineN3);
 				neolineN3.getPublicKey().then((account) => {
@@ -1222,9 +1177,7 @@ export const App = () => {
 
 	const onDisconnectWallet = async () => {
 		try {
-			if (walletData && walletData.name === 'o3-desktop') {
-				await neo3Dapi.disconnect();
-			} else if (!dapi && wcSdk?.isConnected()) {
+			if (!dapi && wcSdk?.isConnected()) {
 				await wcSdk.disconnect();
 			}
 		} catch (e) {
@@ -1453,17 +1406,6 @@ export const App = () => {
 							<Button className="btn_connect_wallet" renderAs="button">
 								Install NeoLine
 								<img src="/img/icons/wallets/neoline.svg" alt="neoline logo" />
-							</Button>
-						</a>
-						<a
-							href="https://o3.network/#/wallet"
-							style={{ textDecoration: 'none' }}
-							rel="noopener noreferrer"
-							target="_blank"
-						>
-							<Button className="btn_connect_wallet" renderAs="button">
-								Install O3
-								<img src="/img/icons/wallets/o3.svg" alt="o3 logo" />
 							</Button>
 						</a>
 						<a
