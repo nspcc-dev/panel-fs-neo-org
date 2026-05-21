@@ -34,7 +34,7 @@ const WalletAuthMethods = ({
 			<Button
 				renderAs="button"
 				className="btn_connect_wallet"
-				onClick={() => onSelectWallet('onegate')}
+				onClick={() => window.open('https://github.com/nspcc-dev/panel-fs-neo-org/issues/276', '_blank', 'noopener,noreferrer')}
 			>
 				Onegate
 				{hasOneGate ? (
