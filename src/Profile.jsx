@@ -8,11 +8,14 @@ import {
 	Button,
 	Box,
 	Tag,
+	Notification,
 } from 'react-bulma-components';
+import DomainItem from './Components/DomainItem/DomainItem';
 import ContainerItem from './Components/ContainerItem/ContainerItem';
 import {
 	formatBytes,
 	formatGasPerMonth,
+	invokeFunction,
 } from './Functions/handle';
 import api from './api';
 
@@ -25,11 +28,13 @@ const Profile = ({
 		networkInfo,
 		NeoFSContract,
 		activeNet,
+		domainsRefreshTick,
 		walletData,
 		setWalletData,
 		handleError,
 		onModal,
 		onPopup,
+		openDomainRegister,
 		wcSdk,
 		dapi,
 		neolineN3,
@@ -38,6 +43,10 @@ const Profile = ({
 		onAuth,
 	}) => {
 	const [isLoading, setIsLoading] = useState(false);
+
+	const [domains, setDomains] = useState([]);
+	const [isLoadingDomains, setIsLoadingDomains] = useState(false);
+
 	const [containers, setContainers] = useState([]);
 	const [isLoadingContainers, setIsLoadingContainers] = useState(false);
 
@@ -67,13 +76,14 @@ const Profile = ({
 	}, [isLoadContainers]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
-		if (walletData && walletData.account && !isLoading) {
+		if (walletData && walletData.account && NeoFSContract.sidechainContract && !isLoading) {
 			setTimeout(() => onNeoBalance(), 500);
 			onNeoFSBalance();
 			onGetContainers();
+			onGetDomains();
 			setIsLoading(true);
 		}
-	}, [walletData]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [walletData, NeoFSContract]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	const onNeoFSBalance = async () => {
 		setIsLoadingNeoFSBalance(true);
@@ -139,6 +149,56 @@ const Profile = ({
 			onPopup('failed', 'Something went wrong');
 		}
 	};
+
+	const onGetDomains = async () => {
+		if (!NeoFSContract?.nnsHash) {
+			onPopup('failed', 'NNS contract is not initialized yet');
+			return;
+		}
+		setIsLoadingDomains(true);
+		try {
+			const response = await invokeFunction(
+				NeoFSContract.sidechain,
+				[
+					NeoFSContract.nnsHash,
+					"tokensOf",
+					[{ type: "Hash160", value: Neon.create.account(walletData.account.address).scriptHash }]
+				],
+			);
+			if (!response) {
+				onPopup('failed', 'No response from RPC');
+				return;
+			}
+			if (response.exception) {
+				onPopup('failed', response.exception);
+				return;
+			}
+			if (!Array.isArray(response.stack)) {
+				onPopup('failed', response.message || 'Failed to load domains');
+				return;
+			}
+			const iterator = response.stack[0]?.iterator ?? [];
+			setDomains(iterator.map((item) => atob(item.value)));
+			onPopup('success', 'Domains have been updated');
+		} catch (error) {
+			onPopup('failed', error?.message || 'Something went wrong');
+		} finally {
+			setTimeout(() => {
+				setIsLoadingDomains(false);
+			}, 1000);
+		}
+	};
+
+	const refreshDomains = async () => {
+		await onGetDomains();
+	};
+
+	useEffect(() => {
+		if (!domainsRefreshTick) return;
+		if (!walletData?.account?.address || !NeoFSContract?.sidechainContract) return;
+		refreshDomains();
+	}, [domainsRefreshTick]); // eslint-disable-line react-hooks/exhaustive-deps
+
 
 	const onGetContainers = () => {
 		setIsLoadingContainers(true);
@@ -254,6 +314,53 @@ const Profile = ({
 								{`Withdraw from NeoFS to ${activeNet}`}
 							</Button>
 						</div>
+					</Box>
+					<Box id="domains">
+						<Heading style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} weight="bold">
+							<span style={{ display: 'flex', alignItems: 'center' }}>
+								{`Domains`}
+								<img
+									src="/img/icons/sync.svg"
+									width={20}
+									height={20}
+									alt="sync"
+									style={isLoadingDomains ? {
+										marginLeft: 10,
+										cursor: 'pointer',
+										animation: 'spin 1.5s infinite linear',
+									} : {
+										marginLeft: 10,
+										cursor: 'pointer',
+									}}
+									onClick={onGetDomains}
+								/>
+							</span>
+							<Button
+								renderAs="button"
+								color="primary"
+								size="small"
+								onClick={() => openDomainRegister()}
+								disabled={!wcSdk?.session}
+								style={!wcSdk?.session ? { pointerEvents: 'none', opacity: 0.6 } : {}}
+							>
+								Register domain
+							</Button>
+						</Heading>
+						{!wcSdk?.session && (
+							<Notification color="warning" light>
+								Domain operations are available only with the Neon wallet. Reconnect using Neon to manage domains.
+							</Notification>
+						)}
+						{domains.map((domainItem) => (
+							<DomainItem
+								key={domainItem}
+								NeoFSContract={NeoFSContract}
+								wcSdk={wcSdk}
+								domainItem={domainItem}
+								onModal={onModal}
+								openDomainRegister={openDomainRegister}
+							/>
+						))}
 					</Box>
 					<Box id="containers">
 						<Heading style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} weight="bold">

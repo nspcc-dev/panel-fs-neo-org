@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
 	Routes,
 	Route,
@@ -25,7 +25,6 @@ import TokenSignPanel from './Components/TokenSignPanel/TokenSignPanel';
 import WalletAuthMethods from './Components/WalletAuthMethods/WalletAuthMethods';
 import api from './api';
 import Neon from "@cityofzion/neon-js";
-import { useWalletConnect } from "@cityofzion/wallet-connect-sdk-react";
 import { BaseDapi } from '@neongd/neo-dapi';
 import neo3Dapi from "neo3-dapi";
 import QRCode from "react-qr-code";
@@ -33,6 +32,7 @@ import {
 	invokeFunction,
 	hexToBytesToBase64,
 } from './Functions/handle';
+import { getWcSdk } from './Functions/wcSdk';
 import 'bulma/css/bulma.min.css';
 import './App.css';
 
@@ -47,7 +47,7 @@ function formatDateToHours(date) {
 export const App = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
-	const wcSdk = useWalletConnect();
+	const [wcSdk, setWcSdk] = useState(null);
 	const dapi = useMemo(() => (window.OneGate ? new BaseDapi(window.OneGate) : null), []);
 	let [neolineN3, setNeolineN3] = useState(null);
 	const [activeNet] = useState(import.meta.env.VITE_NETWORK ? capitalizeFirstLetter(import.meta.env.VITE_NETWORK) : 'Mainnet');
@@ -57,6 +57,7 @@ export const App = () => {
 		scriptHash: Neon.create.account(import.meta.env.VITE_NEOFS_ACCOUNT).scriptHash,
 		sidechain: import.meta.env.VITE_SIDECHAIN_RPC,
 		sidechainContract: null,
+		nnsHash: null,
 	});
 
 	const [params] = useState({
@@ -168,6 +169,16 @@ export const App = () => {
 		type: '',
 		address: '',
 	});
+	const [domainForm, setDomainForm] = useState({
+		name: '',
+		email: '',
+		refresh: '3600',
+		retry: '600',
+		expire: '86400',
+		ttl: '3600',
+	});
+	const [domainsRefreshTick, setDomainsRefreshTick] = useState(0);
+	const [isDomainAdvancedOpen, setDomainAdvancedOpen] = useState(false);
 	const [containerForm, setContainerForm] = useState({
 		containerName: '',
 		placementPolicy: '',
@@ -184,21 +195,53 @@ export const App = () => {
 		text: '',
 		params: '',
 	});
-	const [popup, setPopup] = useState({
-		current: null,
-		text: '',
-	});
+	const [popups, setPopups] = useState([]);
+	const popupTimers = useRef(new Map());
+	const popupCounter = useRef(0);
 
 	const onModal = (current = null, text = null, params = null) => {
 		setModal({ current, text, params });
 	};
 
-	const onPopup = (current = null, text = null) => {
-		setPopup({ current, text });
-		setTimeout(() => {
-			setPopup({ current: null, text: null });
-		}, 2000);
+	const openDomainRegister = (name = '') => {
+		setDomainForm((prev) => ({ ...prev, name, email: '' }));
+		const neoNamespace = wcSdk?.session?.namespaces?.neo3;
+		const sessionChains = neoNamespace?.accounts?.map((a) => a.split(':').slice(0, 2).join(':'));
+		const hasPrivate = neoNamespace?.chains?.includes('neo3:private') || sessionChains?.includes('neo3:private');
+		onModal(hasPrivate ? 'registerDomain' : 'fsChainSwitch');
 	};
+
+	const onPopup = (current = null, text = null) => {
+		if (!current || !text) {
+			return;
+		}
+
+		const id = `${Date.now()}-${popupCounter.current++}`;
+		setPopups((prev) => [...prev, { id, current, text }]);
+
+		const timerId = setTimeout(() => {
+			setPopups((prev) => prev.filter((popupItem) => popupItem.id !== id));
+			popupTimers.current.delete(id);
+		}, 3000);
+
+		popupTimers.current.set(id, timerId);
+	};
+
+	useEffect(() => {
+		return () => {
+			popupTimers.current.forEach((timerId) => clearTimeout(timerId));
+			popupTimers.current.clear();
+		};
+	}, []);
+
+	useEffect(() => {
+		let cancelled = false;
+		getWcSdk().then((sdk) => {
+			if (cancelled) return;
+			setWcSdk(sdk);
+		}).catch((err) => console.error('WalletConnect init failed', err));
+		return () => { cancelled = true; };
+	}, []);
 
 	const onLoadWalletSessionData = () => {
 		api('GET', '/v1/network-info').then((e) => {
@@ -234,17 +277,15 @@ export const App = () => {
 	}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
-		const timer = setInterval(() => {
-			try {
-				const chainId = wcSdk.getChainId();
-				if (!chainId) {
-					setNeonReady(true);
-					clearInterval(timer);
-				}
-			} catch {}
-		}, 200);
-		return () => clearInterval(timer);
-	}, []); // eslint-disable-line react-hooks/exhaustive-deps
+		if (!wcSdk) return;
+		try {
+			if (!wcSdk.getChainId()) {
+				setNeonReady(true);
+			}
+		} catch {
+			// SDK not ready yet — expected, leave neonReady as is.
+		}
+	}, [wcSdk]);
 
 	useEffect(() => {
 		let isCancelled = false;
@@ -262,7 +303,7 @@ export const App = () => {
 			);
 
 			const isProtectedRoute = location.pathname !== '/' && location.pathname.indexOf('/getobject') === -1;
-			if (wcSdk.isConnected()) {
+			if (wcSdk?.isConnected()) {
 				if (isCancelled) {
 					return;
 				}
@@ -340,24 +381,49 @@ export const App = () => {
 	}, [wcSdk, dapi, location.pathname, walletData, isNeonReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	const onGetSidechainContract = async (containerId) => {
-		const response_nns = await invokeFunction(
-			NeoFSContract.sidechain,
-			[1],
-			"getcontractstate",
-		);
+		try {
+			const response_nns = await invokeFunction(
+				NeoFSContract.sidechain,
+				[1],
+				"getcontractstate",
+			);
+			if (!response_nns || response_nns.message || !response_nns.hash) {
+				onPopup('failed', response_nns?.message || 'Failed to resolve NNS contract');
+				return;
+			}
 
-		const response = await invokeFunction(
-			NeoFSContract.sidechain,
-			[
-				response_nns.hash,
-				"resolve",
+			const response = await invokeFunction(
+				NeoFSContract.sidechain,
 				[
-					{ type: "String", value: "container.neofs" },
-					{ type: "Integer", value: "16" },
-				]
-			],
-		);
-		setNeoFSContract({ ...NeoFSContract, sidechainContract: atob(response.stack[0].value[0].value) })
+					response_nns.hash,
+					"resolve",
+					[
+						{ type: "String", value: "container.neofs" },
+						{ type: "Integer", value: "16" },
+					]
+				],
+			);
+			if (!response) {
+				onPopup('failed', 'No response from RPC');
+				return;
+			}
+			if (response.exception) {
+				onPopup('failed', response.exception);
+				return;
+			}
+			const sidechainContractValue = response.stack?.[0]?.value?.[0]?.value;
+			if (!Array.isArray(response.stack) || sidechainContractValue == null) {
+				onPopup('failed', response.message || 'Failed to resolve container contract');
+				return;
+			}
+			setNeoFSContract({
+				...NeoFSContract,
+				sidechainContract: atob(sidechainContractValue),
+				nnsHash: response_nns.hash,
+			});
+		} catch (error) {
+			onPopup('failed', error?.message || 'Failed to initialize NeoFS contract');
+		}
 	};
 
 	const onResetContainerForm = () => {
@@ -833,6 +899,121 @@ export const App = () => {
 		});
 	};
 
+	const onDomainRegister = async () => {
+		if (isLoadingForm) {
+			return;
+		}
+		const normalizedDomainName = domainForm.name.trim().toLowerCase();
+		if (normalizedDomainName.length === 0) {
+			onPopup('failed', 'Insert domain name');
+			return;
+		}
+		if (!walletData?.account?.address) {
+			onPopup('failed', 'Wallet is not connected');
+			return;
+		}
+		if (!NeoFSContract?.nnsHash) {
+			onPopup('failed', 'NNS contract is not initialized yet');
+			return;
+		}
+
+		const isContractNotFound = (msg) => typeof msg === 'string' && /called contract\s+\w+\s+not found/i.test(msg);
+
+		setLoadingForm(true);
+		try {
+			const availability = await invokeFunction(
+				NeoFSContract.sidechain,
+				[
+					NeoFSContract.nnsHash,
+					"isAvailable",
+					[{ type: "String", value: normalizedDomainName }],
+				],
+			);
+			if (availability?.exception) {
+				onPopup('failed', availability.exception);
+				return;
+			}
+			if (availability?.message) {
+				onPopup('failed', availability.message);
+				return;
+			}
+			const isDomainAvailable = String(availability?.stack?.[0]?.value).toLowerCase() === 'true';
+			if (!isDomainAvailable) {
+				onPopup('failed', `Domain "${normalizedDomainName}" is not available`);
+				return;
+			}
+
+			const soaFields = [
+				['refresh', domainForm.refresh],
+				['retry', domainForm.retry],
+				['expire', domainForm.expire],
+				['ttl', domainForm.ttl],
+			];
+			for (const [label, value] of soaFields) {
+				const trimmed = String(value).trim();
+				if (!/^\d+$/.test(trimmed) || Number(trimmed) <= 0) {
+					onPopup('failed', `SOA "${label}" must be a positive number`);
+					return;
+				}
+			}
+
+			const accountScriptHash = Neon.create.account(walletData.account.address).scriptHash;
+			const invocation = {
+				scriptHash: NeoFSContract.nnsHash,
+				operation: "register",
+				args: [
+					{ type: "String", value: normalizedDomainName },
+					{ type: "Hash160", value: accountScriptHash },
+					{ type: "String", value: domainForm.email.trim() },
+					{ type: "Integer", value: String(domainForm.refresh).trim() },
+					{ type: "Integer", value: String(domainForm.retry).trim() },
+					{ type: "Integer", value: String(domainForm.expire).trim() },
+					{ type: "Integer", value: String(domainForm.ttl).trim() },
+				],
+			};
+			const baseSigner = {
+				scopes: 'CalledByEntry',
+				account: accountScriptHash,
+			};
+
+			const handleRegisterError = (err) => {
+				if (isContractNotFound(err?.message) || isContractNotFound(err?.data?.message)) {
+					onModal('fsChainSwitch');
+					return;
+				}
+				handleError(err);
+			};
+
+			onModal('approveRequest');
+			const response = await wcSdk.signClient.request({
+				topic: wcSdk.session.topic,
+				chainId: 'neo3:private',
+				request: {
+					method: 'invokeFunction',
+					params: { invocations: [invocation], signers: [baseSigner] },
+				},
+			}).catch(handleRegisterError);
+
+			if (response?.exception) {
+				if (isContractNotFound(response.exception)) {
+					onModal('fsChainSwitch');
+					return;
+				}
+				handleError(new Error(response.exception));
+				return;
+			}
+			if (response && !response.error && !response.message) {
+				setDomainForm({ name: '', email: '', refresh: '3600', retry: '600', expire: '86400', ttl: '3600' });
+				setTimeout(() => setDomainsRefreshTick((prev) => prev + 1), 4000);
+				onModal('success', response.txid ? response.txid : response);
+			}
+		} catch (error) {
+			handleError(error);
+		} finally {
+			setLoadingForm(false);
+		}
+	};
+
 	const onDeposit = async (neoBalanceTemp) => {
 		if (depositQuantity * 1e8 >= 1 && depositQuantity * 1e8 <= neoBalanceTemp) {
 			onModal('approveRequest');
@@ -970,10 +1151,69 @@ export const App = () => {
 					});
 				}
 			} else {
-				const { uri, approval } = await wcSdk.createConnection(`neo3:${activeNet.toLowerCase()}`, ['invokeFunction', 'testInvoke', 'signMessage', 'verifyMessage']);
+				if (!wcSdk?.signClient) {
+					onModal('failed', 'WalletConnect is not ready yet, please try again in a moment');
+					return;
+				}
+				const methods = ['invokeFunction', 'testInvoke', 'signMessage', 'verifyMessage'];
+				const primaryChain = `neo3:${activeNet.toLowerCase()}`;
+				const connectParams = {
+					requiredNamespaces: {
+						neo3: { chains: [primaryChain], methods, events: [] },
+					},
+				};
+				if (primaryChain !== 'neo3:private') {
+					connectParams.optionalNamespaces = {
+						neo3: { chains: ['neo3:private'], methods, events: [] },
+					};
+				}
+				const { uri, approval } = await wcSdk.signClient.connect(connectParams);
 				onModal('connectWallet', uri);
 				const session = await approval();
-				wcSdk.setSession(session);
+				wcSdk.session = session;
+
+				const neo3ns = session.namespaces?.neo3;
+				const chainsInSession = neo3ns?.chains || neo3ns?.accounts?.map((a) => a.split(':').slice(0, 2).join(':')) || [];
+				if (!chainsInSession.includes('neo3:private') && primaryChain !== 'neo3:private') {
+					try {
+						const address = neo3ns.accounts[0].split(':')[2];
+						const updatedNs = {
+							neo3: {
+								accounts: Array.from(new Set([...neo3ns.accounts, `neo3:private:${address}`])),
+								chains: Array.from(new Set([...(neo3ns.chains || []), primaryChain, 'neo3:private'])),
+								methods: neo3ns.methods,
+								events: neo3ns.events,
+							},
+						};
+						const { acknowledged } = await wcSdk.signClient.update({
+							topic: session.topic,
+							namespaces: updatedNs,
+						});
+						await acknowledged();
+						wcSdk.session = wcSdk.signClient.session.get(session.topic);
+					} catch (e) {
+						console.warn('Failed to extend session with neo3:private', e);
+					}
+				}
+
+				const liveSession = wcSdk.session;
+				const accountStr = liveSession?.namespaces?.neo3?.accounts?.[0];
+				if (accountStr) {
+					const [, net, address] = accountStr.split(':');
+					onHandleConnectedWallet({
+						name: liveSession.peer.metadata.name,
+						type: 'neo3',
+						net,
+						account: {
+							address,
+							publicKey: liveSession.peer.publicKey,
+						},
+						tokens: {
+							container: {},
+							object: null,
+						},
+					});
+				}
 			}
 		} catch (error) {
 			onModal('failed', type === 'onegate' ? 'OneGate connection works only if you open the page from OneGate explorer' : 'Failed to connect to the wallet, please try again');
@@ -981,25 +1221,43 @@ export const App = () => {
 	}
 
 	const onDisconnectWallet = async () => {
-		if (walletData && walletData.name === 'o3-desktop') {
-			await neo3Dapi.disconnect();
-		} else if (!dapi) {
-			await wcSdk.disconnect();
+		try {
+			if (walletData && walletData.name === 'o3-desktop') {
+				await neo3Dapi.disconnect();
+			} else if (!dapi && wcSdk?.isConnected()) {
+				await wcSdk.disconnect();
+			}
+		} catch (e) {
+			console.warn('Wallet disconnect threw', e);
 		}
 		onPopup('success', 'Wallet disconnected');
-		document.location.href = "/";
 		setWalletData(null);
+		document.location.href = "/";
 	};
 
 	return (
 		<>
-			{(popup.current === 'success' || popup.current === 'failed') && (
+			{popups.length > 0 && (
 				<div className="popup">
-					<div
-						className={popup.current === 'success' ? "popup_content popup_content_success" : "popup_content popup_content_failed"}
-					>
-						<Heading align="center" size={7}>{popup.text}</Heading>
-					</div>
+					{popups.map((popupItem) => (
+						<div
+							key={popupItem.id}
+							className={popupItem.current === 'success' ? "popup_content popup_content_success" : "popup_content popup_content_failed"}
+						>
+							<div className="popup_badge">
+								{popupItem.current === 'success' ? (
+									<img
+										src="/img/icons/success.svg"
+										width={16}
+										height={16}
+										className="popup_badge_icon"
+										alt="success"
+									/>
+								) : '!'}
+							</div>
+							<Heading size={7} className="popup_message">{popupItem.text}</Heading>
+						</div>
+					))}
 				</div>
 			)}
 			{(modal.current === 'success' || modal.current === 'failed') && (
@@ -1073,6 +1331,49 @@ export const App = () => {
 						{modal.text && modal.text.indexOf('0x') === -1 && (
 							<Heading align="center" size={6} weight="normal">{modal.text}</Heading>
 						)}
+					</div>
+				</div>
+			)}
+			{modal.current === 'fsChainSwitch' && (
+				<div className="modal">
+					<div
+						className="modal_close_panel"
+						onClick={onModal}
+					/>
+					<div className="modal_content">
+						<div
+							className="modal_close"
+							onClick={onModal}
+						>
+							<img
+								src="/img/icons/close.svg"
+								height={30}
+								width={30}
+								alt="close"
+							/>
+						</div>
+						<Heading align="center" size={5} weight="bold">Switch network to FS-Chain</Heading>
+						<Heading align="center" size={6} weight="normal">
+							Domain operations run on the private FS-Chain network. Add and select it in your wallet:
+						</Heading>
+						<ol style={{ margin: '15px 0 25px', paddingLeft: 22, lineHeight: 1.7 }}>
+							<li>Open <span style={{ fontWeight: 600 }}>Network Configuration</span> in your wallet settings.</li>
+							<li>Create a new profile.</li>
+							<li>
+								In <span style={{ fontWeight: 600 }}>Current network</span> choose <span style={{ fontWeight: 600 }}>Add custom network</span>, enter the FS-Chain parameters from{' '}
+								<a href="https://status.fs.neo.org" target="_blank" rel="noopener noreferrer">status.fs.neo.org</a>{' '}
+								(the <span style={{ fontWeight: 600 }}>Side chain RPC nodes</span> section), then select it.
+							</li>
+						</ol>
+						<Button
+							renderAs="button"
+							color="primary"
+							size="small"
+							onClick={onModal}
+							style={{ display: 'block', margin: '0 auto' }}
+						>
+							Got it
+						</Button>
 					</div>
 				</div>
 			)}
@@ -1278,6 +1579,158 @@ export const App = () => {
 					</div>
 				</div>
 			)}
+			{modal.current === 'registerDomain' && (
+				<div className="modal">
+					<div
+						className="modal_close_panel"
+						onClick={onModal}
+					/>
+					<div className="modal_content">
+						<div
+							className="modal_close"
+							onClick={onModal}
+						>
+							<img
+								src="/img/icons/close.svg"
+								height={30}
+								width={30}
+								alt="loader"
+							/>
+						</div>
+						<Heading align="center" size={5} weight="bold">Register domain</Heading>
+						<Heading className="input_caption">See the <a href="https://github.com/nspcc-dev/neofs-node/blob/master/docs/verified-node-domains.md" target="_blank" rel="noopener noreferrer">documentation</a> on verified domains for NeoFS storage nodes.</Heading>
+						<Form.Field>
+							<Form.Label>Domain name</Form.Label>
+							<Form.Control>
+								<Form.Input
+									renderAs="input"
+									type="text"
+									value={domainForm.name}
+									className={isError.active && isError.type.indexOf('domainName') !== -1 ? 'is-error' : ""}
+									onChange={(e) => setDomainForm({ ...domainForm, name: e.target.value })}
+									disabled={isLoadingForm}
+								/>
+							</Form.Control>
+							<Form.Help>
+								Use lowercase letters, digits and hyphens only. Each part must be 1–62 characters and must not start or end with a hyphen. Example: my-node.neofs
+							</Form.Help>
+						</Form.Field>
+						<Form.Field>
+							<Form.Label>Email</Form.Label>
+							<Form.Control>
+								<Form.Input
+									renderAs="input"
+									type="text"
+									placeholder="Wallet address or email"
+									value={domainForm.email}
+									style={{ marginBottom: '0.5rem' }}
+									onChange={(e) => setDomainForm({ ...domainForm, email: e.target.value })}
+									disabled={isLoadingForm}
+								/>
+							</Form.Control>
+						</Form.Field>
+						<Heading
+							size={6}
+							weight="semibold"
+							style={{
+								cursor: 'pointer',
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'space-between',
+							}}
+							onClick={() => setDomainAdvancedOpen(!isDomainAdvancedOpen)}
+						>
+							Advanced
+							<img
+								src="/img/icons/chevron_down.svg"
+								width={22}
+								height={22}
+								style={isDomainAdvancedOpen ? { transform: 'rotateZ(180deg)' } : {}}
+								alt="toggle advanced"
+							/>
+						</Heading>
+						{isDomainAdvancedOpen && (
+							<>
+								<Heading className="input_caption">DNS SOA record timers, in seconds. Defaults are fine for most domains.</Heading>
+								<Form.Field>
+									<Form.Label>Refresh</Form.Label>
+									<Form.Control>
+										<Form.Input
+											renderAs="input"
+											type="number"
+											value={domainForm.refresh}
+											onChange={(e) => setDomainForm({ ...domainForm, refresh: e.target.value })}
+											disabled={isLoadingForm}
+										/>
+									</Form.Control>
+								</Form.Field>
+								<Form.Field>
+									<Form.Label>Retry</Form.Label>
+									<Form.Control>
+										<Form.Input
+											renderAs="input"
+											type="number"
+											value={domainForm.retry}
+											onChange={(e) => setDomainForm({ ...domainForm, retry: e.target.value })}
+											disabled={isLoadingForm}
+										/>
+									</Form.Control>
+								</Form.Field>
+								<Form.Field>
+									<Form.Label>Expire</Form.Label>
+									<Form.Control>
+										<Form.Input
+											renderAs="input"
+											type="number"
+											value={domainForm.expire}
+											onChange={(e) => setDomainForm({ ...domainForm, expire: e.target.value })}
+											disabled={isLoadingForm}
+										/>
+									</Form.Control>
+								</Form.Field>
+								<Form.Field>
+									<Form.Label>TTL</Form.Label>
+									<Form.Control>
+										<Form.Input
+											renderAs="input"
+											type="number"
+											value={domainForm.ttl}
+											onChange={(e) => setDomainForm({ ...domainForm, ttl: e.target.value })}
+											disabled={isLoadingForm}
+										/>
+									</Form.Control>
+								</Form.Field>
+							</>
+						)}
+						<Button
+							renderAs="button"
+							color="primary"
+							onClick={() => onDomainRegister()}
+							size="small"
+							disabled={isLoadingForm}
+							style={isLoadingForm ? {
+								display: 'flex',
+								margin: 'auto',
+								pointerEvents: 'none',
+								opacity: 0.8,
+							} : {
+								display: 'flex',
+								margin: 'auto',
+							}}
+						>
+							{isLoadingForm ? (
+								<img
+									src="/img/icons/spinner.svg"
+									className="spinner"
+									width={20}
+									height={20}
+									alt="spinner"
+								/>
+							) : 'Register'}
+						</Button>
+					</div>
+				</div>
+			)}
 			{modal.current === 'createContainer' && (
 				<div className="modal">
 					<div
@@ -1437,7 +1890,7 @@ export const App = () => {
 										onChange={(e) => setContainerForm({ ...containerForm , basicAcl: e.target.value })}
 										disabled={true}
 									/>
-									<Heading className="input_caption">NeoFS Panel is incompatible with basic ACLs that disable Bearer tokens or use Final bit. Therefore, basic ACL can't be changed here, but you can set any EACL rules you need. If you need a container with some different basic ACL, please use the <a href="https://github.com/nspcc-dev/neofs-node" target="_blank" rel="noopener noreferrer" alt="neofs-node">CLI</a>.</Heading>
+									<Heading className="input_caption">NeoFS Panel is incompatible with basic ACLs that disable Bearer tokens or use Final bit. Therefore, basic ACL can't be changed here, but you can set any EACL rules you need. If you need a container with some different basic ACL, please use the <a href="https://github.com/nspcc-dev/neofs-node" target="_blank" rel="noopener noreferrer">CLI</a>.</Heading>
 								</Form.Control>
 								<Form.Label size="small" style={{ marginTop: 10 }}>Extended ACL</Form.Label>
 								{Object.keys(presets).map((basicPresetExample) => (
@@ -2003,7 +2456,7 @@ export const App = () => {
 							/>
 						</div>
 						<Heading align="center" size={5} weight="bold">{`Withdraw from NeoFS to ${activeNet}`}</Heading>
-						<Heading className="input_caption" style={{ maxWidth: 310 }}>{`Withdrawing requires a fee to be paid, currently it's ${networkInfo ? 7 * networkInfo.withdrawalFee * 1e-8  : '-'} GAS.`} It will be reduced once the <a href="https://github.com/neo-project/neo/issues/1573" target="_blank" rel="noopener noreferrer" alt="neofs-node">notary subsystem</a> is implemented in Neo</Heading>
+						<Heading className="input_caption" style={{ maxWidth: 310 }}>{`Withdrawing requires a fee to be paid, currently it's ${networkInfo ? 7 * networkInfo.withdrawalFee * 1e-8  : '-'} GAS.`} It will be reduced once the <a href="https://github.com/neo-project/neo/issues/1573" target="_blank" rel="noopener noreferrer">notary subsystem</a> is implemented in Neo</Heading>
 						<Form.Field>
 							<Form.Label size="small" weight="light">Quantity (GAS)</Form.Label>
 							<Form.Control>
@@ -2147,6 +2600,7 @@ export const App = () => {
 						networkInfo={networkInfo}
 						NeoFSContract={NeoFSContract}
 						activeNet={activeNet}
+						domainsRefreshTick={domainsRefreshTick}
 						onAuth={onAuth}
 						walletData={walletData}
 						handleError={handleError}
@@ -2159,6 +2613,7 @@ export const App = () => {
 						onDisconnectWallet={onDisconnectWallet}
 						onModal={onModal}
 						onPopup={onPopup}
+						openDomainRegister={openDomainRegister}
 					/>}
 				/>
 			</Routes>

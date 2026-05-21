@@ -165,17 +165,18 @@ ul {
     color: #003;
 }
 
-
-
-#containers .tile.is-parent>.notification {
+#containers .tile.is-parent>.notification,
+#domains .tile.is-parent>.notification {
     padding: 0;
 }
 
-#containers .tile.is-parent>.notification>.title {
+#containers .tile.is-parent>.notification>.title,
+#domains .tile.is-parent>.notification>.title {
     padding: 1.25rem 1.5rem 1.25rem;
 }
 
-#containers .tile.is-parent>.notification:hover {
+#containers .tile.is-parent>.notification:hover,
+#domains .tile.is-parent>.notification:hover {
     /* background: #00e599; */
 }
 
@@ -598,6 +599,33 @@ label.panel-block:hover {
     }
 }
 
+.table_container {
+    overflow-x: auto;
+    margin: 0 0 20px;
+}
+
+.table {
+    width: 100%;
+    margin: 0;
+    /* border-collapse: collapse; */
+}
+
+.table td,
+.table th {
+    background: #fff;
+    text-align: left !important;
+    white-space: pre;
+}
+
+.table thead th {
+    border-width: 0 0 1px;
+    /* border-bottom: 2px solid #dee2e6; */
+}
+
+.table tr td {
+    white-space: pre-line;
+}
+
 .token_status_panel {
     display: flex;
     align-items: center;
@@ -671,41 +699,92 @@ label.panel-block:hover {
     position: fixed;
     z-index: 104;
     display: flex;
-    justify-content: center;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    top: 16px;
+    left: 12px;
+    right: 12px;
     pointer-events: none;
 }
 
 .popup_content {
-    position: absolute;
-    background: #fff;
-    box-shadow: 0 0 10px rgb(255 255 255 / 15%);
-    border-radius: 6px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 12px;
     z-index: 105;
-    padding: 10px;
-    margin-top: 20px;
-    min-width: 200px;
+    padding: 10px 12px;
+    min-width: 220px;
     max-width: 450px;
+    width: min(450px, 100%);
     pointer-events: auto;
+    border: 1px solid transparent;
+    box-shadow: 0 14px 32px rgb(0 0 0 / 18%), 0 2px 8px rgb(0 0 0 / 10%);
+    backdrop-filter: blur(6px);
+    animation: popup-enter .18s ease-out;
 }
 
 .popup_content_success {
-    color: #ffffff;
-    background: #00e599;
-    border: 1px solid #00e59999;
+    color: #0f3b2f;
+    background: linear-gradient(135deg, #ecfff8 0%, #d9fff0 100%);
+    border-color: #8ce8c4;
 }
 
 .popup_content_failed {
-    color: #ffffff;
-    background: #fc5758;
-    border: 1px solid #dc5253;
+    color: #5a1e1e;
+    background: linear-gradient(135deg, #fff1f1 0%, #ffe5e5 100%);
+    border-color: #f2b3b3;
 }
 
 .popup_content .title {
     color: inherit;
+    margin: 0;
+}
+
+.popup_badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 9999px;
+    flex-shrink: 0;
+}
+
+.popup_badge_icon {
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+
+.popup_content_success .popup_badge {
+    background: #e7fff4;
+}
+
+.popup_content_failed .popup_badge {
+    color: #ffffff;
+    background: #e24f51;
+}
+
+.popup_message {
+    text-align: left;
+    line-height: 1.25;
+    font-weight: 600 !important;
+}
+
+@keyframes popup-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* modal */
@@ -841,15 +920,18 @@ label.panel-block:hover {
         padding: 1rem;
     }
 
-    #containers .tile.is-parent>.notification>.title {
+    #containers .tile.is-parent>.notification>.title,
+    #domains .tile.is-parent>.notification>.title {
         padding: 0.75rem 1rem 0.75rem;
     }
 
-    #containers .title.is-5 {
+    #containers .title.is-5,
+    #domains .title.is-5 {
         font-size: 1rem;
     }
 
-    #containers .objects_tree_file_content .title.is-6 {
+    #containers .objects_tree_file_content .title.is-6,
+    #domains .objects_tree_file_content .title.is-6 {
         font-size: 0.75rem;
         line-height: 1rem;
         margin-bottom: 0.25rem;
@@ -884,13 +966,15 @@ label.panel-block:hover {
         max-width: 290px;
     }
 
-    #containers .token_status_panel {
+    #containers .token_status_panel,
+    #domains .token_status_panel {
         flex-direction: column;
         text-align: center;
         max-width: 200px;
     }
 
-    #containers .token_status_panel .title.is-6 {
+    #containers .token_status_panel .title.is-6,
+    #domains .token_status_panel .title.is-6 {
         margin: 0 0 10px 0 !important;
         font-size: 0.9rem;
     }
@@ -899,7 +983,8 @@ label.panel-block:hover {
         padding: 0 10px;
     }
 
-    #containers .active.title img {
+    #containers .active.title img,
+    #domains .active.title img {
         width: 14px;
     }
 
