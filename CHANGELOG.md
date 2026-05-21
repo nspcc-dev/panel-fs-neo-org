@@ -4,6 +4,24 @@ Changelog for NeoFS Panel
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-05-21
+
+### Added
+- Sharing files to specific accounts (#174)
+- Numeric eACL rules (#252)
+- Default file attributes (#268)
+- Verifiable domains management (#189)
+
+### Changed
+- Single all-in-one master token is used now (#254)
+- NEP-21 compatibility (#273)
+
+### Fixed
+- Missing content type when uploading big files (#269)
+
+### Removed
+- O3 wallet support (#275)
+
 ## [0.8.2] - 2026-04-10
 
 ### Fixed
@@ -203,4 +221,5 @@ First public review release.
 [0.8.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.8.0
 [0.8.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.8.1
 [0.8.2]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.8.2
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.8.2...master
+[0.9.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.9.0
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.9.0...master
