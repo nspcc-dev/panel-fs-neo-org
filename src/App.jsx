@@ -120,11 +120,6 @@ export const App = () => {
 				"action": "DENY",
 				"filters": [],
 				"targets": [{ "keys": [], "role": "OTHERS" }],
-			}, {
-				"operation": "RANGEHASH",
-				"action": "DENY",
-				"filters": [],
-				"targets": [{ "keys": [], "role": "OTHERS" }],
 			}],
 		},
 		shared: {
@@ -157,11 +152,6 @@ export const App = () => {
 				"targets": [{ "keys": [], "role": "OTHERS" }],
 			}, {
 				"operation": "RANGE",
-				"action": "ALLOW",
-				"filters": [],
-				"targets": [{ "keys": [], "role": "OTHERS" }],
-			}, {
-				"operation": "RANGEHASH",
 				"action": "ALLOW",
 				"filters": [],
 				"targets": [{ "keys": [], "role": "OTHERS" }],

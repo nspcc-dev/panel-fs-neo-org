@@ -185,7 +185,7 @@ export default function EACLPanel({
 										disabled={!isEdit || isLoadingForm}
 									>
 										<option value="" disabled>Operation</option>
-										{['PUT', 'GET', 'HEAD', 'DELETE', 'SEARCH', 'RANGE', 'RANGEHASH'].map((item) => (
+										{['PUT', 'GET', 'HEAD', 'DELETE', 'SEARCH', 'RANGE'].map((item) => (
 											<option value={item} key={item}>{item}</option>
 										))}
 									</Form.Select>
