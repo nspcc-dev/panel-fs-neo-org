@@ -4,6 +4,20 @@ Changelog for NeoFS Panel
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-07-10
+
+This release requires REST gateway 0.18.0.
+
+### Changed
+- Non-ASCII symbols are supported in attributes properly now (#262)
+- Non-regular objects are detected and displayed properly now (#272)
+
+### Fixed
+- OneGate v2 support (#276)
+
+### Removed
+- RANGEHASH support (#281)
+
 ## [0.9.0] - 2026-05-21
 
 ### Added
@@ -222,4 +236,5 @@ First public review release.
 [0.8.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.8.1
 [0.8.2]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.8.2
 [0.9.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.9.0
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.9.0...master
+[0.10.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.10.0
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.10.0...master
