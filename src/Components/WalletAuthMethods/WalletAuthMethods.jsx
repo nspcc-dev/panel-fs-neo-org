@@ -7,7 +7,7 @@ import {
 const WalletAuthMethods = ({
 		isNeoLineSupport,
 		isNeonReady,
-		hasOneGate,
+		isOneGateSupport,
 		onSelectWallet,
 		onInstallWallet,
 	}) => {
@@ -34,14 +34,11 @@ const WalletAuthMethods = ({
 			<Button
 				renderAs="button"
 				className="btn_connect_wallet"
-				onClick={() => window.open('https://github.com/nspcc-dev/panel-fs-neo-org/issues/276', '_blank', 'noopener,noreferrer')}
+				onClick={() => onSelectWallet('onegate')}
+				style={isOneGateSupport ? { border: '2px solid #00e599', background: '#00dc9633' } : {}}
 			>
 				Onegate
-				{hasOneGate ? (
-					<span>Connect</span>
-				) : (
-					<img src="/img/icons/wallets/onegate.svg" alt="onegate logo" />
-				)}
+				<img src="/img/icons/wallets/onegate.svg" alt="onegate logo" />
 			</Button>
 			{onInstallWallet && (
 				<Heading

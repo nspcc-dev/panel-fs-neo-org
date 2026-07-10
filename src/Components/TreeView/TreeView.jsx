@@ -165,7 +165,7 @@ const File = ({
 											{isAssociatedSystemObject && (
 												<Heading className="input_caption">NeoFS system object: TOMBSTONE/LOCK — a record of deleted/locked object, managed by the NeoFS protocol.</Heading>
 											)}
-										{!window.OneGate && (
+										{!window.OneGateDapiProvider && (
 											<>
 												<img
 													src="/img/icons/manage/open.png"
