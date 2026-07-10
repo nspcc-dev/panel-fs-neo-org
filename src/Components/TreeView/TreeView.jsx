@@ -84,7 +84,7 @@ const File = ({
 	}) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [objectDate, setObjectDate] = useState(null);
-	const isAssociatedSystemObject = objectDate?.attributes?.__NEOFS__ASSOCIATE && objectDate.objectSize === '0';
+	const isRegular = !objectDate?.objectType || objectDate.objectType === 'REGULAR';
 
 	const handleToggle = e => {
 		setIsOpen(!isOpen);
@@ -162,8 +162,8 @@ const File = ({
 									</Section>
 									<Section style={{ paddingTop: 0 }}>
 										<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Manage</Heading>
-											{isAssociatedSystemObject && (
-												<Heading className="input_caption">NeoFS system object: TOMBSTONE/LOCK — a record of deleted/locked object, managed by the NeoFS protocol.</Heading>
+											{!isRegular && (
+												<Heading className="input_caption">{`NeoFS system object: ${objectDate.objectType} — a service record managed by the NeoFS protocol.`}</Heading>
 											)}
 										{!window.OneGateDapiProvider && (
 											<>
@@ -261,7 +261,7 @@ const File = ({
 										<img
 											src="/img/icons/manage/delete.png"
 											className="manage_icon"
-											style={isAssociatedSystemObject ? { opacity: '0.3', pointerEvents: 'none' } : {}}
+											style={!isRegular ? { opacity: '0.3', pointerEvents: 'none' } : {}}
 											onClick={(e) => {
 												onModal('deleteObject', { containerId: containerItem.containerId, objectId: objectItem.objectId });
 												e.stopPropagation();

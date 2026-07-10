@@ -48,6 +48,7 @@ export default function api(method, url, params = {}, headers = {}) {
 						'containerId': response.headers.get('x-container-Id'),
 						'objectId': response.headers.get('x-object-id'),
 						'ownerId': response.headers.get('x-owner-Id'),
+						'objectType': response.headers.get('x-object-type'),
 						'filename': attributes['FileName'],
 						'attributes': attributes,
 						'contentType': response.headers.get('Content-Type'),
