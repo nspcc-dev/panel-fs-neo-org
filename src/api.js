@@ -1,4 +1,13 @@
+import { base64ToAttributes } from './Functions/handle';
+
 const rest_gw = import.meta.env.VITE_RESTGW ? import.meta.env.VITE_RESTGW : 'https://rest.t5.fs.neo.org';
+
+function readAttributes(headers) {
+	if (headers.get('x-attributes-base64')) {
+		return base64ToAttributes(headers.get('x-attributes-base64'));
+	}
+	return headers.get('x-attributes') ? JSON.parse(headers.get('x-attributes')) : {};
+}
 
 async function serverRequest(method, url, params, headers) {
 	const json = {
@@ -34,7 +43,7 @@ export default function api(method, url, params = {}, headers = {}) {
 					const header = response.headers.get('Content-Type');
 					resolve({ header, res, status: response.status });
 				} else if (method === 'HEAD' && url.indexOf(`/by_id/`) !== -1 && response.status === 200) {
-					const attributes = response.headers.get('x-attributes') ? JSON.parse(response.headers.get('x-attributes')) : {};
+					const attributes = readAttributes(response.headers);
 					const res = {
 						'containerId': response.headers.get('x-container-Id'),
 						'objectId': response.headers.get('x-object-id'),

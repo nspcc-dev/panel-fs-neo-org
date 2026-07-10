@@ -106,6 +106,15 @@ function bytesToBase64(bytes) {
 	return btoa(s);
 }
 
+export function attributesToBase64(attributes) {
+	return bytesToBase64(new TextEncoder().encode(JSON.stringify(attributes)));
+}
+
+export function base64ToAttributes(value) {
+	const bytes = Uint8Array.from(atob(value), (char) => char.charCodeAt(0));
+	return JSON.parse(new TextDecoder().decode(bytes));
+}
+
 export async function invokeFunction(rpcUrl, params, method = "invokefunction") {
   const response = await fetch(rpcUrl, {
     method: "POST",
