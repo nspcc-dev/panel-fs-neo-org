@@ -41,7 +41,7 @@ const Home = ({
 							<WalletAuthMethods
 								isNeoLineSupport={isNeoLineSupport}
 								isNeonReady={isNeonReady}
-								hasOneGate={Boolean(dapi)}
+								isOneGateSupport={Boolean(dapi)}
 								onSelectWallet={onConnectWallet}
 								onInstallWallet={() => onModal('installWallet')}
 							/>

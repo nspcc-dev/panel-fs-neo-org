@@ -121,7 +121,7 @@ const Profile = ({
 		if (neolineN3) {
 			response = await neolineN3.invokeRead({ ...invocations[0], signers }).catch((err) => handleError(err, 'balance'));
 		} else if (dapi) {
-			response = await dapi.invokeRead({ ...invocations[0] }).catch((err) => handleError(err, 'balance'));
+			response = await dapi.call({ hash: invocations[0].scriptHash, operation: invocations[0].operation, args: invocations[0].args }).catch((err) => handleError(err, 'balance'));
 		} else {
 			if (wcSdk.session.expiry * 1000 < new Date().getTime()) {
 				onModal('failed', 'Session expired, re-login to continue');

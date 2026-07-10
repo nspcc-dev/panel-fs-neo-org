@@ -25,7 +25,6 @@ import TokenSignPanel from './Components/TokenSignPanel/TokenSignPanel';
 import WalletAuthMethods from './Components/WalletAuthMethods/WalletAuthMethods';
 import api from './api';
 import Neon from "@cityofzion/neon-js";
-import { BaseDapi } from '@neongd/neo-dapi';
 import QRCode from "react-qr-code";
 import {
 	invokeFunction,
@@ -39,6 +38,11 @@ function capitalizeFirstLetter(string) {
 	return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+const NETWORK_MAGIC = {
+	860833102: 'mainnet',
+	894710606: 'testnet',
+};
+
 function formatDateToHours(date) {
 	return Math.floor((new Date(`${date}T23:59:00`).getTime() - new Date().getTime()) / 1000 / 60 / 60)
 }
@@ -47,7 +51,7 @@ export const App = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const [wcSdk, setWcSdk] = useState(null);
-	const dapi = useMemo(() => (window.OneGate ? new BaseDapi(window.OneGate) : null), []);
+	const dapi = useMemo(() => window.OneGateDapiProvider || null, []);
 	let [neolineN3, setNeolineN3] = useState(null);
 	const [activeNet] = useState(import.meta.env.VITE_NETWORK ? capitalizeFirstLetter(import.meta.env.VITE_NETWORK) : 'Mainnet');
 	const [NeoFSContract, setNeoFSContract] = useState({
@@ -324,23 +328,20 @@ export const App = () => {
 
 				if (!isWalletConnected && dapi) {
 					try {
-						const account = await withTimeout(dapi.getAccount());
+						const accounts = await withTimeout(dapi.getAccounts());
+						const account = accounts && accounts[0];
 						if (account && !isCancelled) {
-							const provider = await dapi.getProvider();
-							const networks = await dapi.getNetworks();
-							if (!isCancelled) {
-								onHandleConnectedWallet({
-									name: provider.name,
-									type: 'neo3',
-									net: networks.defaultNetwork.toLowerCase(),
-									account: account,
-									tokens: {
-										container: {},
-										object: null,
-									}
-								});
-								isWalletConnected = true;
-							}
+							onHandleConnectedWallet({
+								name: dapi.name,
+								type: 'neo3',
+								net: NETWORK_MAGIC[dapi.network] || activeNet.toLowerCase(),
+								account: { address: account.address },
+								tokens: {
+									container: {},
+									object: null,
+								}
+							});
+							isWalletConnected = true;
 						}
 					} catch {}
 				}
@@ -658,8 +659,10 @@ export const App = () => {
 		if (neolineN3) {
 			response = await neolineN3.signMessage({ message: msg.token }).catch((err) => handleError(err));
 		} else if (dapi) {
-			response = await dapi.signMessage({ message: msg.token }).catch((err) => handleError(err));
-			response.data = response.signature;
+			response = await dapi.signMessage(msg.token).catch((err) => handleError(err));
+			if (response) {
+				response = { publicKey: response.pubkey, data: response.signature, salt: '' };
+			}
 		} else {
 			response = await wcSdk.signMessage({ message: msg.token, version: 1 }).catch((err) => handleError(err));
 		}
@@ -1013,7 +1016,10 @@ export const App = () => {
 			if (neolineN3) {
 				response = await neolineN3.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
 			} else if (dapi) {
-				response = await dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
+				response = await dapi.invoke(
+					[{ hash: invocations[0].scriptHash, operation: invocations[0].operation, args: invocations[0].args }],
+					signers,
+				).catch((err) => handleError(err));
 			} else {
 				response = await wcSdk.invokeFunction({ invocations, signers }).catch((error) => {
 					if (error.message === 'Failed or Rejected Request') {
@@ -1056,7 +1062,10 @@ export const App = () => {
 			if (neolineN3) {
 				response = await neolineN3.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
 			} else if (dapi) {
-				response = await dapi.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
+				response = await dapi.invoke(
+					[{ hash: invocations[0].scriptHash, operation: invocations[0].operation, args: invocations[0].args }],
+					signers,
+				).catch((err) => handleError(err));
 			} else {
 				response = await wcSdk.invokeFunction({ invocations, signers }).catch((err) => handleError(err));
 			}
@@ -1089,16 +1098,15 @@ export const App = () => {
 					}).catch((err) => handleError(err));
 				}).catch((err) => handleError(err));
 			} else if (type === 'onegate') {
-				const account = await dapi.getAccount().catch((err) => handleError(err));
-				const provider = await dapi.getProvider();
-				const networks = await dapi.getNetworks();
+				const accounts = await dapi.getAccounts().catch((err) => handleError(err));
+				const account = accounts && accounts[0];
 
 				if (account) {
 					onHandleConnectedWallet({
-						name: provider.name,
+						name: dapi.name,
 						type: 'neo3',
-						net: networks.defaultNetwork.toLowerCase(),
-						account: account,
+						net: NETWORK_MAGIC[dapi.network] || activeNet.toLowerCase(),
+						account: { address: account.address },
 						tokens: {
 							container: {},
 							object: null,
@@ -1456,7 +1464,7 @@ export const App = () => {
 						<WalletAuthMethods
 							isNeoLineSupport={isNeoLineSupport}
 							isNeonReady={isNeonReady}
-							hasOneGate={Boolean(dapi)}
+							isOneGateSupport={Boolean(dapi)}
 							onSelectWallet={(type) => {
 								onModal();
 								onConnectWallet(type);
