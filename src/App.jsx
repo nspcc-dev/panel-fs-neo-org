@@ -29,6 +29,7 @@ import QRCode from "react-qr-code";
 import {
 	invokeFunction,
 	hexToBytesToBase64,
+	attributesToBase64,
 } from './Functions/handle';
 import { getWcSdk } from './Functions/wcSdk';
 import 'bulma/css/bulma.min.css';
@@ -823,7 +824,7 @@ export const App = () => {
 				api('POST', `/v1/objects/${containerId}`, objectForm.file, {
 					'Content-Type': objectForm.file.type || 'application/octet-stream',
 					"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
-					'X-Attributes': JSON.stringify(attributesHeaders),
+					'X-Attributes-Base64': attributesToBase64(attributesHeaders),
 				}).then((e) => {
 					setLoadingForm(false);
 					if (e.message && e.message.indexOf('access to object operation denied') !== -1) {
