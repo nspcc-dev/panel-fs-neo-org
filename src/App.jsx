@@ -71,8 +71,6 @@ export const App = () => {
 	const [objectLinkLifetime, setObjectLinkLifetime] = useState(new Date().toLocaleDateString("sv"));
 	const [networkInfo, setNetworkInfo] = useState(null);
 	const [gatewayInfo, setGatewayInfo] = useState(null);
-	const [depositQuantity, setDepositQuantity] = useState(0);
-	const [withdrawQuantity, setWithdrawQuantity] = useState(0);
 	const [attributes, setAttributes] = useState([]);
 	const [isLoadContainers, setLoadContainers] = useState(false);
 	const [isLoadingForm, setLoadingForm] = useState(false);
@@ -981,91 +979,6 @@ export const App = () => {
 			handleError(error);
 		} finally {
 			setLoadingForm(false);
-		}
-	};
-
-	const onDeposit = async (neoBalanceTemp) => {
-		if (depositQuantity * 1e8 >= 1 && depositQuantity * 1e8 <= neoBalanceTemp) {
-			onModal('approveRequest');
-			const invocations = [{
-				scriptHash: NeoFSContract.gasToken,
-				operation: 'transfer',
-				args: [
-					{ type: 'Hash160', value: Neon.create.account(walletData.account.address).scriptHash },
-					{ type: 'Hash160', value: Neon.create.account(NeoFSContract.account).scriptHash },
-					{ type: 'Integer', value: depositQuantity * 1e8 },
-					{ type: 'Any', value: null },
-				]
-			}];
-
-			const signers = [{
-				scopes: 'CalledByEntry',
-				account: Neon.create.account(walletData.account.address).scriptHash,
-			}];
-
-			let response = '';
-			if (neolineN3) {
-				response = await neolineN3.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
-			} else if (dapi) {
-				response = await dapi.invoke(
-					[{ hash: invocations[0].scriptHash, operation: invocations[0].operation, args: invocations[0].args }],
-					signers,
-				).catch((err) => handleError(err));
-			} else {
-				response = await wcSdk.invokeFunction({ invocations, signers }).catch((error) => {
-					if (error.message === 'Failed or Rejected Request') {
-						onModal('failed', 'Failed or Rejected Request');
-					} else if (error.message === 'Error: intrinsic gas too low') {
-						onModal('failed', 'Transaction intrinsic gas too low');
-					} else {
-						onModal('failed', 'Something went wrong, try again');
-					}
-				});
-			}
-			if (!response.error) {
-				setDepositQuantity(0);
-				onModal('success', response.txid ? response.txid : response);
-			}
-		} else {
-			onPopup('failed', 'Incorrect amount');
-		}
-	};
-
-	const onWithdraw = async (neoFSBalanceTemp) => {
-		if (withdrawQuantity >= 1 && withdrawQuantity * 1e12 <= neoFSBalanceTemp) {
-			onModal('approveRequest');
-			const invocations = [{
-				scriptHash: NeoFSContract.scriptHash,
-				operation: 'withdraw',
-				args: [
-					{ type: 'Hash160', value: Neon.create.account(walletData.account.address).scriptHash },
-					{ type: 'Integer', value: withdrawQuantity },
-				]
-			}];
-
-			const signers = [{
-				scopes: 'CustomContracts',
-				account: Neon.create.account(walletData.account.address).scriptHash,
-				allowedContracts: [NeoFSContract.gasToken, NeoFSContract.scriptHash]
-			}];
-
-			let response = '';
-			if (neolineN3) {
-				response = await neolineN3.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
-			} else if (dapi) {
-				response = await dapi.invoke(
-					[{ hash: invocations[0].scriptHash, operation: invocations[0].operation, args: invocations[0].args }],
-					signers,
-				).catch((err) => handleError(err));
-			} else {
-				response = await wcSdk.invokeFunction({ invocations, signers }).catch((err) => handleError(err));
-			}
-			if (response && !response.message) {
-				setWithdrawQuantity(0);
-				onModal('success', response.txid ? response.txid : response);
-			}
-		} else {
-			onPopup('failed', 'Incorrect amount');
 		}
 	};
 
@@ -2333,96 +2246,6 @@ export const App = () => {
 								) : "Yes"}
 							</Button>
 						</div>
-					</div>
-				</div>
-			)}
-			{modal.current === 'deposit' && (
-				<div className="modal">
-					<div
-						className="modal_close_panel"
-						onClick={onModal}
-					/>
-					<div className="modal_content">
-						<div
-							className="modal_close"
-							onClick={onModal}
-						>
-							<img
-								src="/img/icons/close.svg"
-								height={30}
-								width={30}
-								alt="loader"
-							/>
-						</div>
-						<Heading align="center" size={5} weight="bold">{`Deposit from ${activeNet} to NeoFS`}</Heading>
-						<Form.Field>
-							<Form.Label size="small" weight="light">Quantity (GAS)</Form.Label>
-							<Form.Control>
-								<Form.Input
-									renderAs="input"
-									type="number"
-									value={depositQuantity}
-									onChange={(e) => setDepositQuantity(e.target.value)}
-								/>
-							</Form.Control>
-						</Form.Field>
-						<Button
-							renderAs="button"
-							color="primary"
-							onClick={() => onDeposit(modal.text.neoBalance)}
-							size="small"
-							style={{ display: 'flex', margin: 'auto' }}
-						>
-							Make a payment
-						</Button>
-					</div>
-				</div>
-			)}
-			{modal.current === 'withdraw' && (
-				<div className="modal">
-					<div
-						className="modal_close_panel"
-						onClick={onModal}
-					/>
-					<div className="modal_content">
-						<div
-							className="modal_close"
-							onClick={onModal}
-						>
-							<img
-								src="/img/icons/close.svg"
-								height={30}
-								width={30}
-								alt="loader"
-							/>
-						</div>
-						<Heading align="center" size={5} weight="bold">{`Withdraw from NeoFS to ${activeNet}`}</Heading>
-						<Heading className="input_caption" style={{ maxWidth: 310 }}>{`Withdrawing requires a fee to be paid, currently it's ${networkInfo ? 7 * networkInfo.withdrawalFee * 1e-8  : '-'} GAS.`} It will be reduced once the <a href="https://github.com/neo-project/neo/issues/1573" target="_blank" rel="noopener noreferrer">notary subsystem</a> is implemented in Neo</Heading>
-						<Form.Field>
-							<Form.Label size="small" weight="light">Quantity (GAS)</Form.Label>
-							<Form.Control>
-								<Form.Input
-									renderAs="input"
-									type="number"
-									value={withdrawQuantity}
-									onChange={(e) => setWithdrawQuantity(e.target.value)}
-									onKeyPress={(event) => {
-										if (!/[0-9]/.test(event.key)) {
-											event.preventDefault();
-										}
-									}}
-								/>
-							</Form.Control>
-						</Form.Field>
-						<Button
-							renderAs="button"
-							color="primary"
-							onClick={() => onWithdraw(modal.text.neoFSBalance)}
-							size="small"
-							style={{ display: 'flex', margin: 'auto' }}
-						>
-							Receive funds
-						</Button>
 					</div>
 				</div>
 			)}
