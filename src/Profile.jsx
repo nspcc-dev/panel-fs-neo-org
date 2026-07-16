@@ -7,6 +7,7 @@ import {
 	Button,
 	Box,
 	Tag,
+	Form,
 	Notification,
 } from 'react-bulma-components';
 import DomainItem from './Components/DomainItem/DomainItem';
@@ -42,6 +43,10 @@ const Profile = ({
 		onAuth,
 	}) => {
 	const [isLoading, setIsLoading] = useState(false);
+
+	const [activeTransfer, setActiveTransfer] = useState(null);
+	const [isSendingTransfer, setSendingTransfer] = useState(false);
+	const [quantity, setQuantity] = useState('');
 
 	const [domains, setDomains] = useState([]);
 	const [isLoadingDomains, setIsLoadingDomains] = useState(false);
@@ -230,6 +235,111 @@ const Profile = ({
 		});
 	};
 
+	const onDeposit = async () => {
+		if (quantity * 1e8 >= 1 && quantity * 1e8 <= neoBalance) {
+			onModal('approveRequest');
+			const invocations = [{
+				scriptHash: NeoFSContract.gasToken,
+				operation: 'transfer',
+				args: [
+					{ type: 'Hash160', value: Neon.create.account(walletData.account.address).scriptHash },
+					{ type: 'Hash160', value: Neon.create.account(NeoFSContract.account).scriptHash },
+					{ type: 'Integer', value: String(Math.round(quantity * 1e8)) },
+					{ type: 'Any', value: null },
+				]
+			}];
+
+			const signers = [{
+				scopes: 'CalledByEntry',
+				account: Neon.create.account(walletData.account.address).scriptHash,
+			}];
+
+			let response = '';
+			if (neolineN3) {
+				response = await neolineN3.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
+			} else if (dapi) {
+				response = await dapi.invoke(
+					[{ hash: invocations[0].scriptHash, operation: invocations[0].operation, args: invocations[0].args }],
+					signers,
+				).catch((err) => handleError(err));
+			} else {
+				response = await wcSdk.invokeFunction({ invocations, signers }).catch((error) => {
+					if (error.message === 'Failed or Rejected Request') {
+						onModal('failed', 'Failed or Rejected Request');
+					} else if (error.message === 'Error: intrinsic gas too low') {
+						onModal('failed', 'Transaction intrinsic gas too low');
+					} else {
+						onModal('failed', 'Something went wrong, try again');
+					}
+				});
+			}
+			if (response && !response.error) {
+				setQuantity('');
+				onModal('success', response.txid ? response.txid : response);
+				return true;
+			}
+		} else {
+			onPopup('failed', 'Incorrect amount');
+		}
+		return false;
+	};
+
+	const onWithdraw = async () => {
+		if (quantity >= 1 && quantity * 1e12 <= neoFSBalance) {
+			onModal('approveRequest');
+			const invocations = [{
+				scriptHash: NeoFSContract.scriptHash,
+				operation: 'withdraw',
+				args: [
+					{ type: 'Hash160', value: Neon.create.account(walletData.account.address).scriptHash },
+					{ type: 'Integer', value: quantity },
+				]
+			}];
+
+			const signers = [{
+				scopes: 'CustomContracts',
+				account: Neon.create.account(walletData.account.address).scriptHash,
+				allowedContracts: [NeoFSContract.gasToken, NeoFSContract.scriptHash]
+			}];
+
+			let response = '';
+			if (neolineN3) {
+				response = await neolineN3.invoke({ ...invocations[0], signers }).catch((err) => handleError(err));
+			} else if (dapi) {
+				response = await dapi.invoke(
+					[{ hash: invocations[0].scriptHash, operation: invocations[0].operation, args: invocations[0].args }],
+					signers,
+				).catch((err) => handleError(err));
+			} else {
+				response = await wcSdk.invokeFunction({ invocations, signers }).catch((err) => handleError(err));
+			}
+			if (response && !response.message) {
+				setQuantity('');
+				onModal('success', response.txid ? response.txid : response);
+				return true;
+			}
+		} else {
+			onPopup('failed', 'Incorrect amount');
+		}
+		return false;
+	};
+
+	const onToggleTransfer = (transfer) => {
+		setQuantity('');
+		setActiveTransfer(activeTransfer === transfer ? null : transfer);
+	};
+
+	const onSubmitTransfer = async () => {
+		setSendingTransfer(true);
+		const isSucceed = activeTransfer === 'deposit'
+			? await onDeposit()
+			: await onWithdraw();
+		setSendingTransfer(false);
+		if (isSucceed) {
+			setActiveTransfer(null);
+		}
+	};
+
 	return (
 		<Container style={{ minHeight: 'calc(100vh - 212px)' }}>
 			{walletData ? (
@@ -294,23 +404,63 @@ const Profile = ({
 						<div style={{ display: 'flex', flexWrap: 'wrap' }}>
 							<Button
 								renderAs="button"
-								color="primary"
+								color={activeTransfer === 'deposit' ? 'primary' : 'secondary'}
 								size="small"
-								onClick={() => onModal('deposit', { neoBalance })}
+								onClick={() => onToggleTransfer('deposit')}
 								style={isNotAvailableNeoFS ? { display: 'block', margin: '0 10px 10px 0', pointerEvents: 'none', opacity: 0.6 } : { display: 'block', margin: '0 10px 10px 0' }}
 							>
 								{`Deposit from ${activeNet} to NeoFS`}
 							</Button>
 							<Button
 								renderAs="button"
-								color="primary"
+								color={activeTransfer === 'withdraw' ? 'primary' : 'secondary'}
 								size="small"
-								onClick={() => onModal('withdraw', { neoFSBalance })}
+								onClick={() => onToggleTransfer('withdraw')}
 								style={isNotAvailableNeoFS ? { display: 'block', pointerEvents: 'none', opacity: 0.6 } : { display: 'block' }}
 							>
 								{`Withdraw from NeoFS to ${activeNet}`}
 							</Button>
 						</div>
+						{activeTransfer && (
+							<div style={{ marginTop: 10, maxWidth: 420 }}>
+								{activeTransfer === 'withdraw' && (
+									<Heading className="input_caption" style={{ maxWidth: 420 }}>{`Withdrawing requires a fee to be paid, currently it's ${networkInfo ? 7 * networkInfo.withdrawalFee * 1e-8 : '-'} GAS.`} It will be reduced once the <a href="https://github.com/neo-project/neo/issues/1573" target="_blank" rel="noopener noreferrer">notary subsystem</a> is implemented in Neo</Heading>
+								)}
+								<Form.Field kind="addons">
+									<Form.Control fullwidth>
+										<Form.Input
+											renderAs="input"
+											type="number"
+											size="small"
+											autoFocus
+											placeholder="Quantity (GAS)"
+											value={quantity}
+											onChange={(e) => setQuantity(e.target.value)}
+											onKeyDown={(e) => {
+												if (e.key === 'Enter' && !isSendingTransfer) {
+													onSubmitTransfer();
+												} else if (e.key === 'Escape') {
+													setActiveTransfer(null);
+												} else if (activeTransfer === 'withdraw' && e.key.length === 1 && !/[0-9]/.test(e.key)) {
+													e.preventDefault();
+												}
+											}}
+										/>
+									</Form.Control>
+									<Form.Control>
+										<Button
+											renderAs="button"
+											color="primary"
+											size="small"
+											disabled={isSendingTransfer}
+											onClick={onSubmitTransfer}
+										>
+											{activeTransfer === 'deposit' ? 'Make a payment' : 'Receive funds'}
+										</Button>
+									</Form.Control>
+								</Form.Field>
+							</div>
+						)}
 					</Box>
 					<Box id="domains">
 						<Heading style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} weight="bold">
