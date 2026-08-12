@@ -534,17 +534,11 @@ export const App = () => {
 					}]
 				}, ...presets.forbid.eACLParams]
 			}
-			api('POST', '/v2/auth/bearer', body).then((e) => {
-				if (e.message) {
-					onPopup('failed', e.message);
-				} else {
-					onSignMessage(e, type, operation, params);
-				}
-			});
-			return;
 		} else if (type === 'object' && params.objectId) {
-			body = [{
-				"object": [{
+			body = {
+				"issuer": walletData.account.address,
+				"lifetime": formatDateToHours(objectLinkLifetime),
+				"records": [{
 					"operation": 'GET',
 					"action": "ALLOW",
 					"filters": [{
@@ -584,10 +578,12 @@ export const App = () => {
 						"keys": []
 					}]
 				}, ...presets.forbid.eACLParams]
-			}]
+			}
 		} else if (type === 'object') {
-			body = [{
-				"object": [{
+			body = {
+				"issuer": walletData.account.address,
+				"lifetime": 2,
+				"records": [{
 					"operation": 'GET',
 					"action": "ALLOW",
 					"filters": [],
@@ -612,15 +608,15 @@ export const App = () => {
 						"keys": []
 					}]
 				}]
-			}]
+			}
 		}
 
-		api('POST', '/v1/auth', body, {
-			"X-Bearer-Owner-Id": walletData.account.address,
-			"X-Bearer-Lifetime": params.objectId ? formatDateToHours(objectLinkLifetime) : 2,
-			"X-Bearer-For-All-Users": true,
-		}).then((e) => {
-			onSignMessage(e[0], type, operation, params);
+		api('POST', '/v2/auth/bearer', body).then((e) => {
+			if (e.message) {
+				onPopup('failed', e.message);
+			} else {
+				onSignMessage(e, type, operation, params);
+			}
 		});
 	};
 
@@ -657,15 +653,11 @@ export const App = () => {
 		}
 
 		if (type === 'object') {
-			api(params.address ? 'POST' : 'GET', params.address ? '/v2/auth/bearer/complete' : '/v1/auth/bearer?walletConnect=true', params.address ? {
+			api('POST', '/v2/auth/bearer/complete', {
 				"key": response.publicKey,
 				"scheme": "WALLETCONNECT",
 				"token": msg.token,
 				"signature": response.data + response.salt,
-			} : {}, params.address ? {} : {
-				"Authorization": `Bearer ${msg.token}`,
-				"X-Bearer-Signature": response.data + response.salt,
-				"X-Bearer-Signature-Key": response.publicKey,
 			}).then((e) => {
 				if (params.objectId || params.address) {
 					onModal('shareObjectLink', { ...params, token: e.token })
