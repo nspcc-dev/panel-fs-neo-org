@@ -4,6 +4,11 @@ Changelog for NeoFS Panel
 
 ## [Unreleased]
 
+## [0.10.2] - 2026-08-18
+
+### Changed
+- Dropped use of deprecated v1/auth REST endpoints for bearer tokens (#291)
+
 ## [0.10.1] - 2026-07-28
 
 ### Changed
@@ -243,4 +248,5 @@ First public review release.
 [0.9.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.9.0
 [0.10.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.10.0
 [0.10.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.10.1
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.10.1...master
+[0.10.2]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.10.2
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.10.2...master
