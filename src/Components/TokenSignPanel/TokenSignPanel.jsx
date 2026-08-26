@@ -42,18 +42,20 @@ export default function TokenSignPanel({
 	title = 'Sign master token',
 	requiredVerbs = [],
 	availableVerbs = ALL_VERBS,
+	resignVerbs = [],
 	params = {},
 	style,
 }) {
 	const tokens = walletData?.tokens || { container: {}, object: null };
+	const isSigned = (verb) => !resignVerbs.includes(verb) && isVerbSigned(tokens, verb);
 
 	const initialVerbs = useMemo(() => {
 		const set = new Set();
 		availableVerbs.forEach((verb) => {
-			if (!isVerbSigned(tokens, verb)) set.add(verb);
+			if (!isSigned(verb)) set.add(verb);
 		});
 		requiredVerbs.forEach((verb) => {
-			if (!isVerbSigned(tokens, verb)) set.add(verb);
+			if (!isSigned(verb)) set.add(verb);
 		});
 		return set;
 	}, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -65,30 +67,31 @@ export default function TokenSignPanel({
 
 	const requiredKey = requiredVerbs.join('|');
 	const availableKey = availableVerbs.join('|');
+	const resignKey = resignVerbs.join('|');
 
 	useEffect(() => {
 		setSelectedVerbs((prev) => {
 			const next = new Set(prev);
 			let changed = false;
 			requiredVerbs.forEach((verb) => {
-				if (!isVerbSigned(tokens, verb) && !next.has(verb)) {
+				if (!isSigned(verb) && !next.has(verb)) {
 					next.add(verb);
 					changed = true;
 				}
 			});
 			availableVerbs.forEach((verb) => {
-				if (!isVerbSigned(tokens, verb) && !prev.has(verb) && !next.has(verb)) {
+				if (!isSigned(verb) && !prev.has(verb) && !next.has(verb)) {
 					next.add(verb);
 					changed = true;
 				}
 			});
 			return changed ? next : prev;
 		});
-	}, [requiredKey, availableKey]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [requiredKey, availableKey, resignKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
 		if (!isSigning || !pending) return;
-		const isDone = pending.every((verb) => isVerbSigned(tokens, verb));
+		const isDone = pending.every((verb) => isSigned(verb));
 		if (isDone) {
 			setSigning(false);
 			setPending(null);
@@ -98,7 +101,7 @@ export default function TokenSignPanel({
 	const onSign = async () => {
 		const verbsSet = new Set(selectedVerbs);
 		requiredVerbs.forEach((verb) => verbsSet.add(verb));
-		const verbs = Array.from(verbsSet).filter((verb) => !isVerbSigned(tokens, verb));
+		const verbs = Array.from(verbsSet).filter((verb) => !isSigned(verb));
 		if (verbs.length === 0) return;
 
 		const hasNewObjectVerbs = verbs.some((verb) => verb.startsWith('OBJECT_'));
@@ -120,7 +123,7 @@ export default function TokenSignPanel({
 
 	const toggleVerb = (verb) => {
 		if (requiredVerbs.includes(verb)) return;
-		if (isVerbSigned(tokens, verb)) return;
+		if (isSigned(verb)) return;
 		setSelectedVerbs((prev) => {
 			const next = new Set(prev);
 			if (next.has(verb)) next.delete(verb);
@@ -168,7 +171,7 @@ export default function TokenSignPanel({
 								<div className="token_sign_panel_group_title">{group.title}</div>
 								{groupVerbs.map(({ verb, label }) => {
 									const isRequired = requiredVerbs.includes(verb);
-									const alreadySigned = isVerbSigned(tokens, verb);
+									const alreadySigned = isSigned(verb);
 									return (
 										<Form.Field key={verb}>
 											<Form.Control>

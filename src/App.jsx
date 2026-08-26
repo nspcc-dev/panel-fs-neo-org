@@ -155,7 +155,12 @@ export const App = () => {
 				"filters": [],
 				"targets": [{ "keys": [], "role": "OTHERS" }],
 			}],
-		}
+		},
+		custom: {
+			name: 'custom',
+			preset: 'custom',
+			eACLParams: [],
+		},
 	});
 	const [shareObjectForm, setShareObjectForm] = useState({
 		type: '',
@@ -190,6 +195,10 @@ export const App = () => {
 	const [popups, setPopups] = useState([]);
 	const popupTimers = useRef(new Map());
 	const popupCounter = useRef(0);
+
+	const containerTokens = walletData ? walletData.tokens.container : {};
+	const isEaclTokenShared = !!(containerTokens.CONTAINER_PUT && containerTokens.CONTAINER_SET_EACL && containerTokens.CONTAINER_PUT.token === containerTokens.CONTAINER_SET_EACL.token);
+	const eaclResignVerbs = containerForm.eACLParams.length > 0 && !isEaclTokenShared ? ['CONTAINER_PUT', 'CONTAINER_SET_EACL'] : [];
 
 	const onModal = (current = null, text = null, params = null) => {
 		setModal({ current, text, params });
@@ -688,6 +697,11 @@ export const App = () => {
 			if (attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0)) {
 				if (containerForm.containerName.length > 0 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0) {
 					if (containerForm.containerName.length >= 3) {
+						const eACLParams = containerForm.eACLParams.map(({ isOpen, ...rest }) => rest);
+						if (eACLParams.length > 0 && !isEaclTokenShared) {
+							setError({ active: true, type: ['eacl'], text: 'To create a container with EACL, "Create container" and "Manage eACL" permissions must be signed in one token. Please sign a new token.' });
+							return;
+						}
 						setError({ active: false, type: [], text: '' });
 						setLoadingForm(true);
 						api('POST', '/v1/containers?walletConnect=true&name-scope-global=true', {
@@ -695,8 +709,9 @@ export const App = () => {
 							"placementPolicy": containerForm.placementPolicy,
 							"basicAcl": containerForm.basicAcl,
 							"attributes": attributes,
+							...(eACLParams.length > 0 ? { "eacl": eACLParams } : {}),
 						}, {
-							"Authorization": `Bearer ${walletData.tokens.container.CONTAINER_PUT.token}`,
+							"Authorization": `Bearer ${containerTokens.CONTAINER_PUT.token}`,
 						}).then((e) => {
 							if (e.message && e.message.indexOf('insufficient balance to create container') !== -1) {
 								setLoadingForm(false);
@@ -714,27 +729,12 @@ export const App = () => {
 								setLoadingForm(false);
 								setError({ active: true, type: [], text: e.message });
 							} else {
-								if (containerForm.eACLParams.length > 0) {
-									api('PUT', `/v1/containers/${e.containerId}/eacl?walletConnect=true`, {
-										"records": containerForm.eACLParams.filter((item) => delete item.isOpen),
-									}, {
-										"Authorization": `Bearer ${walletData.tokens.container.CONTAINER_SET_EACL.token}`,
-									}).then(() => {
-										setLoadingForm(false);
-										onPopup('success', 'New container with EACL has been created');
-										setLoadContainers(true);
-										onResetContainerForm();
-										setAttributes([]);
-										onModal();
-									});
-								} else {
-									setLoadingForm(false);
-									onPopup('success', 'New container has been created');
-									setLoadContainers(true);
-									onResetContainerForm();
-									setAttributes([]);
-									onModal();
-								}
+								setLoadingForm(false);
+								onPopup('success', eACLParams.length > 0 ? 'New container with EACL has been created' : 'New container has been created');
+								setLoadContainers(true);
+								onResetContainerForm();
+								setAttributes([]);
+								onModal();
 							}
 						});
 					} else {
@@ -1776,7 +1776,7 @@ export const App = () => {
 									{isError.text}
 								</Notification>
 							)}
-							{(!walletData.tokens.container.CONTAINER_PUT || (!walletData.tokens.container.CONTAINER_SET_EACL && containerForm.eACLParams.length > 0)) ? (
+							{(!walletData.tokens.container.CONTAINER_PUT || (containerForm.eACLParams.length > 0 && !isEaclTokenShared)) ? (
 								<TokenSignPanel
 									walletData={walletData}
 									onAuth={onAuth}
@@ -1784,6 +1784,7 @@ export const App = () => {
 									requiredVerbs={containerForm.eACLParams.length > 0
 										? ['CONTAINER_PUT', 'CONTAINER_SET_EACL']
 										: ['CONTAINER_PUT']}
+									resignVerbs={eaclResignVerbs}
 									style={{ margin: '25px 0 10px', maxWidth: 'unset' }}
 								/>
 							) : (
