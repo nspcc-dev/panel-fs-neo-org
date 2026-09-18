@@ -542,15 +542,28 @@ const Profile = ({
 									}}
 								>{objectsTotalSize && networkInfo ? `${formatGasPerMonth(objectsTotalSize, networkInfo)} GAS per month (${formatBytes(objectsTotalSize)})` : '-'}</Heading>
 							</div>
-							<Button
-								renderAs="button"
-								color="primary"
-								size="small"
-								onClick={() => onModal('createContainer', { neoFSBalance })}
-								style={isNotAvailableNeoFS ? { pointerEvents: 'none', opacity: 0.6 } : {}}
-							>
-								New container
-							</Button>
+							<div style={{ display: 'flex', gap: 10 }}>
+								{params.authmate && (
+									<Button
+										renderAs="button"
+										color="primary"
+										size="small"
+										onClick={() => onModal('s3Credentials', { containers })}
+										style={isNotAvailableNeoFS ? { pointerEvents: 'none', opacity: 0.6 } : {}}
+									>
+										S3 credentials
+									</Button>
+								)}
+								<Button
+									renderAs="button"
+									color="primary"
+									size="small"
+									onClick={() => onModal('createContainer', { neoFSBalance })}
+									style={isNotAvailableNeoFS ? { pointerEvents: 'none', opacity: 0.6 } : {}}
+								>
+									New container
+								</Button>
+							</div>
 						</Heading>
 						{containers.map((containerItem, index) => (
 							<ContainerItem

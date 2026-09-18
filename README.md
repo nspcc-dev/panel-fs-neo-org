@@ -20,6 +20,7 @@ framework under the hood and includes:
 - Manage containers: all CRUD operations are available
 - Manage objects: create objects with custom attributes, show them and delete
 - Manage ACL and extended ACL fluently
+- Issue S3 credentials via the S3 authmate service
 
 # Requirements
 
@@ -45,6 +46,8 @@ Set variables in `.env` file
 - `VITE_NETWORK` - Network of the Neo (might be `mainnet`, `testnet`)
 - `VITE_NEOFS_ACCOUNT` - Neo3 address of the NeoFS contract
 - `VITE_SIDECHAIN_RPC` - NeoFS side chain RPC node
+- `VITE_AUTHMATESRV` - [NeoFS S3 authmate service](https://github.com/nspcc-dev/neofs-s3-gw/blob/master/docs/authmatesrv.md),
+  optional, enables S3 credentials issuing on the profile page
 
 Run next commands from project's root:
 

@@ -22,6 +22,7 @@ import Profile from './Profile';
 import Getobject from './Getobject';
 import EACLPanel from './Components/EACLPanel/EACLPanel';
 import TokenSignPanel from './Components/TokenSignPanel/TokenSignPanel';
+import S3CredentialsPanel from './Components/S3CredentialsPanel/S3CredentialsPanel';
 import WalletAuthMethods from './Components/WalletAuthMethods/WalletAuthMethods';
 import api from './api';
 import Neon from "@cityofzion/neon-js";
@@ -66,6 +67,7 @@ export const App = () => {
 
 	const [params] = useState({
 		rest_gw: import.meta.env.VITE_RESTGW ? import.meta.env.VITE_RESTGW : 'https://rest.t5.fs.neo.org',
+		authmate: (import.meta.env.VITE_AUTHMATESRV || '').replace(/\/$/, ''),
 	});
 
 	const [objectLinkLifetime, setObjectLinkLifetime] = useState(new Date().toLocaleDateString("sv"));
@@ -647,19 +649,19 @@ export const App = () => {
 		}
 	};
 
-	const onSignMessage = async (msg = '', type, operation, params) => {
-		let response = '';
-
+	const onSignWithWallet = async (message) => {
 		if (neolineN3) {
-			response = await neolineN3.signMessage({ message: msg.token }).catch((err) => handleError(err));
-		} else if (dapi) {
-			response = await dapi.signMessage(msg.token).catch((err) => handleError(err));
-			if (response) {
-				response = { publicKey: response.pubkey, data: response.signature, salt: '' };
-			}
-		} else {
-			response = await wcSdk.signMessage({ message: msg.token, version: 1 }).catch((err) => handleError(err));
+			return neolineN3.signMessage({ message }).catch((err) => handleError(err));
 		}
+		if (dapi) {
+			const response = await dapi.signMessage(message).catch((err) => handleError(err));
+			return response ? { publicKey: response.pubkey, data: response.signature, salt: '' } : response;
+		}
+		return wcSdk.signMessage({ message, version: 1 }).catch((err) => handleError(err));
+	};
+
+	const onSignMessage = async (msg = '', type, operation, params) => {
+		const response = await onSignWithWallet(msg.token);
 
 		if (type === 'object') {
 			api('POST', '/v2/auth/bearer/complete', {
@@ -1422,6 +1424,37 @@ export const App = () => {
 								params={modal.params || {}}
 							/>
 						)}
+					</div>
+				</div>
+			)}
+			{modal.current === 's3Credentials' && (
+				<div className="modal">
+					<div
+						className="modal_close_panel"
+						onClick={onModal}
+					/>
+					<div className="modal_scroll">
+						<div className="modal_content" style={{ maxWidth: 650 }}>
+							<div
+								className="modal_close"
+								onClick={onModal}
+							>
+								<img
+									src="/img/icons/close.svg"
+									height={30}
+									width={30}
+									alt="close"
+								/>
+							</div>
+							<Heading align="center" size={5} weight="bold">S3 credentials</Heading>
+							<S3CredentialsPanel
+								authmate={params.authmate}
+								walletData={walletData}
+								containers={modal.text.containers}
+								onAuth={onAuth}
+								onSign={onSignWithWallet}
+							/>
+						</div>
 					</div>
 				</div>
 			)}
