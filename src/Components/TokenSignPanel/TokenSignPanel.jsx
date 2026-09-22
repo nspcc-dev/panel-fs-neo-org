@@ -2,13 +2,15 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Heading, Button, Form } from 'react-bulma-components';
 import './TokenSignPanel.css';
 
-const VERB_GROUPS = [
+export const VERB_GROUPS = [
 	{
 		title: 'Container',
 		verbs: [
 			{ verb: 'CONTAINER_PUT', label: 'Create container' },
 			{ verb: 'CONTAINER_DELETE', label: 'Delete container' },
 			{ verb: 'CONTAINER_SET_EACL', label: 'Manage eACL' },
+			{ verb: 'CONTAINER_SET_ATTRIBUTE', label: 'Set container attribute' },
+			{ verb: 'CONTAINER_REMOVE_ATTRIBUTE', label: 'Remove container attribute' },
 		],
 	},
 	{

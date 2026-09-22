@@ -110,9 +110,17 @@ export function attributesToBase64(attributes) {
 	return bytesToBase64(new TextEncoder().encode(JSON.stringify(attributes)));
 }
 
+export function base64ToBytes(value) {
+	return Uint8Array.from(atob(value), (char) => char.charCodeAt(0));
+}
+
 export function base64ToAttributes(value) {
-	const bytes = Uint8Array.from(atob(value), (char) => char.charCodeAt(0));
-	return JSON.parse(new TextDecoder().decode(bytes));
+	return JSON.parse(new TextDecoder().decode(base64ToBytes(value)));
+}
+
+export function isPublicReadContainer(basicAcl) {
+	const othersGetHead = 0x22;
+	return (parseInt(basicAcl, 16) & othersGetHead) === othersGetHead;
 }
 
 export async function invokeFunction(rpcUrl, params, method = "invokefunction") {
