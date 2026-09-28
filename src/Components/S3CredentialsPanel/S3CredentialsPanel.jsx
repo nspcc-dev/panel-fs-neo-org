@@ -91,7 +91,7 @@ export default function S3CredentialsPanel({
 					token: prepared.tokens[i],
 					key: hexToBytesToBase64(signature.publicKey),
 					signature: hexToBytesToBase64(signature.data + signature.salt),
-					scheme: 'WALLETCONNECT',
+					scheme: signature.scheme || 'WALLETCONNECT',
 				});
 			}
 
