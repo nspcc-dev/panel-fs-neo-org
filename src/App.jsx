@@ -30,6 +30,7 @@ import QRCode from "react-qr-code";
 import {
 	invokeFunction,
 	hexToBytesToBase64,
+	base64ToHex,
 	attributesToBase64,
 } from './Functions/handle';
 import { getWcSdk } from './Functions/wcSdk';
@@ -654,19 +655,22 @@ export const App = () => {
 			return neolineN3.signMessage({ message }).catch((err) => handleError(err));
 		}
 		if (dapi) {
-			const response = await dapi.signMessage(message).catch((err) => handleError(err));
-			return response ? { publicKey: response.pubkey, data: response.signature, salt: '' } : response;
+			const response = await dapi.signMessage(message, undefined, { isBase64Encoded: true }).catch((err) => handleError(err));
+			return response ? { publicKey: response.pubkey, data: base64ToHex(response.signature), salt: '', scheme: 'DETERMINISTIC_SHA256' } : response;
 		}
 		return wcSdk.signMessage({ message, version: 1 }).catch((err) => handleError(err));
 	};
 
 	const onSignMessage = async (msg = '', type, operation, params) => {
 		const response = await onSignWithWallet(msg.token);
+		if (!response) {
+			throw new Error('Signing aborted');
+		}
 
 		if (type === 'object') {
 			api('POST', '/v2/auth/bearer/complete', {
 				"key": response.publicKey,
-				"scheme": "WALLETCONNECT",
+				"scheme": response.scheme || "WALLETCONNECT",
 				"token": msg.token,
 				"signature": response.data + response.salt,
 			}).then((e) => {
@@ -680,7 +684,7 @@ export const App = () => {
 			const e = await api('POST', '/v2/auth/session/complete', {
 				"key": response.publicKey,
 				"lock": msg.lock,
-				"scheme": "WALLETCONNECT",
+				"scheme": response.scheme || "WALLETCONNECT",
 				"token": msg.token,
 				"signature": hexToBytesToBase64(response.data + response.salt),
 			});

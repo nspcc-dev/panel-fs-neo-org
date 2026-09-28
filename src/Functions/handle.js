@@ -114,6 +114,10 @@ export function base64ToBytes(value) {
 	return Uint8Array.from(atob(value), (char) => char.charCodeAt(0));
 }
 
+export function base64ToHex(value) {
+	return Array.from(base64ToBytes(value), (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 export function base64ToAttributes(value) {
 	return JSON.parse(new TextDecoder().decode(base64ToBytes(value)));
 }
