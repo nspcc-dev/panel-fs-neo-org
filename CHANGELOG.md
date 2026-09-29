@@ -4,6 +4,15 @@ Changelog for NeoFS Panel
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-09-29
+
+### Added
+- Initial EACL setting when creating a container (#295)
+- S3 credentials issuance with authbox service (#298)
+
+### Fixed
+- Compatibility with updated OneGate wallet (#300)
+
 ## [0.10.2] - 2026-08-18
 
 ### Changed
@@ -249,4 +258,5 @@ First public review release.
 [0.10.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.10.0
 [0.10.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.10.1
 [0.10.2]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.10.2
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.10.2...master
+[0.11.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.11.0
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.11.0...master
