@@ -20,7 +20,6 @@ export const VERB_GROUPS = [
 			{ verb: 'OBJECT_GET', label: 'Download object' },
 			{ verb: 'OBJECT_HEAD', label: 'Read object metadata' },
 			{ verb: 'OBJECT_DELETE', label: 'Delete object' },
-			{ verb: 'OBJECT_RANGE', label: 'Read object range' },
 			{ verb: 'OBJECT_SEARCH', label: 'Search objects' },
 		],
 	},
