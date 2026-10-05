@@ -117,11 +117,6 @@ export const App = () => {
 				"action": "DENY",
 				"filters": [],
 				"targets": [{ "keys": [], "role": "OTHERS" }],
-			}, {
-				"operation": "RANGE",
-				"action": "DENY",
-				"filters": [],
-				"targets": [{ "keys": [], "role": "OTHERS" }],
 			}],
 		},
 		shared: {
@@ -149,11 +144,6 @@ export const App = () => {
 				"targets": [{ "keys": [], "role": "OTHERS" }],
 			}, {
 				"operation": "HEAD",
-				"action": "ALLOW",
-				"filters": [],
-				"targets": [{ "keys": [], "role": "OTHERS" }],
-			}, {
-				"operation": "RANGE",
 				"action": "ALLOW",
 				"filters": [],
 				"targets": [{ "keys": [], "role": "OTHERS" }],
@@ -490,7 +480,7 @@ export const App = () => {
 			body = {
 				"contexts": [{
 					"containerID": params.containerId,
-					"verbs": ['OBJECT_GET', 'OBJECT_RANGE', 'OBJECT_HEAD'],
+					"verbs": ['OBJECT_GET', 'OBJECT_HEAD'],
 				}],
 				"issuer": walletData.account.address,
 				"targets": [gatewayInfo.address],
@@ -521,18 +511,6 @@ export const App = () => {
 						"accounts": [params.address],
 					}]
 				}, {
-					"operation": 'RANGE',
-					"action": "ALLOW",
-					"filters": [{
-						"headerType": "OBJECT",
-						"key": "$Object:objectID",
-						"matchType": "STRING_EQUAL",
-						"value": params.objectId,
-					}],
-					"targets": [{
-						"accounts": [params.address],
-					}]
-				}, {
 					"operation": 'HEAD',
 					"action": "ALLOW",
 					"filters": [{
@@ -552,19 +530,6 @@ export const App = () => {
 				"lifetime": formatDateToHours(objectLinkLifetime),
 				"records": [{
 					"operation": 'GET',
-					"action": "ALLOW",
-					"filters": [{
-						"headerType": "OBJECT",
-						"key": "$Object:objectID",
-						"matchType": "STRING_EQUAL",
-						"value": params.objectId,
-					}],
-					"targets": [{
-						"role": "OTHERS",
-						"keys": []
-					}]
-				}, {
-					"operation": 'RANGE',
 					"action": "ALLOW",
 					"filters": [{
 						"headerType": "OBJECT",
