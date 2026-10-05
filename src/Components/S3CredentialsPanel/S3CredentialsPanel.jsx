@@ -97,7 +97,7 @@ export default function S3CredentialsPanel({
 
 			setStep('Packing access box');
 
-			const completed = await api('POST', `${authmate}/v1/auth/s3/complete`, { tokens, ...(prepared.state ? { state: prepared.state } : {}) });
+			const completed = await api('POST', `${authmate}/v1/auth/s3/complete`, { tokens });
 			if (completed.message) throw new Error(completed.message);
 
 			setStep('Storing access box');
@@ -110,7 +110,7 @@ export default function S3CredentialsPanel({
 
 			setResult({
 				accessKeyId: `${boxContainer}0${stored.object_id}`,
-				secretAccessKey: prepared.secretAccessKey || completed.secretAccessKey,
+				secretAccessKey: prepared.secretAccessKey,
 				expiresAt: completed.expiresAt,
 				box: `${boxContainer}/${stored.object_id}`,
 			});
