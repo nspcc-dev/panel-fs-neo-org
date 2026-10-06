@@ -51,12 +51,15 @@ export default function EACLPanel({
 			}, {
 				"Authorization": `Bearer ${walletData.tokens.container.CONTAINER_SET_EACL.token}`,
 			}).then((e) => {
-				setLoadingForm(false);
 				if (e.message) {
 					setError({ active: true, type: ['eacl'], text: e.message });
 				} else {
 					setLoadContainers(true);
 				}
+			}).catch(() => {
+				setError({ active: true, type: ['eacl'], text: 'Failed to update eACL. Please try again.' });
+			}).finally(() => {
+				setLoadingForm(false);
 			});
 		} else {
 			setError({ active: true, type: ['eacl'], text: 'Please fill in all required fields.' });

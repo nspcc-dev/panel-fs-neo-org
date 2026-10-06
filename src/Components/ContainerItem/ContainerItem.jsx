@@ -162,10 +162,15 @@ export default function ContainerItem({
 	const onGetEACL = (containerId) => {
 		setLoadingEACL(true);
 		api('GET', `/v1/containers/${containerId}/eacl`).then((e) => {
-			setLoadingEACL(false);
+			if (e.message) throw new Error(e.message);
 			if (e.records) {
 				setEACLParams(e.records);
 			}
+		}).catch((error) => {
+			onPopup('failed', error?.message || 'Failed to retrieve eACL. Please try again.');
+			setActivePanel((current) => current === 'eACL' ? '' : current);
+		}).finally(() => {
+			setLoadingEACL(false);
 		});
 	};
 

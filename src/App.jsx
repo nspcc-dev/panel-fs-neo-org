@@ -469,13 +469,6 @@ export const App = () => {
 				"issuer": walletData.account.address,
 				"targets": [gatewayInfo.address],
 			}
-			const e = await api('POST', '/v2/auth/session', body);
-			if (e.message) {
-				onPopup('failed', e.message);
-				throw new Error(e.message);
-			}
-			await onSignMessage(e, type, operation, params);
-			return;
 		} else if (type === 'sharedObjectAccess') {
 			body = {
 				"contexts": [{
@@ -485,14 +478,6 @@ export const App = () => {
 				"issuer": walletData.account.address,
 				"targets": [gatewayInfo.address],
 			}
-			api('POST', '/v2/auth/session', body).then((e) => {
-				if (e.message) {
-					onPopup('failed', e.message);
-				} else {
-					onSignMessage(e, type, operation, params).catch(() => {});
-				}
-			});
-			return;
 		} else if (type === 'object' && params.address) {
 			body = {
 				"issuer": walletData.account.address,
@@ -588,13 +573,18 @@ export const App = () => {
 			}
 		}
 
-		api('POST', '/v2/auth/bearer', body).then((e) => {
+		try {
+			const e = await api('POST', type === 'object' ? '/v2/auth/bearer' : '/v2/auth/session', body);
 			if (e.message) {
-				onPopup('failed', e.message);
-			} else {
-				onSignMessage(e, type, operation, params);
+				throw new Error(e.message);
 			}
-		});
+			await onSignMessage(e, type, operation, params);
+		} catch (error) {
+			if (error?.message !== 'Signing aborted') {
+				onPopup('failed', error?.message || 'Unable to sign token. Check your connection and try again.');
+			}
+			if (type === 'container') throw error;
+		}
 	};
 
 	const handleError = (error, type) => {
@@ -633,18 +623,20 @@ export const App = () => {
 		}
 
 		if (type === 'object') {
-			api('POST', '/v2/auth/bearer/complete', {
+			const e = await api('POST', '/v2/auth/bearer/complete', {
 				"key": response.publicKey,
 				"scheme": response.scheme || "WALLETCONNECT",
 				"token": msg.token,
 				"signature": response.data + response.salt,
-			}).then((e) => {
-				if (params.objectId || params.address) {
-					onModal('shareObjectLink', { ...params, token: e.token })
-				} else {
-					onUpdateWalletData(response, params, operation, type, msg, e.token);
-				}
 			});
+			if (e.message) {
+				throw new Error(e.message);
+			}
+			if (params.objectId || params.address) {
+				onModal('shareObjectLink', { ...params, token: e.token })
+			} else {
+				onUpdateWalletData(response, params, operation, type, msg, e.token);
+			}
 		} else if (!response.error) {
 			const e = await api('POST', '/v2/auth/session/complete', {
 				"key": response.publicKey,
@@ -654,11 +646,11 @@ export const App = () => {
 				"signature": hexToBytesToBase64(response.data + response.salt),
 			});
 			if (e.message) {
-				onPopup('failed', e.message);
 				throw new Error(e.message);
 			}
 			onUpdateWalletData(response, params, operation, type, msg, e.token);
 		} else {
+			handleError(response);
 			throw new Error('Signing aborted');
 		}
 	};
@@ -685,28 +677,26 @@ export const App = () => {
 							"Authorization": `Bearer ${containerTokens.CONTAINER_PUT.token}`,
 						}).then((e) => {
 							if (e.message && e.message.indexOf('insufficient balance to create container') !== -1) {
-								setLoadingForm(false);
 								setError({ active: true, type: [], text: 'Insufficient balance to create container' });
 							} else if (e.message && e.message.indexOf('name is already taken') !== -1) {
-								setLoadingForm(false);
 								setError({ active: true, type: ['containerName'], text: 'Name is already taken' });
 							} else if (e.message && e.message.indexOf('couldn\'t parse placement policy') !== -1) {
-								setLoadingForm(false);
 								setError({ active: true, type: ['placementPolicy'], text: 'Incorrect placement policy' });
 							} else if (e.message && e.message.indexOf('couldn\'t parse basic acl') !== -1) {
-								setLoadingForm(false);
 								setError({ active: true, type: ['basicAcl'], text: 'Incorrect basic acl' });
 							} else if (e.message) {
-								setLoadingForm(false);
 								setError({ active: true, type: [], text: e.message });
 							} else {
-								setLoadingForm(false);
 								onPopup('success', eACLParams.length > 0 ? 'New container with EACL has been created' : 'New container has been created');
 								setLoadContainers(true);
 								onResetContainerForm();
 								setAttributes([]);
 								onModal();
 							}
+						}).catch(() => {
+							setError({ active: true, type: [], text: 'Unable to create container. Check your connection and try again.' });
+						}).finally(() => {
+							setLoadingForm(false);
 						});
 					} else {
 						setError({ active: true, type: ['containerName'], text: 'Container name must contain at least 3 characters.' });
@@ -738,7 +728,6 @@ export const App = () => {
 		api('DELETE', `/v1/containers/${containerName}?walletConnect=true`, {}, {
 			"Authorization": `Bearer ${walletData.tokens.container.CONTAINER_DELETE.token}`,
 		}).then((e) => {
-			setLoadingForm(false);
 			if (e.message) {
 				setError({ active: true, type: [], text: e.message });
 			} else {
@@ -746,6 +735,10 @@ export const App = () => {
 				onPopup('success', 'Container was deleted successfully');
 				setLoadContainers(true);
 			}
+		}).catch(() => {
+			setError({ active: true, type: [], text: 'Unable to delete container. Check your connection and try again.' });
+		}).finally(() => {
+			setLoadingForm(false);
 		});
 	};
 
@@ -787,7 +780,6 @@ export const App = () => {
 					"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 					'X-Attributes-Base64': attributesToBase64(attributesHeaders),
 				}).then((e) => {
-					setLoadingForm(false);
 					if (e.message && e.message.indexOf('access to object operation denied') !== -1) {
 						setError({ active: true, type: [], text: 'Access to object operation denied' });
 					} else if (e.message) {
@@ -804,6 +796,7 @@ export const App = () => {
 					}
 				}).catch((err) => {
 					onModal('failed', `Something went wrong: ${err}`);
+				}).finally(() => {
 					setLoadingForm(false);
 				});
 			} else {
@@ -820,13 +813,16 @@ export const App = () => {
 		api('DELETE', `/v1/objects/${containerId}/${objectId}`, {}, {
 			"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 		}).then((e) => {
-			setLoadingForm(false);
 			if (e.message) {
 				setError({ active: true, type: [], text: e.message });
 			} else {
 				onPopup('success', 'Object was deleted successfully');
 				setLoadContainers(containerId);
 			}
+		}).catch(() => {
+			setError({ active: true, type: [], text: 'Unable to delete object. Check your connection and try again.' });
+		}).finally(() => {
+			setLoadingForm(false);
 		});
 	};
 

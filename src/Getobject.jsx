@@ -70,7 +70,7 @@ const Getobject = ({
 				setObjectStatus('Available');
 				setObjectData(e);
 			}
-		});
+		}).catch(() => setObjectStatus('Unable to load object. Check your connection and reload the page.'));
 	}
 
 	const onDownload = () => {
@@ -102,7 +102,7 @@ const Getobject = ({
 					document.body.removeChild(a);
 				}, 0);
 			}
-		});
+		}).catch(() => onModal('failed', 'Unable to download object. Check your connection and try again.'));
 	};
 
 	return (

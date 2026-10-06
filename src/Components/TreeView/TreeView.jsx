@@ -93,7 +93,7 @@ const File = ({
 				"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 			}).then((e) => {
 				setObjectDate(e);
-			});
+			}).catch(() => setObjectDate('error'));
 		}
 		e.preventDefault();
 	};
@@ -197,7 +197,7 @@ const File = ({
 																	document.body.removeChild(a);
 																}, 0);
 															}
-														});
+														}).catch(() => onModal('failed', 'Unable to load object. Check your connection and try again.'));
 													}}
 													width={40}
 													height={40}
@@ -229,7 +229,7 @@ const File = ({
 																	document.body.removeChild(a);
 																}, 0);
 															}
-														});
+														}).catch(() => onModal('failed', 'Unable to download object. Check your connection and try again.'));
 													}}
 													width={40}
 													height={40}
@@ -252,7 +252,7 @@ const File = ({
 														containerId: containerItem.containerId,
 														objectId: objectItem.objectId,
 													});
-												});
+												}).catch(() => onModal('failed', 'Unable to share object. Check your connection and try again.'));
 											}}
 											width={40}
 											height={40}
