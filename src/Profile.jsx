@@ -285,14 +285,15 @@ const Profile = ({
 	};
 
 	const onWithdraw = async () => {
-		if (quantity >= 1 && quantity * 1e12 <= neoFSBalance) {
+		const amount = Number(quantity);
+		if (Number.isSafeInteger(amount) && amount >= 1 && amount * 1e12 <= neoFSBalance) {
 			onModal('approveRequest');
 			const invocations = [{
 				scriptHash: NeoFSContract.scriptHash,
 				operation: 'withdraw',
 				args: [
 					{ type: 'Hash160', value: Neon.create.account(walletData.account.address).scriptHash },
-					{ type: 'Integer', value: quantity },
+					{ type: 'Integer', value: String(amount) },
 				]
 			}];
 
@@ -430,19 +431,22 @@ const Profile = ({
 									<Form.Control fullwidth>
 										<Form.Input
 											renderAs="input"
-											type="number"
+											type={activeTransfer === 'withdraw' ? 'text' : 'number'}
+											inputMode={activeTransfer === 'withdraw' ? 'numeric' : undefined}
 											size="small"
 											autoFocus
 											placeholder="Quantity (GAS)"
 											value={quantity}
-											onChange={(e) => setQuantity(e.target.value)}
+											onChange={(e) => {
+												if (activeTransfer !== 'withdraw' || /^\d*$/.test(e.target.value)) {
+													setQuantity(e.target.value);
+												}
+											}}
 											onKeyDown={(e) => {
 												if (e.key === 'Enter' && !isSendingTransfer) {
 													onSubmitTransfer();
 												} else if (e.key === 'Escape') {
 													setActiveTransfer(null);
-												} else if (activeTransfer === 'withdraw' && e.key.length === 1 && !/[0-9]/.test(e.key)) {
-													e.preventDefault();
 												}
 											}}
 										/>
