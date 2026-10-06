@@ -194,7 +194,7 @@ export const App = () => {
 	const eaclResignVerbs = containerForm.eACLParams.length > 0 && !isEaclTokenShared ? ['CONTAINER_PUT', 'CONTAINER_SET_EACL'] : [];
 
 	const onModal = (current = null, text = null, params = null) => {
-		setModal({ current, text, params });
+		setModal((prev) => prev.current === 's3Credentials' && prev.isIssuing ? prev : { current, text, params });
 	};
 
 	const openDomainRegister = (name = '') => {
@@ -1402,6 +1402,7 @@ export const App = () => {
 						<div className="modal_content" style={{ maxWidth: 650 }}>
 							<div
 								className="modal_close"
+								style={modal.isIssuing ? { pointerEvents: 'none', opacity: 0.3 } : undefined}
 								onClick={onModal}
 							>
 								<img
@@ -1418,6 +1419,7 @@ export const App = () => {
 								containers={modal.text.containers}
 								onAuth={onAuth}
 								onSign={onSignWithWallet}
+								onIssuingChange={(isIssuing) => setModal((prev) => ({ ...prev, isIssuing }))}
 							/>
 						</div>
 					</div>

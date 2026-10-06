@@ -19,6 +19,7 @@ export default function S3CredentialsPanel({
 	containers = [],
 	onAuth,
 	onSign,
+	onIssuingChange,
 }) {
 	const [gates, setGates] = useState([]);
 	const [boxContainer, setBoxContainer] = useState('');
@@ -70,6 +71,7 @@ export default function S3CredentialsPanel({
 			if (selectedGates.length === 0) throw new Error('Select at least one S3 gateway');
 			if (contexts.some((context) => context.verbs.length === 0)) throw new Error('Each context must allow at least one operation');
 
+			onIssuingChange(true);
 			setStep('Requesting session tokens');
 			const prepared = await api('POST', `${authmate}/v1/auth/s3`, {
 				issuer: walletData.account.address,
@@ -118,6 +120,7 @@ export default function S3CredentialsPanel({
 			setError(e?.message || 'Something went wrong, try again');
 		} finally {
 			setStep('');
+			onIssuingChange(false);
 		}
 	};
 
