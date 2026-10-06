@@ -176,11 +176,12 @@ const File = ({
 														api('GET', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.objectId}`, {}, {
 															"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 														}).then((data) => {
+															const contentType = data.res?.type.split(';', 1)[0].trim().toLowerCase();
 															if (data.message) {
 																onModal('failed', data.message);
-															} else if (data.header.indexOf("image/") !== -1 || data.header === 'text/plain; charset=utf-8') {
+															} else if (['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/avif', 'image/bmp', 'text/plain'].includes(contentType)) {
 																const fileURL = URL.createObjectURL(data.res);
-																window.open(fileURL, '_blank');
+																window.open(fileURL, '_blank', 'noopener');
 																onModal();
 															} else {
 																const a = document.createElement('a');
