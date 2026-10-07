@@ -54,6 +54,7 @@ export const App = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const [wcSdk, setWcSdk] = useState(null);
+	const [isWcLoading, setWcLoading] = useState(true);
 	const dapi = useMemo(() => window.OneGateDapiProvider || null, []);
 	let [neolineN3, setNeolineN3] = useState(null);
 	const [activeNet] = useState(import.meta.env.VITE_NETWORK ? capitalizeFirstLetter(import.meta.env.VITE_NETWORK) : 'Mainnet');
@@ -233,7 +234,9 @@ export const App = () => {
 		getWcSdk().then((sdk) => {
 			if (cancelled) return;
 			setWcSdk(sdk);
-		}).catch((err) => console.error('WalletConnect init failed', err));
+		}).catch((err) => console.error('WalletConnect init failed', err)).finally(() => {
+			if (!cancelled) setWcLoading(false);
+		});
 		return () => { cancelled = true; };
 	}, []);
 
@@ -315,7 +318,7 @@ export const App = () => {
 						object: null,
 					}
 				});
-			} else if (isProtectedRoute && isNeonReady) {
+			} else if (isProtectedRoute && !isWcLoading) {
 				let isWalletConnected = false;
 
 				if (!isWalletConnected && dapi) {
@@ -349,7 +352,7 @@ export const App = () => {
 		return () => {
 			isCancelled = true;
 		};
-	}, [wcSdk, dapi, location.pathname, walletData, isNeonReady]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [wcSdk, dapi, location.pathname, walletData, isWcLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	const onGetSidechainContract = async (containerId) => {
 		try {
