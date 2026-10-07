@@ -253,7 +253,8 @@ export const App = () => {
 		onGetSidechainContract();
 	};
 
-	const onHandleConnectedWallet = (nextWalletData) => {
+	const onHandleConnectedWallet = (nextWalletData, neolineProvider = null) => {
+		setNeolineN3(neolineProvider);
 		setWalletData(nextWalletData);
 		onPopup('success', 'Wallet connected');
 		onModal();
@@ -945,7 +946,6 @@ export const App = () => {
 		try {
 			if (type === 'neoline') {
 				const neolineN3 = new window.NEOLineN3.Init();
-				setNeolineN3(neolineN3);
 				neolineN3.getPublicKey().then((account) => {
 					neolineN3.getNetworks().then((networks) => {
 						onHandleConnectedWallet({
@@ -957,7 +957,7 @@ export const App = () => {
 								container: {},
 								object: null,
 							}
-						});
+						}, neolineN3);
 					}).catch((err) => handleError(err));
 				}).catch((err) => handleError(err));
 			} else if (type === 'onegate') {
