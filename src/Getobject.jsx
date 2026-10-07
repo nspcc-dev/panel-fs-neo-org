@@ -67,6 +67,7 @@ const Getobject = ({
 				setObjectStatus('Forbidden');
 				onModal('failed', e.message);
 			} else {
+				if (!e.attributes) throw new Error('Missing object metadata');
 				setObjectStatus('Available');
 				setObjectData(e);
 			}
