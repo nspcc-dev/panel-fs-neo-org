@@ -191,7 +191,7 @@ export const App = () => {
 	const popupCounter = useRef(0);
 
 	const containerTokens = walletData ? walletData.tokens.container : {};
-	const isEaclTokenShared = !!(containerTokens.CONTAINER_PUT && containerTokens.CONTAINER_SET_EACL && containerTokens.CONTAINER_PUT.token === containerTokens.CONTAINER_SET_EACL.token);
+	const isEaclTokenShared = !!(walletData && ['CONTAINER_PUT', 'CONTAINER_SET_EACL'].every((verb) => isVerbSigned(walletData.tokens, verb)) && containerTokens.CONTAINER_PUT.token === containerTokens.CONTAINER_SET_EACL.token);
 	const eaclResignVerbs = containerForm.eACLParams.length > 0 && !isEaclTokenShared ? ['CONTAINER_PUT', 'CONTAINER_SET_EACL'] : [];
 
 	const onModal = (current = null, text = null, params = null) => {
@@ -239,6 +239,20 @@ export const App = () => {
 		});
 		return () => { cancelled = true; };
 	}, []);
+
+	useEffect(() => {
+		if (!walletData) return;
+		const expirations = [
+			...Object.values(walletData.tokens.container),
+			walletData.tokens.object,
+			...Object.values(walletData.tokens.sharedObjectAccess || {}),
+		].map((token) => token?.expiresAt).filter((expiresAt) => expiresAt > Date.now());
+		if (!expirations.length) return;
+		const timer = setTimeout(() => {
+			setWalletData((prev) => prev && { ...prev });
+		}, Math.min(...expirations) - Date.now());
+		return () => clearTimeout(timer);
+	}, [walletData]);
 
 	const onLoadWalletSessionData = () => {
 		api('GET', '/v1/network-info').then((e) => {
@@ -456,9 +470,6 @@ export const App = () => {
 					},
 				};
 			}
-			if (!next.expiry || next.expiry < new Date().getTime()) {
-				next.expiry = new Date().getTime() + 7200000;
-			}
 			return next;
 		});
 	}
@@ -578,6 +589,10 @@ export const App = () => {
 		}
 
 		try {
+			if (type !== 'object') {
+				body['expiration-duration'] = '24h';
+				params = { ...params, expiresAt: Date.now() + 24 * 60 * 60 * 1000 };
+			}
 			const e = await api('POST', type === 'object' ? '/v2/auth/bearer' : '/v2/auth/session', body);
 			if (e.message) {
 				throw new Error(e.message);
@@ -651,6 +666,9 @@ export const App = () => {
 			});
 			if (e.message) {
 				throw new Error(e.message);
+			}
+			if (params.expiresAt <= Date.now()) {
+				throw new Error('Token expired while signing. Please sign again.');
 			}
 			onUpdateWalletData(response, params, operation, type, msg, e.token);
 		} else {
@@ -1779,7 +1797,7 @@ export const App = () => {
 									{isError.text}
 								</Notification>
 							)}
-							{(!walletData.tokens.container.CONTAINER_PUT || (containerForm.eACLParams.length > 0 && !isEaclTokenShared)) ? (
+							{(!isVerbSigned(walletData.tokens, 'CONTAINER_PUT') || (containerForm.eACLParams.length > 0 && !isEaclTokenShared)) ? (
 								<TokenSignPanel
 									walletData={walletData}
 									onAuth={onAuth}
@@ -1851,7 +1869,7 @@ export const App = () => {
 								{isError.text}
 							</Notification>
 						)}
-						{!walletData.tokens.container.CONTAINER_DELETE ? (
+						{!isVerbSigned(walletData.tokens, 'CONTAINER_DELETE') ? (
 							<TokenSignPanel
 								walletData={walletData}
 								onAuth={onAuth}

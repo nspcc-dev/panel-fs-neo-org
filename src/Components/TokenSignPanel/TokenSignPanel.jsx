@@ -28,13 +28,10 @@ export const VERB_GROUPS = [
 export const ALL_VERBS = VERB_GROUPS.flatMap((group) => group.verbs.map((verb) => verb.verb));
 
 export const isVerbSigned = (tokens, verb) => {
-	if (verb.startsWith('CONTAINER_')) return !!tokens.container?.[verb];
-	if (verb.startsWith('OBJECT_')) {
-		if (!tokens.object) return false;
-		if (Array.isArray(tokens.object.verbs)) return tokens.object.verbs.includes(verb);
-		return true;
-	}
-	return false;
+	const token = verb.startsWith('CONTAINER_') ? tokens.container?.[verb] : tokens.object;
+	if (!(token?.expiresAt > Date.now())) return false;
+	if (verb.startsWith('CONTAINER_')) return true;
+	return verb.startsWith('OBJECT_') && (!Array.isArray(token.verbs) || token.verbs.includes(verb));
 };
 
 export default function TokenSignPanel({
@@ -106,7 +103,7 @@ export default function TokenSignPanel({
 		if (verbs.length === 0) return;
 
 		const hasNewObjectVerbs = verbs.some((verb) => verb.startsWith('OBJECT_'));
-		if (hasNewObjectVerbs && Array.isArray(tokens.object?.verbs)) {
+		if (hasNewObjectVerbs && tokens.object?.expiresAt > Date.now() && Array.isArray(tokens.object.verbs)) {
 			tokens.object.verbs.forEach((verb) => {
 				if (!verbs.includes(verb)) verbs.push(verb);
 			});

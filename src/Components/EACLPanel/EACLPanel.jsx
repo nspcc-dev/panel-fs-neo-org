@@ -8,7 +8,7 @@ import {
 	Form,
 } from 'react-bulma-components';
 import api from '../../api';
-import TokenSignPanel from '../TokenSignPanel/TokenSignPanel';
+import TokenSignPanel, { isVerbSigned } from '../TokenSignPanel/TokenSignPanel';
 
 export default function EACLPanel({
 	walletData,
@@ -403,7 +403,7 @@ export default function EACLPanel({
 			)}
 			{walletData && (
 				<>
-					{!walletData.tokens.container.CONTAINER_SET_EACL ? (
+					{!isVerbSigned(walletData.tokens, 'CONTAINER_SET_EACL') ? (
 						<TokenSignPanel
 							walletData={walletData}
 							onAuth={onAuth}

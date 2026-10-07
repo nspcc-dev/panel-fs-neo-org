@@ -24,7 +24,7 @@ const Getobject = ({
 	const [objectStatus, setObjectStatus] = useState('Loading');
 	const [params, setParams] = useState(null);
 	const objectAccessData = walletData?.tokens?.sharedObjectAccess?.OBJECT_ACCESS;
-	const objectAccessToken = objectAccessData?.containerId === params?.containerId ? objectAccessData?.token : null;
+	const objectAccessToken = objectAccessData?.containerId === params?.containerId && objectAccessData?.expiresAt > Date.now() ? objectAccessData.token : null;
 
 	useEffect(() => {
 		const token = searchParams.get('token') ? searchParams.get('token').replace(/ /g, '+') : '';
@@ -51,6 +51,7 @@ const Getobject = ({
 	}, [walletData, params, objectAccessToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	const onHeadObject = (containerId, objectId, token, bearer = null) => {
+		const expiresAt = params?.isAuth ? objectAccessData?.expiresAt : Infinity;
 		const payload = {};
 		if (token) {
 			payload["Authorization"] = `Bearer ${token}`;
@@ -59,6 +60,7 @@ const Getobject = ({
 			payload["NeoFS-Bearer-Token"] = bearer;
 		}
 		api('HEAD', `/v1/objects/${containerId}/by_id/${objectId}`, {}, payload).then((e) => {
+			if (expiresAt <= Date.now()) return;
 			if (e === 400 || e === 404) {
 				setObjectStatus('Not found');
 			} else if (e === 403) {
@@ -71,7 +73,9 @@ const Getobject = ({
 				setObjectStatus('Available');
 				setObjectData(e);
 			}
-		}).catch(() => setObjectStatus('Unable to load object. Check your connection and reload the page.'));
+		}).catch(() => {
+			if (expiresAt > Date.now()) setObjectStatus('Unable to load object. Check your connection and reload the page.');
+		});
 	}
 
 	const onDownload = () => {
