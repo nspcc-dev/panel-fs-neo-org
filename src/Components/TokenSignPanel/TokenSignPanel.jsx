@@ -25,9 +25,9 @@ export const VERB_GROUPS = [
 	},
 ];
 
-const ALL_VERBS = VERB_GROUPS.flatMap((group) => group.verbs.map((verb) => verb.verb));
+export const ALL_VERBS = VERB_GROUPS.flatMap((group) => group.verbs.map((verb) => verb.verb));
 
-const isVerbSigned = (tokens, verb) => {
+export const isVerbSigned = (tokens, verb) => {
 	if (verb.startsWith('CONTAINER_')) return !!tokens.container?.[verb];
 	if (verb.startsWith('OBJECT_')) {
 		if (!tokens.object) return false;

@@ -21,7 +21,7 @@ import Home from './Home';
 import Profile from './Profile';
 import Getobject from './Getobject';
 import EACLPanel from './Components/EACLPanel/EACLPanel';
-import TokenSignPanel from './Components/TokenSignPanel/TokenSignPanel';
+import TokenSignPanel, { ALL_VERBS, isVerbSigned } from './Components/TokenSignPanel/TokenSignPanel';
 import S3CredentialsPanel from './Components/S3CredentialsPanel/S3CredentialsPanel';
 import WalletAuthMethods from './Components/WalletAuthMethods/WalletAuthMethods';
 import api from './api';
@@ -1362,7 +1362,7 @@ export const App = () => {
 						<Heading align="center" size={6} style={{ margin: '0 auto 1rem', maxWidth: 500, color: '#666', fontWeight: 'normal' }}>
 							Sign one master token covering all operations, or expand to choose which permissions to grant.
 						</Heading>
-						{walletData && walletData.tokens.container.CONTAINER_PUT && walletData.tokens.container.CONTAINER_DELETE && walletData.tokens.container.CONTAINER_SET_EACL && walletData.tokens.object ? (
+						{walletData && ALL_VERBS.every((verb) => isVerbSigned(walletData.tokens, verb)) ? (
 							<>
 								<div className="token_sign_panel">
 									<div className="token_sign_panel_row">
