@@ -78,6 +78,7 @@ export default function EACLPanel({
 
 	const onDragOver = (event) => {
 		event.preventDefault();
+		if (!dragAndDropEACLParams.isDragging) return;
 
 		const draggedTo = Number(event.currentTarget.dataset.position);
 		if (draggedTo !== dragAndDropEACLParams.draggedTo) {
@@ -124,6 +125,7 @@ export default function EACLPanel({
 					data-position={index}
 					className={dragAndDropEACLParams && dragAndDropEACLParams.draggedTo === Number(index) ? "drop_area" : ""}
 					onDragStart={onDragStart}
+					onDragEnd={onDrop}
 					onDragOver={onDragOver}
 					onDragLeave={onDragLeave}
 					onDrop={onDrop}
