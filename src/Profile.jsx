@@ -97,13 +97,11 @@ const Profile = ({
 			} else {
 				onPopup('success', 'NeoFS chain balance has been updated');
 				setNeoFSBalance(e.value);
-				setTimeout(() => {
-					setIsLoadingNeoFSBalance(false);
-				}, 500);
 			}
 		}).catch(() => {
+			onPopup('failed', 'Failed to update NeoFS balance. Please try again.');
+		}).finally(() => {
 			setIsLoadingNeoFSBalance(false);
-			setNotAvailableNeoFS(true);
 		});
 	};
 
@@ -225,13 +223,11 @@ const Profile = ({
 				});
 
 				setContainers([...containersNamed, ...containersUnnamed]);
-				setTimeout(() => {
-					setIsLoadingContainers(false);
-				}, 1000);
 			}
 		}).catch(() => {
+			onPopup('failed', 'Failed to retrieve containers. Please try again.');
+		}).finally(() => {
 			setIsLoadingContainers(false);
-			setNotAvailableNeoFS(true);
 		});
 	};
 
