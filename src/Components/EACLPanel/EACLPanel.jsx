@@ -78,7 +78,7 @@ export default function EACLPanel({
 
 	const onDragOver = (event) => {
 		event.preventDefault();
-		if (!dragAndDropEACLParams.isDragging) return;
+		if (!isEdit || isLoadingForm || !dragAndDropEACLParams.isDragging) return;
 
 		const draggedTo = Number(event.currentTarget.dataset.position);
 		if (draggedTo !== dragAndDropEACLParams.draggedTo) {
@@ -129,7 +129,7 @@ export default function EACLPanel({
 					onDragOver={onDragOver}
 					onDragLeave={onDragLeave}
 					onDrop={onDrop}
-					draggable
+					draggable={isEdit && !isLoadingForm}
 				>
 					<div
 						className="panel-block-header"
