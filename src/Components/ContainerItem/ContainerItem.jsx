@@ -10,6 +10,7 @@ import {
 } from 'react-bulma-components';
 import TreeView from '../TreeView/TreeView';
 import EACLPanel from '../EACLPanel/EACLPanel';
+import { isVerbSigned } from '../TokenSignPanel/TokenSignPanel';
 import {
 	formatForTreeView,
 	formatForContainerName,
@@ -162,10 +163,15 @@ export default function ContainerItem({
 	const onGetEACL = (containerId) => {
 		setLoadingEACL(true);
 		api('GET', `/v1/containers/${containerId}/eacl`).then((e) => {
-			setLoadingEACL(false);
+			if (e.message) throw new Error(e.message);
 			if (e.records) {
 				setEACLParams(e.records);
 			}
+		}).catch((error) => {
+			onPopup('failed', error?.message || 'Failed to retrieve eACL. Please try again.');
+			setActivePanel((current) => current === 'eACL' ? '' : current);
+		}).finally(() => {
+			setLoadingEACL(false);
 		});
 	};
 
@@ -353,7 +359,7 @@ export default function ContainerItem({
 											weight="bolder"
 											className="objects_title"
 											onClick={() => {
-												if (!walletData.tokens.object) {
+												if (!isVerbSigned(walletData.tokens, 'OBJECT_SEARCH')) {
 													onModal('signTokens', 'object', { containerId: containerItem.containerId });
 												} else if (activePanel === 'objects') {
 													setActivePanel('');

@@ -21,7 +21,7 @@ import Home from './Home';
 import Profile from './Profile';
 import Getobject from './Getobject';
 import EACLPanel from './Components/EACLPanel/EACLPanel';
-import TokenSignPanel from './Components/TokenSignPanel/TokenSignPanel';
+import TokenSignPanel, { ALL_VERBS, isVerbSigned } from './Components/TokenSignPanel/TokenSignPanel';
 import S3CredentialsPanel from './Components/S3CredentialsPanel/S3CredentialsPanel';
 import WalletAuthMethods from './Components/WalletAuthMethods/WalletAuthMethods';
 import api from './api';
@@ -54,6 +54,7 @@ export const App = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const [wcSdk, setWcSdk] = useState(null);
+	const [isWcLoading, setWcLoading] = useState(true);
 	const dapi = useMemo(() => window.OneGateDapiProvider || null, []);
 	let [neolineN3, setNeolineN3] = useState(null);
 	const [activeNet] = useState(import.meta.env.VITE_NETWORK ? capitalizeFirstLetter(import.meta.env.VITE_NETWORK) : 'Mainnet');
@@ -190,11 +191,11 @@ export const App = () => {
 	const popupCounter = useRef(0);
 
 	const containerTokens = walletData ? walletData.tokens.container : {};
-	const isEaclTokenShared = !!(containerTokens.CONTAINER_PUT && containerTokens.CONTAINER_SET_EACL && containerTokens.CONTAINER_PUT.token === containerTokens.CONTAINER_SET_EACL.token);
+	const isEaclTokenShared = !!(walletData && ['CONTAINER_PUT', 'CONTAINER_SET_EACL'].every((verb) => isVerbSigned(walletData.tokens, verb)) && containerTokens.CONTAINER_PUT.token === containerTokens.CONTAINER_SET_EACL.token);
 	const eaclResignVerbs = containerForm.eACLParams.length > 0 && !isEaclTokenShared ? ['CONTAINER_PUT', 'CONTAINER_SET_EACL'] : [];
 
 	const onModal = (current = null, text = null, params = null) => {
-		setModal({ current, text, params });
+		setModal((prev) => prev.current === 's3Credentials' && prev.isIssuing ? prev : { current, text, params });
 	};
 
 	const openDomainRegister = (name = '') => {
@@ -233,9 +234,25 @@ export const App = () => {
 		getWcSdk().then((sdk) => {
 			if (cancelled) return;
 			setWcSdk(sdk);
-		}).catch((err) => console.error('WalletConnect init failed', err));
+		}).catch((err) => console.error('WalletConnect init failed', err)).finally(() => {
+			if (!cancelled) setWcLoading(false);
+		});
 		return () => { cancelled = true; };
 	}, []);
+
+	useEffect(() => {
+		if (!walletData) return;
+		const expirations = [
+			...Object.values(walletData.tokens.container),
+			walletData.tokens.object,
+			...Object.values(walletData.tokens.sharedObjectAccess || {}),
+		].map((token) => token?.expiresAt).filter((expiresAt) => expiresAt > Date.now());
+		if (!expirations.length) return;
+		const timer = setTimeout(() => {
+			setWalletData((prev) => prev && { ...prev });
+		}, Math.min(...expirations) - Date.now());
+		return () => clearTimeout(timer);
+	}, [walletData]);
 
 	const onLoadWalletSessionData = () => {
 		api('GET', '/v1/network-info').then((e) => {
@@ -253,7 +270,8 @@ export const App = () => {
 		onGetSidechainContract();
 	};
 
-	const onHandleConnectedWallet = (nextWalletData) => {
+	const onHandleConnectedWallet = (nextWalletData, neolineProvider = null) => {
+		setNeolineN3(neolineProvider);
 		setWalletData(nextWalletData);
 		onPopup('success', 'Wallet connected');
 		onModal();
@@ -314,7 +332,7 @@ export const App = () => {
 						object: null,
 					}
 				});
-			} else if (isProtectedRoute && isNeonReady) {
+			} else if (isProtectedRoute && !isWcLoading) {
 				let isWalletConnected = false;
 
 				if (!isWalletConnected && dapi) {
@@ -348,7 +366,7 @@ export const App = () => {
 		return () => {
 			isCancelled = true;
 		};
-	}, [wcSdk, dapi, location.pathname, walletData, isNeonReady]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [wcSdk, dapi, location.pathname, walletData, isWcLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	const onGetSidechainContract = async (containerId) => {
 		try {
@@ -452,9 +470,6 @@ export const App = () => {
 					},
 				};
 			}
-			if (!next.expiry || next.expiry < new Date().getTime()) {
-				next.expiry = new Date().getTime() + 7200000;
-			}
 			return next;
 		});
 	}
@@ -469,13 +484,6 @@ export const App = () => {
 				"issuer": walletData.account.address,
 				"targets": [gatewayInfo.address],
 			}
-			const e = await api('POST', '/v2/auth/session', body);
-			if (e.message) {
-				onPopup('failed', e.message);
-				throw new Error(e.message);
-			}
-			await onSignMessage(e, type, operation, params);
-			return;
 		} else if (type === 'sharedObjectAccess') {
 			body = {
 				"contexts": [{
@@ -485,14 +493,6 @@ export const App = () => {
 				"issuer": walletData.account.address,
 				"targets": [gatewayInfo.address],
 			}
-			api('POST', '/v2/auth/session', body).then((e) => {
-				if (e.message) {
-					onPopup('failed', e.message);
-				} else {
-					onSignMessage(e, type, operation, params).catch(() => {});
-				}
-			});
-			return;
 		} else if (type === 'object' && params.address) {
 			body = {
 				"issuer": walletData.account.address,
@@ -588,13 +588,22 @@ export const App = () => {
 			}
 		}
 
-		api('POST', '/v2/auth/bearer', body).then((e) => {
-			if (e.message) {
-				onPopup('failed', e.message);
-			} else {
-				onSignMessage(e, type, operation, params);
+		try {
+			if (type !== 'object') {
+				body['expiration-duration'] = '24h';
+				params = { ...params, expiresAt: Date.now() + 24 * 60 * 60 * 1000 };
 			}
-		});
+			const e = await api('POST', type === 'object' ? '/v2/auth/bearer' : '/v2/auth/session', body);
+			if (e.message) {
+				throw new Error(e.message);
+			}
+			await onSignMessage(e, type, operation, params);
+		} catch (error) {
+			if (error?.message !== 'Signing aborted') {
+				onPopup('failed', error?.message || 'Unable to sign token. Check your connection and try again.');
+			}
+			if (type === 'container') throw error;
+		}
 	};
 
 	const handleError = (error, type) => {
@@ -633,18 +642,20 @@ export const App = () => {
 		}
 
 		if (type === 'object') {
-			api('POST', '/v2/auth/bearer/complete', {
+			const e = await api('POST', '/v2/auth/bearer/complete', {
 				"key": response.publicKey,
 				"scheme": response.scheme || "WALLETCONNECT",
 				"token": msg.token,
 				"signature": response.data + response.salt,
-			}).then((e) => {
-				if (params.objectId || params.address) {
-					onModal('shareObjectLink', { ...params, token: e.token })
-				} else {
-					onUpdateWalletData(response, params, operation, type, msg, e.token);
-				}
 			});
+			if (e.message) {
+				throw new Error(e.message);
+			}
+			if (params.objectId || params.address) {
+				onModal('shareObjectLink', { ...params, token: e.token })
+			} else {
+				onUpdateWalletData(response, params, operation, type, msg, e.token);
+			}
 		} else if (!response.error) {
 			const e = await api('POST', '/v2/auth/session/complete', {
 				"key": response.publicKey,
@@ -654,11 +665,14 @@ export const App = () => {
 				"signature": hexToBytesToBase64(response.data + response.salt),
 			});
 			if (e.message) {
-				onPopup('failed', e.message);
 				throw new Error(e.message);
+			}
+			if (params.expiresAt <= Date.now()) {
+				throw new Error('Token expired while signing. Please sign again.');
 			}
 			onUpdateWalletData(response, params, operation, type, msg, e.token);
 		} else {
+			handleError(response);
 			throw new Error('Signing aborted');
 		}
 	};
@@ -685,28 +699,26 @@ export const App = () => {
 							"Authorization": `Bearer ${containerTokens.CONTAINER_PUT.token}`,
 						}).then((e) => {
 							if (e.message && e.message.indexOf('insufficient balance to create container') !== -1) {
-								setLoadingForm(false);
 								setError({ active: true, type: [], text: 'Insufficient balance to create container' });
 							} else if (e.message && e.message.indexOf('name is already taken') !== -1) {
-								setLoadingForm(false);
 								setError({ active: true, type: ['containerName'], text: 'Name is already taken' });
 							} else if (e.message && e.message.indexOf('couldn\'t parse placement policy') !== -1) {
-								setLoadingForm(false);
 								setError({ active: true, type: ['placementPolicy'], text: 'Incorrect placement policy' });
 							} else if (e.message && e.message.indexOf('couldn\'t parse basic acl') !== -1) {
-								setLoadingForm(false);
 								setError({ active: true, type: ['basicAcl'], text: 'Incorrect basic acl' });
 							} else if (e.message) {
-								setLoadingForm(false);
 								setError({ active: true, type: [], text: e.message });
 							} else {
-								setLoadingForm(false);
 								onPopup('success', eACLParams.length > 0 ? 'New container with EACL has been created' : 'New container has been created');
 								setLoadContainers(true);
 								onResetContainerForm();
 								setAttributes([]);
 								onModal();
 							}
+						}).catch(() => {
+							setError({ active: true, type: [], text: 'Unable to create container. Check your connection and try again.' });
+						}).finally(() => {
+							setLoadingForm(false);
 						});
 					} else {
 						setError({ active: true, type: ['containerName'], text: 'Container name must contain at least 3 characters.' });
@@ -738,7 +750,6 @@ export const App = () => {
 		api('DELETE', `/v1/containers/${containerName}?walletConnect=true`, {}, {
 			"Authorization": `Bearer ${walletData.tokens.container.CONTAINER_DELETE.token}`,
 		}).then((e) => {
-			setLoadingForm(false);
 			if (e.message) {
 				setError({ active: true, type: [], text: e.message });
 			} else {
@@ -746,6 +757,10 @@ export const App = () => {
 				onPopup('success', 'Container was deleted successfully');
 				setLoadContainers(true);
 			}
+		}).catch(() => {
+			setError({ active: true, type: [], text: 'Unable to delete container. Check your connection and try again.' });
+		}).finally(() => {
+			setLoadingForm(false);
 		});
 	};
 
@@ -787,7 +802,6 @@ export const App = () => {
 					"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 					'X-Attributes-Base64': attributesToBase64(attributesHeaders),
 				}).then((e) => {
-					setLoadingForm(false);
 					if (e.message && e.message.indexOf('access to object operation denied') !== -1) {
 						setError({ active: true, type: [], text: 'Access to object operation denied' });
 					} else if (e.message) {
@@ -804,6 +818,7 @@ export const App = () => {
 					}
 				}).catch((err) => {
 					onModal('failed', `Something went wrong: ${err}`);
+				}).finally(() => {
 					setLoadingForm(false);
 				});
 			} else {
@@ -820,13 +835,16 @@ export const App = () => {
 		api('DELETE', `/v1/objects/${containerId}/${objectId}`, {}, {
 			"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 		}).then((e) => {
-			setLoadingForm(false);
 			if (e.message) {
 				setError({ active: true, type: [], text: e.message });
 			} else {
 				onPopup('success', 'Object was deleted successfully');
 				setLoadContainers(containerId);
 			}
+		}).catch(() => {
+			setError({ active: true, type: [], text: 'Unable to delete object. Check your connection and try again.' });
+		}).finally(() => {
+			setLoadingForm(false);
 		});
 	};
 
@@ -949,7 +967,6 @@ export const App = () => {
 		try {
 			if (type === 'neoline') {
 				const neolineN3 = new window.NEOLineN3.Init();
-				setNeolineN3(neolineN3);
 				neolineN3.getPublicKey().then((account) => {
 					neolineN3.getNetworks().then((networks) => {
 						onHandleConnectedWallet({
@@ -961,7 +978,7 @@ export const App = () => {
 								container: {},
 								object: null,
 							}
-						});
+						}, neolineN3);
 					}).catch((err) => handleError(err));
 				}).catch((err) => handleError(err));
 			} else if (type === 'onegate') {
@@ -1363,7 +1380,7 @@ export const App = () => {
 						<Heading align="center" size={6} style={{ margin: '0 auto 1rem', maxWidth: 500, color: '#666', fontWeight: 'normal' }}>
 							Sign one master token covering all operations, or expand to choose which permissions to grant.
 						</Heading>
-						{walletData && walletData.tokens.container.CONTAINER_PUT && walletData.tokens.container.CONTAINER_DELETE && walletData.tokens.container.CONTAINER_SET_EACL && walletData.tokens.object ? (
+						{walletData && ALL_VERBS.every((verb) => isVerbSigned(walletData.tokens, verb)) ? (
 							<>
 								<div className="token_sign_panel">
 									<div className="token_sign_panel_row">
@@ -1406,6 +1423,7 @@ export const App = () => {
 						<div className="modal_content" style={{ maxWidth: 650 }}>
 							<div
 								className="modal_close"
+								style={modal.isIssuing ? { pointerEvents: 'none', opacity: 0.3 } : undefined}
 								onClick={onModal}
 							>
 								<img
@@ -1422,6 +1440,7 @@ export const App = () => {
 								containers={modal.text.containers}
 								onAuth={onAuth}
 								onSign={onSignWithWallet}
+								onIssuingChange={(isIssuing) => setModal((prev) => ({ ...prev, isIssuing }))}
 							/>
 						</div>
 					</div>
@@ -1778,7 +1797,7 @@ export const App = () => {
 									{isError.text}
 								</Notification>
 							)}
-							{(!walletData.tokens.container.CONTAINER_PUT || (containerForm.eACLParams.length > 0 && !isEaclTokenShared)) ? (
+							{(!isVerbSigned(walletData.tokens, 'CONTAINER_PUT') || (containerForm.eACLParams.length > 0 && !isEaclTokenShared)) ? (
 								<TokenSignPanel
 									walletData={walletData}
 									onAuth={onAuth}
@@ -1850,7 +1869,7 @@ export const App = () => {
 								{isError.text}
 							</Notification>
 						)}
-						{!walletData.tokens.container.CONTAINER_DELETE ? (
+						{!isVerbSigned(walletData.tokens, 'CONTAINER_DELETE') ? (
 							<TokenSignPanel
 								walletData={walletData}
 								onAuth={onAuth}

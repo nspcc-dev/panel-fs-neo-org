@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Heading, Button, Form, Notification } from 'react-bulma-components';
 import copy from 'copy-to-clipboard';
-import TokenSignPanel, { VERB_GROUPS } from '../TokenSignPanel/TokenSignPanel';
+import TokenSignPanel, { VERB_GROUPS, isVerbSigned } from '../TokenSignPanel/TokenSignPanel';
 import api from '../../api';
 import {
 	base64ToBytes,
@@ -19,6 +19,7 @@ export default function S3CredentialsPanel({
 	containers = [],
 	onAuth,
 	onSign,
+	onIssuingChange,
 }) {
 	const [gates, setGates] = useState([]);
 	const [boxContainer, setBoxContainer] = useState('');
@@ -31,8 +32,7 @@ export default function S3CredentialsPanel({
 
 	const isLoading = step !== '';
 	const publicContainers = containers.filter((item) => isPublicReadContainer(item.basicAcl));
-	const objectToken = walletData.tokens.object;
-	const canStoreBox = !!objectToken && (!Array.isArray(objectToken.verbs) || objectToken.verbs.includes('OBJECT_PUT'));
+	const canStoreBox = isVerbSigned(walletData.tokens, 'OBJECT_PUT');
 
 	useEffect(() => {
 		api('GET', `${authmate}/v1/auth/s3/gates`).then((e) => {
@@ -70,6 +70,7 @@ export default function S3CredentialsPanel({
 			if (selectedGates.length === 0) throw new Error('Select at least one S3 gateway');
 			if (contexts.some((context) => context.verbs.length === 0)) throw new Error('Each context must allow at least one operation');
 
+			onIssuingChange(true);
 			setStep('Requesting session tokens');
 			const prepared = await api('POST', `${authmate}/v1/auth/s3`, {
 				issuer: walletData.account.address,
@@ -118,6 +119,7 @@ export default function S3CredentialsPanel({
 			setError(e?.message || 'Something went wrong, try again');
 		} finally {
 			setStep('');
+			onIssuingChange(false);
 		}
 	};
 
@@ -267,7 +269,7 @@ export default function S3CredentialsPanel({
 			{error && (
 				<Notification className="error_message" style={{ margin: '20px 0' }}>{error}</Notification>
 			)}
-			{!canStoreBox ? (
+			{!canStoreBox && !isLoading ? (
 				<TokenSignPanel
 					walletData={walletData}
 					onAuth={onAuth}

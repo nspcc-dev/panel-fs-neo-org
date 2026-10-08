@@ -8,7 +8,7 @@ import {
 	Form,
 } from 'react-bulma-components';
 import api from '../../api';
-import TokenSignPanel from '../TokenSignPanel/TokenSignPanel';
+import TokenSignPanel, { isVerbSigned } from '../TokenSignPanel/TokenSignPanel';
 
 export default function EACLPanel({
 	walletData,
@@ -51,12 +51,15 @@ export default function EACLPanel({
 			}, {
 				"Authorization": `Bearer ${walletData.tokens.container.CONTAINER_SET_EACL.token}`,
 			}).then((e) => {
-				setLoadingForm(false);
 				if (e.message) {
 					setError({ active: true, type: ['eacl'], text: e.message });
 				} else {
 					setLoadContainers(true);
 				}
+			}).catch(() => {
+				setError({ active: true, type: ['eacl'], text: 'Failed to update eACL. Please try again.' });
+			}).finally(() => {
+				setLoadingForm(false);
 			});
 		} else {
 			setError({ active: true, type: ['eacl'], text: 'Please fill in all required fields.' });
@@ -75,6 +78,7 @@ export default function EACLPanel({
 
 	const onDragOver = (event) => {
 		event.preventDefault();
+		if (!isEdit || isLoadingForm || !dragAndDropEACLParams.isDragging) return;
 
 		const draggedTo = Number(event.currentTarget.dataset.position);
 		if (draggedTo !== dragAndDropEACLParams.draggedTo) {
@@ -121,10 +125,11 @@ export default function EACLPanel({
 					data-position={index}
 					className={dragAndDropEACLParams && dragAndDropEACLParams.draggedTo === Number(index) ? "drop_area" : ""}
 					onDragStart={onDragStart}
+					onDragEnd={onDrop}
 					onDragOver={onDragOver}
 					onDragLeave={onDragLeave}
 					onDrop={onDrop}
-					draggable
+					draggable={isEdit && !isLoadingForm}
 				>
 					<div
 						className="panel-block-header"
@@ -398,7 +403,7 @@ export default function EACLPanel({
 			)}
 			{walletData && (
 				<>
-					{!walletData.tokens.container.CONTAINER_SET_EACL ? (
+					{!isVerbSigned(walletData.tokens, 'CONTAINER_SET_EACL') ? (
 						<TokenSignPanel
 							walletData={walletData}
 							onAuth={onAuth}

@@ -93,7 +93,7 @@ const File = ({
 				"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 			}).then((e) => {
 				setObjectDate(e);
-			});
+			}).catch(() => setObjectDate('error'));
 		}
 		e.preventDefault();
 	};
@@ -176,11 +176,12 @@ const File = ({
 														api('GET', `/v1/objects/${containerItem.containerId}/by_id/${objectItem.objectId}`, {}, {
 															"Authorization": `Bearer ${walletData.tokens.object.bearer}`,
 														}).then((data) => {
+															const contentType = data.res?.type.split(';', 1)[0].trim().toLowerCase();
 															if (data.message) {
 																onModal('failed', data.message);
-															} else if (data.header.indexOf("image/") !== -1 || data.header === 'text/plain; charset=utf-8') {
+															} else if (['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/avif', 'image/bmp', 'text/plain'].includes(contentType)) {
 																const fileURL = URL.createObjectURL(data.res);
-																window.open(fileURL, '_blank');
+																window.open(fileURL, '_blank', 'noopener');
 																onModal();
 															} else {
 																const a = document.createElement('a');
@@ -196,7 +197,7 @@ const File = ({
 																	document.body.removeChild(a);
 																}, 0);
 															}
-														});
+														}).catch(() => onModal('failed', 'Unable to load object. Check your connection and try again.'));
 													}}
 													width={40}
 													height={40}
@@ -228,7 +229,7 @@ const File = ({
 																	document.body.removeChild(a);
 																}, 0);
 															}
-														});
+														}).catch(() => onModal('failed', 'Unable to download object. Check your connection and try again.'));
 													}}
 													width={40}
 													height={40}
@@ -251,7 +252,7 @@ const File = ({
 														containerId: containerItem.containerId,
 														objectId: objectItem.objectId,
 													});
-												});
+												}).catch(() => onModal('failed', 'Unable to share object. Check your connection and try again.'));
 											}}
 											width={40}
 											height={40}

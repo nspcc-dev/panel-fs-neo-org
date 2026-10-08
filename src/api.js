@@ -24,9 +24,7 @@ async function serverRequest(method, url, params, headers) {
 	if (url.indexOf('http') !== -1) {
 		activeUrl = url;
 	}
-	return fetch(activeUrl, json).catch((error) => {
-		console.log(error);
-	});
+	return fetch(activeUrl, json);
 }
 
 export default function api(method, url, params = {}, headers = {}) {
@@ -70,6 +68,6 @@ export default function api(method, url, params = {}, headers = {}) {
 					reject(res);
 				}
 			}
-		});
+		}).catch(reject);
 	});
 }

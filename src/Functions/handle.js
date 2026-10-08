@@ -14,7 +14,7 @@ export function formatForTreeView(objects) {
 
 			for (const part of parts) {
 				if (!current[part]) {
-					current[part] = {};
+					current[part] = Object.create(null);
 				}
 				if (!current[part]['/']) {
 					current[part]['/'] = [];
@@ -28,7 +28,7 @@ export function formatForTreeView(objects) {
 			current['/'].push(item);
 
 			return root;
-		}, {});
+		}, Object.create(null));
 	};
 
 	for (let i = 0; i < objects.length; i++) {

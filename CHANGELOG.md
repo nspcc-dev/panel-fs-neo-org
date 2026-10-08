@@ -4,6 +4,21 @@ Changelog for NeoFS Panel
 
 ## [Unreleased]
 
+### Changed
+- Object previews are limited to safe content types (#307)
+- Upgraded Docker build image to Node 22 (#307)
+
+### Fixed
+- Fractional GAS amounts accepted for withdrawal (#307)
+- Handling of network errors and failed object metadata requests (#307)
+- Prototype pollution when building the object tree (#307)
+- Closing S3 credentials dialog before issuance completes (#307)
+- Unintended EACL rule changes during drag-and-drop (#307)
+- Wallet selection after cancelling NeoLine connection (#307)
+- OneGate session restoration when WalletConnect initialization fails (#307)
+- Profile loading stuck after failed requests (#307)
+- Incorrect signing status for expired tokens and missing permissions (#307)
+
 ## [0.11.0] - 2026-09-29
 
 ### Added
