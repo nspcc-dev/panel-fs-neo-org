@@ -4,7 +4,18 @@ Changelog for NeoFS Panel
 
 ## [Unreleased]
 
+### Added
+
+### Fixed
+
 ### Changed
+
+### Removed
+
+## [0.11.1] - 2026-10-09
+
+### Changed
+- Authmatesrv compatibility with S3 0.47.0 (#305)
 - Object previews are limited to safe content types (#307)
 - Upgraded Docker build image to Node 22 (#307)
 
@@ -18,6 +29,9 @@ Changelog for NeoFS Panel
 - OneGate session restoration when WalletConnect initialization fails (#307)
 - Profile loading stuck after failed requests (#307)
 - Incorrect signing status for expired tokens and missing permissions (#307)
+
+### Removed
+- RANGE EACL support (#304)
 
 ## [0.11.0] - 2026-09-29
 
@@ -274,4 +288,5 @@ First public review release.
 [0.10.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.10.1
 [0.10.2]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.10.2
 [0.11.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.11.0
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.11.0...master
+[0.11.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.11.1
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.11.1...master
