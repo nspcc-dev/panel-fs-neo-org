@@ -256,7 +256,7 @@ export default function ContainerItem({
 											{objectsWithCopies ? `${objectsWithCopies.count} object${objectsWithCopies.count === '1' ? '' : 's'}` : '-'}
 										</Heading>
 										<Heading size={6} weight="light">
-											<span>{`Version: `}</span>
+											<span>{`API Version: `}</span>
 											{containerItem.version}
 										</Heading>
 										<Heading size={6} weight="light">
