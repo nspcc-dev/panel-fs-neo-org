@@ -260,6 +260,10 @@ export default function ContainerItem({
 											{containerItem.version}
 										</Heading>
 										<Heading size={6} weight="light">
+											<span>{`Revision: `}</span>
+											{containerItem.revision ?? '-'}
+										</Heading>
+										<Heading size={6} weight="light">
 											<span>{`Basic acl: `}</span>
 											{`0x${containerItem.basicAcl}${containerItem.cannedAcl ? ` (${containerItem.cannedAcl})` : ''}`}
 										</Heading>
