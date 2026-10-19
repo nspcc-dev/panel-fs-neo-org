@@ -32,6 +32,8 @@ import {
 	hexToBytesToBase64,
 	base64ToHex,
 	attributesToBase64,
+	BASIC_ACL_PRESETS,
+	isFinalBasicAcl,
 } from './Functions/handle';
 import { getWcSdk } from './Functions/wcSdk';
 import 'bulma/css/bulma.min.css';
@@ -191,8 +193,12 @@ export const App = () => {
 	const popupCounter = useRef(0);
 
 	const containerTokens = walletData ? walletData.tokens.container : {};
+	const basicAclValue = parseInt(BASIC_ACL_PRESETS[containerForm.basicAcl] || containerForm.basicAcl, 16);
+	const basicAclPreset = Object.keys(BASIC_ACL_PRESETS).find((preset) => parseInt(BASIC_ACL_PRESETS[preset], 16) === basicAclValue) || '';
+	const isContainerAclFinal = isFinalBasicAcl(containerForm.basicAcl);
+	const containerEACLParams = isContainerAclFinal ? [] : containerForm.eACLParams;
 	const isEaclTokenShared = !!(walletData && ['CONTAINER_PUT', 'CONTAINER_SET_EACL'].every((verb) => isVerbSigned(walletData.tokens, verb)) && containerTokens.CONTAINER_PUT.token === containerTokens.CONTAINER_SET_EACL.token);
-	const eaclResignVerbs = containerForm.eACLParams.length > 0 && !isEaclTokenShared ? ['CONTAINER_PUT', 'CONTAINER_SET_EACL'] : [];
+	const eaclResignVerbs = containerEACLParams.length > 0 && !isEaclTokenShared ? ['CONTAINER_PUT', 'CONTAINER_SET_EACL'] : [];
 
 	const onModal = (current = null, text = null, params = null) => {
 		setModal((prev) => prev.current === 's3Credentials' && prev.isIssuing ? prev : { current, text, params });
@@ -677,12 +683,19 @@ export const App = () => {
 		}
 	};
 
+	const onSetBasicAclFlag = (mask, checked) => {
+		setContainerForm((prev) => {
+			const value = parseInt(BASIC_ACL_PRESETS[prev.basicAcl] || prev.basicAcl, 16);
+			return { ...prev, basicAcl: ((checked ? value | mask : value & ~mask) >>> 0).toString(16).padStart(8, '0') };
+		});
+	};
+
 	const onCreateContainer = () => {
-		if (containerForm.eACLParams.every((eACLItem) => eACLItem.operation !== '' && eACLItem.action !== '' && eACLItem.targets[0] && eACLItem.targets[0].role !== '' && eACLItem.filters.every((filterItem) => filterItem.headerType !== '' && filterItem.matchType !== '' && filterItem.key !== '' && filterItem.value !== ''))) {
+		if (containerEACLParams.every((eACLItem) => eACLItem.operation !== '' && eACLItem.action !== '' && eACLItem.targets[0] && eACLItem.targets[0].role !== '' && eACLItem.filters.every((filterItem) => filterItem.headerType !== '' && filterItem.matchType !== '' && filterItem.key !== '' && filterItem.value !== ''))) {
 			if (attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0)) {
 				if (containerForm.containerName.length > 0 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0) {
 					if (containerForm.containerName.length >= 3) {
-						const eACLParams = containerForm.eACLParams.map(({ isOpen, ...rest }) => rest);
+						const eACLParams = containerEACLParams.map(({ isOpen, ...rest }) => rest);
 						if (eACLParams.length > 0 && !isEaclTokenShared) {
 							setError({ active: true, type: ['eacl'], text: 'To create a container with EACL, "Create container" and "Manage eACL" permissions must be signed in one token. Please sign a new token.' });
 							return;
@@ -1747,62 +1760,118 @@ export const App = () => {
 								<Form.Label>Access Control</Form.Label>
 							</Form.Field>
 							<Form.Field>
-								<Form.Label size="small">Basic ACL</Form.Label>
+								<Form.Label size="small" htmlFor="basicAcl">Basic ACL</Form.Label>
+								<Heading className="input_caption">Choose a preset or adjust individual permissions. Bearer allows bearer-token rules. Final disables extended ACL rules. Sticky requires uploaders to own their objects. Basic ACL cannot be changed after container creation.</Heading>
 								<Form.Control>
-									<Form.Input
-										renderAs="input"
-										type="text"
-										value={containerForm.basicAcl}
+									<Form.Select
+										id="basicAcl"
+										renderAs="select"
+										value={basicAclPreset}
 										className={isError.active && isError.type.indexOf('basicAcl') !== -1 ? 'is-error' : ""}
-										onChange={(e) => setContainerForm({ ...containerForm , basicAcl: e.target.value })}
-										disabled={true}
-									/>
-									<Heading className="input_caption">NeoFS Panel is incompatible with basic ACLs that disable Bearer tokens or use Final bit. Therefore, basic ACL can't be changed here, but you can set any EACL rules you need. If you need a container with some different basic ACL, please use the <a href="https://github.com/nspcc-dev/neofs-node" target="_blank" rel="noopener noreferrer">CLI</a>.</Heading>
+										onChange={(e) => setContainerForm({ ...containerForm, basicAcl: e.target.value })}
+										disabled={isLoadingForm}
+									>
+										<option value="" disabled>Custom</option>
+										{Object.keys(BASIC_ACL_PRESETS).map((preset) => (
+											<option key={preset} value={preset}>{preset}</option>
+										))}
+									</Form.Select>
+									<div className="table_container" style={{ margin: "10px 0" }}>
+										<table className="table is-narrow basic_acl_table" aria-label="Basic ACL permissions">
+											<thead>
+												<tr>
+													<th scope="col">Operation</th>
+													<th scope="col">Owner</th>
+													<th scope="col">Others</th>
+													<th scope="col">Bearer</th>
+												</tr>
+											</thead>
+											<tbody>
+												{['GET', 'HEAD', 'PUT', 'DELETE', 'SEARCH'].map((operation, index) => (
+													<tr key={operation}>
+														<th scope="row">{operation}</th>
+														{[{ name: 'Owner', bit: 3 }, { name: 'Others', bit: 1 }, { name: 'Bearer', bit: 0 }].map(({ name, bit }) => {
+															const mask = 1 << (index * 4 + bit);
+															return (
+																<td key={name}>
+																	<Form.Checkbox
+																		renderAs="input"
+																		aria-label={`${operation}: ${name}`}
+																		checked={(basicAclValue & mask) !== 0}
+																		onChange={(e) => onSetBasicAclFlag(mask, e.target.checked)}
+																		disabled={isLoadingForm}
+																	/>
+																</td>
+															);
+														})}
+													</tr>
+												))}
+											</tbody>
+										</table>
+									</div>
+									{[{ name: 'Final', mask: 0x10000000 }, { name: 'Sticky', mask: 0x20000000 }].map(({ name, mask }) => (
+										<Form.Field key={name}>
+											<Form.Checkbox
+												renderAs="input"
+												checked={(basicAclValue & mask) !== 0}
+												onChange={(e) => onSetBasicAclFlag(mask, e.target.checked)}
+												disabled={isLoadingForm}
+											>
+												&nbsp;{name}
+											</Form.Checkbox>
+										</Form.Field>
+									))}
 								</Form.Control>
-								<Form.Label size="small" style={{ marginTop: 10 }}>Extended ACL</Form.Label>
-								{Object.keys(presets).map((basicPresetExample) => (
-									<Tag
-										key={basicPresetExample}
-										className={isLoadingForm ? "tag_disabled" : ""}
-										onClick={() => {
-											if (containerForm.preset !== basicPresetExample) {
-												setContainerForm({
-													...containerForm,
-													eACLParams: presets[basicPresetExample].eACLParams,
-													preset: basicPresetExample,
-												})}
-											}
-										}
-										style={basicPresetExample === containerForm.preset ? {
-											margin: '5px 5px 0 0',
-											cursor: 'pointer',
-											background: '#00e599',
-											color: '#fff',
-										} : {
-											margin: '5px 5px 0 0',
-											cursor: 'pointer',
-										}}
-									>{presets[basicPresetExample].name}</Tag>
-								))}
-								<EACLPanel
-									onAuth={onAuth}
-									isErrorParent={isError}
-									isEdit={!(containerForm.preset === 'forbid' || containerForm.preset === 'shared' || isLoadingForm)}
-									eACLParams={containerForm.eACLParams}
-									setEACLParams={(e) => setContainerForm({ ...containerForm, eACLParams: e })}
-								/>
+								{isContainerAclFinal ? (
+									<Heading className="input_caption">The Final flag disables extended ACL rules.</Heading>
+								) : (
+									<>
+										<Form.Label size="small" style={{ marginTop: 10 }}>Extended ACL</Form.Label>
+										{Object.keys(presets).map((basicPresetExample) => (
+											<Tag
+												key={basicPresetExample}
+												className={isLoadingForm ? "tag_disabled" : ""}
+												onClick={() => {
+													if (containerForm.preset !== basicPresetExample) {
+														setContainerForm({
+															...containerForm,
+															eACLParams: presets[basicPresetExample].eACLParams,
+															preset: basicPresetExample,
+														})}
+													}
+												}
+												style={basicPresetExample === containerForm.preset ? {
+													margin: '5px 5px 0 0',
+													cursor: 'pointer',
+													background: '#00e599',
+													color: '#fff',
+												} : {
+													margin: '5px 5px 0 0',
+													cursor: 'pointer',
+												}}
+											>{presets[basicPresetExample].name}</Tag>
+										))}
+										<EACLPanel
+											onAuth={onAuth}
+											isErrorParent={isError}
+											isEdit={!(containerForm.preset === 'forbid' || containerForm.preset === 'shared' || isLoadingForm)}
+											eACLParams={containerForm.eACLParams}
+											setEACLParams={(e) => setContainerForm({ ...containerForm, eACLParams: e })}
+										/>
+									</>
+								)}
 							</Form.Field>
 							{isError.active && (
 								<Notification className="error_message" style={{ margin: '20px 0' }}>
 									{isError.text}
 								</Notification>
 							)}
-							{(!isVerbSigned(walletData.tokens, 'CONTAINER_PUT') || (containerForm.eACLParams.length > 0 && !isEaclTokenShared)) ? (
+							{(!isVerbSigned(walletData.tokens, 'CONTAINER_PUT') || (containerEACLParams.length > 0 && !isEaclTokenShared)) ? (
 								<TokenSignPanel
 									walletData={walletData}
 									onAuth={onAuth}
 									title="Sign token to create container"
-									requiredVerbs={containerForm.eACLParams.length > 0
+									requiredVerbs={containerEACLParams.length > 0
 										? ['CONTAINER_PUT', 'CONTAINER_SET_EACL']
 										: ['CONTAINER_PUT']}
 									resignVerbs={eaclResignVerbs}

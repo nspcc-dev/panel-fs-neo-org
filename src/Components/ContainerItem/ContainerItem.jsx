@@ -18,6 +18,7 @@ import {
 	invokeFunction,
 	formatBytes,
 	formatGasPerMonth,
+	isFinalBasicAcl,
 } from '../../Functions/handle';
 import api from '../../api';
 
@@ -285,7 +286,7 @@ export default function ContainerItem({
 											size={6}
 											weight="bolder"
 											onClick={() => {
-												if (containerItem.basicAcl.length === 8 && (containerItem.basicAcl.substr(0, 1) === '1' || containerItem.basicAcl.substr(0, 1) === '3')) {
+												if (isFinalBasicAcl(containerItem.basicAcl)) {
 													if (activePanel === 'eACL') {
 														setActivePanel('');
 													} else {
@@ -313,7 +314,7 @@ export default function ContainerItem({
 											<>
 												{!isLoadingEACL ? (
 													<>
-														{(containerItem.basicAcl.length === 8 && (containerItem.basicAcl.substr(0, 1) === '1' || containerItem.basicAcl.substr(0, 1) === '3')) ? (
+														{isFinalBasicAcl(containerItem.basicAcl) ? (
 															<Heading size={6} weight="light">
 																Current basic acl doesn't support eACL
 															</Heading>
