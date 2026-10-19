@@ -144,20 +144,26 @@ export default function ContainerItem({
 	};
 
 	const onGetContainerReportSummary = async (containerId) => {
-		const response = await invokeFunction(
-			NeoFSContract.sidechain,
-			[
-				NeoFSContract.sidechainContract,
-				"getNodeReportSummary",
-				[{ type: "ByteString", value: base58ToBase64(containerId) }]
-			],
-		);
-		setObjectsWithCopies({
-			size: response.stack[0].value[0].value,
-			count: response.stack[0].value[1].value,
-		});
+		try {
+			const response = await invokeFunction(
+				NeoFSContract.sidechain,
+				[
+					NeoFSContract.sidechainContract,
+					"getNodeReportSummary",
+					[{ type: "ByteString", value: base58ToBase64(containerId) }]
+				],
+			);
+			const size = response?.stack?.[0]?.value?.[0]?.value;
+			const count = response?.stack?.[0]?.value?.[1]?.value;
+			if (response?.exception || response?.state === 'FAULT' || size == null || count == null) {
+				throw new Error(response?.exception || response?.message || 'Failed to retrieve container storage report');
+			}
+			setObjectsWithCopies({ size, count });
 
-		setObjectsTotalSize((prevState) => prevState + parseInt(response.stack[0].value[0].value));
+			setObjectsTotalSize((prevState) => prevState + parseInt(size));
+		} catch (error) {
+			onPopup('failed', error?.message || 'Failed to retrieve container storage report');
+		}
 	};
 
 	const onGetEACL = (containerId) => {
