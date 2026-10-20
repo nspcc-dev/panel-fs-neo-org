@@ -43,7 +43,7 @@ export default function EACLPanel({
 	}, [isErrorParent]);
 
 	const onSetEACL = (containerId) => {
-		if (eACLParams.every((eACLItem) => eACLItem.operation !== '' && eACLItem.action !== '' && (eACLItem.targets[0]?.role !== '' || eACLItem.targets[0].accounts?.length > 0) && eACLItem.filters.every((filterItem) => filterItem.headerType !== '' && filterItem.matchType !== '' && filterItem.key !== '' && filterItem.value !== ''))) {
+		if (eACLParams.every((eACLItem) => eACLItem.operation !== '' && eACLItem.action !== '' && eACLItem.targets[0] && (eACLItem.targets[0].role !== '' || eACLItem.targets[0].accounts?.length > 0) && eACLItem.filters.every((filterItem) => filterItem.headerType !== '' && filterItem.matchType !== '' && filterItem.key !== '' && filterItem.value !== ''))) {
 			setError({ active: false, type: [], text: '' });
 			setLoadingForm(true);
 			api('PUT', `/v1/containers/${containerId}/eacl?walletConnect=true`, {
@@ -153,7 +153,7 @@ export default function EACLPanel({
 								alt="chevron"
 							/>
 						</Panel.Icon>
-						{`Rule #${index + 1} ${eACLItem.operation && eACLItem.action && (eACLItem.targets[0].role || eACLItem.targets[0].accounts) ? `(${eACLItem.operation}-${eACLItem.action}-${eACLItem.targets[0].role ? eACLItem.targets[0].role : 'ACCOUNTS'})` : ''}`}
+						{`Rule #${index + 1} ${eACLItem.operation && eACLItem.action && (eACLItem.targets[0]?.role || eACLItem.targets[0]?.accounts) ? `(${eACLItem.operation}-${eACLItem.action}-${eACLItem.targets[0].role ? eACLItem.targets[0].role : 'ACCOUNTS'})` : ''}`}
 						{eACLItem.isOpen && isEdit && (
 							<Panel.Icon>
 								<img
@@ -216,8 +216,8 @@ export default function EACLPanel({
 								<Form.Control>
 									<Form.Select
 										renderAs="select"
-										value={eACLItem.targets[0].role ? eACLItem.targets[0].role : 'ACCOUNTS'}
-										className={isError.active && isError.type.indexOf('eacl') !== -1 && eACLItem.targets[0].role?.length === 0 ? 'is-error' : ""}
+										value={eACLItem.targets[0] ? (eACLItem.targets[0].role || 'ACCOUNTS') : ''}
+										className={isError.active && isError.type.indexOf('eacl') !== -1 && (!eACLItem.targets[0] || eACLItem.targets[0].role?.length === 0) ? 'is-error' : ""}
 										onChange={(e) => {
 											const aECLParamsTemp = [...eACLParams];
 											aECLParamsTemp[index].targets = [e.target.value === 'ACCOUNTS' ? { accounts: [] } : { role: e.target.value }];
@@ -232,7 +232,7 @@ export default function EACLPanel({
 									</Form.Select>
 								</Form.Control>
 							</Form.Field>
-							{eACLItem.targets[0].accounts && (
+							{eACLItem.targets[0]?.accounts && (
 								<Form.Field>
 									<Form.Control>
 										<Form.Input

@@ -626,6 +626,11 @@ label.panel-block:hover {
     white-space: pre-line;
 }
 
+.basic_acl_table th,
+.basic_acl_table td {
+    font-weight: 400;
+}
+
 .token_status_panel {
     display: flex;
     align-items: center;

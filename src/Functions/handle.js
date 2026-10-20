@@ -127,6 +127,21 @@ export function isPublicReadContainer(basicAcl) {
 	return (parseInt(basicAcl, 16) & othersGetHead) === othersGetHead;
 }
 
+export const BASIC_ACL_PRESETS = {
+	'private': '1c8c8ccc',
+	'public-read': '1fbf8cff',
+	'public-read-write': '1fbfbfff',
+	'public-append': '1fbf9fff',
+	'eacl-private': '0c8c8ccc',
+	'eacl-public-read': '0fbf8cff',
+	'eacl-public-read-write': '0fbfbfff',
+	'eacl-public-append': '0fbf9fff',
+};
+
+export function isFinalBasicAcl(basicAcl) {
+	return (parseInt(BASIC_ACL_PRESETS[basicAcl] || basicAcl, 16) & 0x10000000) !== 0;
+}
+
 export async function invokeFunction(rpcUrl, params, method = "invokefunction") {
   const response = await fetch(rpcUrl, {
     method: "POST",
