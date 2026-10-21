@@ -193,6 +193,7 @@ export const App = () => {
 	const popupCounter = useRef(0);
 
 	const containerTokens = walletData ? walletData.tokens.container : {};
+	const containerName = containerForm.containerName.trim();
 	const basicAclValue = parseInt(BASIC_ACL_PRESETS[containerForm.basicAcl] || containerForm.basicAcl, 16);
 	const basicAclPreset = Object.keys(BASIC_ACL_PRESETS).find((preset) => parseInt(BASIC_ACL_PRESETS[preset], 16) === basicAclValue) || '';
 	const isContainerAclFinal = isFinalBasicAcl(containerForm.basicAcl);
@@ -693,8 +694,8 @@ export const App = () => {
 	const onCreateContainer = () => {
 		if (containerEACLParams.every((eACLItem) => eACLItem.operation !== '' && eACLItem.action !== '' && eACLItem.targets[0] && eACLItem.targets[0].role !== '' && eACLItem.filters.every((filterItem) => filterItem.headerType !== '' && filterItem.matchType !== '' && filterItem.key !== '' && filterItem.value !== ''))) {
 			if (attributes.every((attribute) => attribute.key.length > 0 && attribute.value.length > 0)) {
-				if (containerForm.containerName.length > 0 && containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0) {
-					if (containerForm.containerName.length >= 3) {
+				if (containerForm.placementPolicy.length > 0 && containerForm.basicAcl.length > 0) {
+					if (containerName.length === 0 || containerName.length >= 3) {
 						const eACLParams = containerEACLParams.map(({ isOpen, ...rest }) => rest);
 						if (eACLParams.length > 0 && !isEaclTokenShared) {
 							setError({ active: true, type: ['eacl'], text: 'To create a container with EACL, "Create container" and "Manage eACL" permissions must be signed in one token. Please sign a new token.' });
@@ -702,8 +703,8 @@ export const App = () => {
 						}
 						setError({ active: false, type: [], text: '' });
 						setLoadingForm(true);
-						api('POST', '/v1/containers?walletConnect=true&name-scope-global=true', {
-							"containerName": containerForm.containerName,
+						api('POST', `/v1/containers?walletConnect=true&name-scope-global=${containerName.length > 0}`, {
+							"containerName": containerName,
 							"placementPolicy": containerForm.placementPolicy,
 							"basicAcl": containerForm.basicAcl,
 							"attributes": attributes,
@@ -738,9 +739,6 @@ export const App = () => {
 					}
 				} else {
 					let fields = [];
-					if (containerForm.containerName.length === 0) {
-						fields.push('containerName');
-					}
 					if (containerForm.placementPolicy.length === 0) {
 						fields.push('placementPolicy');
 					}
@@ -1648,9 +1646,8 @@ export const App = () => {
 									Container creation is a paid operation, make sure you have sufficient NeoFS chain balance
 								</Notification>
 							)}
-							<Heading className="input_caption">{`Container cost is ${networkInfo ? 7 * (networkInfo.containerFee + networkInfo.namedContainerFee) * 1e-12 : '-'} GAS for ${activeNet.toLowerCase()} now.`}</Heading>
 							<Form.Field>
-								<Form.Label>Name</Form.Label>
+								<Form.Label>Name (optional)</Form.Label>
 								<Form.Control>
 									<Form.Input
 										renderAs="input"
@@ -1661,6 +1658,11 @@ export const App = () => {
 										disabled={isLoadingForm}
 									/>
 								</Form.Control>
+								{containerName && (
+									<Heading className="input_caption">
+										{`Naming a container adds ${networkInfo ? 7 * networkInfo.namedContainerFee / 1e12 : '-'} GAS to the creation price.`}
+									</Heading>
+								)}
 							</Form.Field>
 							<Form.Field>
 								<Form.Label>Placement policy</Form.Label>
@@ -1866,6 +1868,9 @@ export const App = () => {
 									{isError.text}
 								</Notification>
 							)}
+							<Heading align="center" size={6} style={{ margin: '30px 0 10px' }}>
+								{`Price: ${networkInfo ? 7 * (networkInfo.containerFee + (containerName ? networkInfo.namedContainerFee : 0)) / 1e12 : '-'} GAS`}
+							</Heading>
 							{(!isVerbSigned(walletData.tokens, 'CONTAINER_PUT') || (containerEACLParams.length > 0 && !isEaclTokenShared)) ? (
 								<TokenSignPanel
 									walletData={walletData}
@@ -1884,12 +1889,12 @@ export const App = () => {
 									onClick={onCreateContainer}
 									style={isLoadingForm ? {
 										display: 'flex',
-										margin: '30px auto 0',
+										margin: '0 auto',
 										pointerEvents: 'none',
 										opacity: 0.8,
 									} : {
 										display: 'flex',
-										margin: '30px auto 0',
+										margin: '0 auto',
 									}}
 								>
 									{isLoadingForm ? (
