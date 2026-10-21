@@ -55,6 +55,7 @@ export default function ContainerItem({
 	const [activePanel, setActivePanel] = useState('');
 	const [isTreeViewObjects, setTreeViewObjects] = useState(false);
 	const [isShowHiddenFiles, setShowFilesActive] = useState(false);
+	const containerName = formatForContainerName(containerItem.attributes, '');
 
 	useEffect(() => {
 		if (isLoadContainers === containerItem.containerId) {
@@ -207,8 +208,8 @@ export default function ContainerItem({
 							setIsOpen(!isOpen);
 						}}
 					>
-						<div>
-							<div>{formatForContainerName(containerItem.attributes, containerItem.containerId)}</div>
+						<div style={{ minWidth: 0, overflowWrap: 'anywhere' }}>
+							<div>{containerName || containerItem.containerId}</div>
 							<Heading
 								size={6}
 								weight="light"
