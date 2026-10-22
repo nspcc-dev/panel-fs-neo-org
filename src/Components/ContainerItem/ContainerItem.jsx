@@ -10,7 +10,7 @@ import {
 } from 'react-bulma-components';
 import TreeView from '../TreeView/TreeView';
 import EACLPanel from '../EACLPanel/EACLPanel';
-import { isVerbSigned } from '../TokenSignPanel/TokenSignPanel';
+import TokenSignPanel, { isVerbSigned } from '../TokenSignPanel/TokenSignPanel';
 import {
 	formatForTreeView,
 	formatForContainerName,
@@ -21,6 +21,8 @@ import {
 	isFinalBasicAcl,
 } from '../../Functions/handle';
 import api from '../../api';
+
+const MUTABLE_ATTRIBUTES = ['__NEOFS__LOCK_UNTIL', 'S3_TAGS', 'S3_SETTINGS', 'S3_NOTIFICATIONS'];
 
 export default function ContainerItem({
 	NeoFSContract,
@@ -51,11 +53,26 @@ export default function ContainerItem({
 	const [objectsWithCopies, setObjectsWithCopies] = useState(null);
 	const [isLoadingObjects, setLoadingObjects] = useState(false);
 	const [isLoadingEACL, setLoadingEACL] = useState(false);
+	const [attributeEditor, setAttributeEditor] = useState(null);
+	const [isLoadingAttribute, setLoadingAttribute] = useState(false);
+	const [attributeError, setAttributeError] = useState('');
 	const [eACLParams, setEACLParams] = useState([]);
 	const [activePanel, setActivePanel] = useState('');
 	const [isTreeViewObjects, setTreeViewObjects] = useState(false);
 	const [isShowHiddenFiles, setShowFilesActive] = useState(false);
 	const containerName = formatForContainerName(containerItem.attributes, '');
+	const attributeVerb = attributeEditor?.remove ? 'CONTAINER_REMOVE_ATTRIBUTE' : 'CONTAINER_SET_ATTRIBUTE';
+	const isAttributeUnchanged = !attributeEditor?.remove && containerItem.attributes.some((attribute) => attribute.key === attributeEditor?.key && attribute.value === attributeEditor?.value);
+	const containerAttributes = attributeEditor && !containerItem.attributes.some((attribute) => attribute.key === attributeEditor.key)
+		? [...containerItem.attributes, attributeEditor]
+		: containerItem.attributes;
+
+	useEffect(() => {
+		if (!isOpen || activePanel !== 'attributes') {
+			setAttributeEditor(null);
+			setAttributeError('');
+		}
+	}, [isOpen, activePanel]);
 
 	useEffect(() => {
 		if (isLoadContainers === containerItem.containerId) {
@@ -181,6 +198,57 @@ export default function ContainerItem({
 		}).finally(() => {
 			setLoadingEACL(false);
 		});
+	};
+
+	const onEditAttribute = (attribute, remove = false) => {
+		setAttributeError('');
+		setAttributeEditor({ ...attribute, remove });
+	};
+
+	const onSaveAttribute = async () => {
+		if (isLoadingAttribute || !attributeEditor || isAttributeUnchanged || !isVerbSigned(walletData.tokens, attributeVerb)) return;
+		setAttributeError('');
+		try {
+			if (!MUTABLE_ATTRIBUTES.includes(attributeEditor.key)) {
+				throw new Error('Select a mutable attribute.');
+			}
+			if (!attributeEditor.remove) {
+				if (!attributeEditor.value.length) throw new Error('Attribute value must not be empty.');
+				if (new TextEncoder().encode(attributeEditor.value).length > 65536) {
+					throw new Error('Attribute value must not exceed 64 KiB.');
+				}
+				if (attributeEditor.key === '__NEOFS__LOCK_UNTIL') {
+					if (!/^\+?\d+$/.test(attributeEditor.value) || BigInt(attributeEditor.value) <= 0n || BigInt(attributeEditor.value) > 9223372036854775807n) {
+						throw new Error('Lock expiration must be a positive Unix timestamp in seconds.');
+					}
+				} else {
+					let value;
+					try { value = JSON.parse(attributeEditor.value); } catch {}
+					if (!value || typeof value !== 'object' || Array.isArray(value) || Object.values(value).some((item) => typeof item !== 'string')) {
+						throw new Error('Attribute value must be a JSON object with string values.');
+					}
+				}
+			}
+			setLoadingAttribute(true);
+			const response = await api(
+				attributeEditor.remove ? 'DELETE' : 'PUT',
+				`/v1/containers/${containerItem.containerId}/attributes/${encodeURIComponent(attributeEditor.key)}`,
+				attributeEditor.remove ? {} : attributeEditor.value,
+				{
+					Authorization: `Bearer ${walletData.tokens.container[attributeVerb].token}`,
+					...(!attributeEditor.remove && { 'Content-Type': 'text/plain' }),
+				},
+			);
+			if (response?.success !== true) {
+				throw new Error(response?.message || 'Failed to update container attribute. Please try again.');
+			}
+			setAttributeEditor(null);
+			setLoadContainers(true);
+		} catch (error) {
+			setAttributeError(error?.message || 'Failed to update container attribute. Please try again.');
+		} finally {
+			setLoadingAttribute(false);
+		}
 	};
 
 	return (
@@ -358,12 +426,101 @@ export default function ContainerItem({
 											/>
 											Attributes
 										</Heading>
-										{activePanel === 'attributes' && containerItem.attributes.map((attribute) => (
-											<Heading size={6} weight="light" style={{ marginLeft: 10 }} key={attribute.key}>
-												<span>{`${attribute.key}: `}</span>
-												{attribute.value}
-											</Heading>
-										))}
+										{activePanel === 'attributes' && (
+											<>
+												<div className="table_container">
+													<table className="table is-narrow container_attributes_table" aria-label="Container attributes">
+														<colgroup>
+															<col style={{ width: '30%' }} />
+															<col />
+															<col style={{ width: '12rem' }} />
+														</colgroup>
+														<tbody>
+															{containerAttributes.map((attribute) => attributeEditor?.key !== attribute.key ? (
+																<tr key={attribute.key}>
+																	<td>{attribute.key}</td>
+																	<td>{attribute.value}</td>
+																	<td>
+																		{MUTABLE_ATTRIBUTES.includes(attribute.key) && (
+																			<div className="buttons">
+																				<Button renderAs="button" size="small" onClick={() => onEditAttribute(attribute)} disabled={!!attributeEditor || isLoadingAttribute} aria-label={`Edit ${attribute.key}`}>Edit</Button>
+																				<Button renderAs="button" size="small" color="danger" outlined onClick={() => onEditAttribute(attribute, true)} disabled={!!attributeEditor || isLoadingAttribute} aria-label={`Remove ${attribute.key}`}>Remove</Button>
+																			</div>
+																		)}
+																	</td>
+																</tr>
+															) : (
+																<tr key={attribute.key}>
+																	<td>
+																		<Form.Select
+																			renderAs="select"
+																			size="small"
+																			aria-label="Attribute name"
+																			value={attributeEditor.key}
+																			disabled={isLoadingAttribute || attributeEditor.remove}
+																			onChange={(event) => {
+																				const key = event.target.value;
+																				onEditAttribute({ key, value: containerItem.attributes.find((attribute) => attribute.key === key)?.value ?? '' });
+																			}}
+																		>
+																			<option value="">Key</option>
+																			{MUTABLE_ATTRIBUTES.map((key) => <option key={key} value={key}>{key}</option>)}
+																		</Form.Select>
+																	</td>
+																	<td>
+																		{attributeEditor.remove ? attributeEditor.value : (
+																			<Form.Input
+																				renderAs="input"
+																				size="small"
+																				placeholder="Value"
+																				aria-label="Attribute value"
+																				value={attributeEditor.value}
+																				onChange={(event) => setAttributeEditor({ ...attributeEditor, value: event.target.value })}
+																				disabled={isLoadingAttribute}
+																			/>
+																		)}
+																	</td>
+																	<td>
+																		<div className="buttons">
+																			<Button renderAs="button" size="small" color={attributeEditor.remove ? 'danger' : 'primary'} onClick={onSaveAttribute} loading={isLoadingAttribute} aria-busy={isLoadingAttribute} disabled={isLoadingAttribute || !attributeEditor.key || isAttributeUnchanged || !isVerbSigned(walletData.tokens, attributeVerb)}>
+																				{attributeEditor.remove ? 'Remove' : 'Save'}
+																			</Button>
+																			<Button renderAs="button" size="small" disabled={isLoadingAttribute} onClick={() => { setAttributeEditor(null); setAttributeError(''); }}>Cancel</Button>
+																		</div>
+																	</td>
+																</tr>
+															))}
+														</tbody>
+													</table>
+												</div>
+												{!attributeEditor ? (
+													<Button renderAs="button" color="primary" size="small" onClick={() => onEditAttribute({ key: '', value: '' })} disabled={isLoadingAttribute}>
+														Add attribute
+													</Button>
+												) : (
+													<>
+														{attributeEditor.remove ? (
+															<Heading size={6} weight="light">Remove {attributeEditor.key} from this container?</Heading>
+														) : (
+															<Heading className="input_caption">
+																{attributeEditor.key === '__NEOFS__LOCK_UNTIL'
+																	? 'Unix timestamp in seconds until which the container cannot be deleted.'
+																	: 'JSON object with string values, for example {"key":"value"}. These attributes store S3 gateway configuration.'}
+															</Heading>
+														)}
+														{attributeError && <Notification className="error_message" role="alert">{attributeError}</Notification>}
+														{!isVerbSigned(walletData.tokens, attributeVerb) && (
+															<TokenSignPanel
+																walletData={walletData}
+																onAuth={onAuth}
+																title="Sign token to manage container attributes"
+																requiredVerbs={[attributeVerb]}
+															/>
+														)}
+													</>
+												)}
+											</>
+										)}
 									</Section>
 									<Section>
 										<Heading

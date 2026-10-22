@@ -627,8 +627,29 @@ label.panel-block:hover {
 }
 
 .basic_acl_table th,
-.basic_acl_table td {
+.basic_acl_table td,
+.container_attributes_table td {
     font-weight: 400;
+}
+
+.container_attributes_table {
+    table-layout: fixed;
+    min-width: 500px;
+}
+
+.container_attributes_table td {
+    overflow-wrap: anywhere;
+    vertical-align: middle;
+}
+
+.container_attributes_table .buttons {
+    flex-wrap: nowrap;
+    margin-bottom: 0;
+}
+
+.container_attributes_table .buttons .button {
+    flex: 1;
+    margin-bottom: 0;
 }
 
 .token_status_panel {
