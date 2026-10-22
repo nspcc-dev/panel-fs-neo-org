@@ -12,6 +12,17 @@ Changelog for NeoFS Panel
 
 ### Removed
 
+## [0.12.0] - 2026-10-22
+
+### Added
+- Container revision support (#312)
+- Basic ACL setting (#314)
+- Container attribute management (#317)
+
+### Changed
+- Container API version label (#311)
+- Container name is optional now (#315)
+
 ## [0.11.1] - 2026-10-09
 
 ### Changed
@@ -289,4 +300,5 @@ First public review release.
 [0.10.2]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.10.2
 [0.11.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.11.0
 [0.11.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.11.1
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.11.1...master
+[0.12.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.12.0
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.12.0...master
