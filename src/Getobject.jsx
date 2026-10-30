@@ -177,6 +177,10 @@ const Getobject = ({
 												<span>{`Object size: `}</span>
 												{formatBytes(objectData.objectSize)}
 											</Heading>
+											<Heading size={6} weight="light">
+												<span>Expiration: </span>
+												{objectData.expirationTimestamp ? new Date(objectData.expirationTimestamp * 1000).toJSON() ?? '-' : '-'}
+											</Heading>
 										</>
 									)}
 								</Section>

@@ -47,6 +47,7 @@ export default function api(method, url, params = {}, headers = {}) {
 						'objectId': response.headers.get('x-object-id'),
 						'ownerId': response.headers.get('x-owner-Id'),
 						'objectType': response.headers.get('x-object-type'),
+						'expirationTimestamp': response.headers.get('x-expiration-timestamp'),
 						'filename': attributes['FileName'],
 						'attributes': attributes,
 						'contentType': response.headers.get('Content-Type'),
