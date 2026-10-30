@@ -12,6 +12,11 @@ Changelog for NeoFS Panel
 
 ### Removed
 
+## [0.12.1] - 2026-10-30
+
+### Added
+- API 2.28 object expiration display (#320)
+
 ## [0.12.0] - 2026-10-22
 
 ### Added
@@ -301,4 +306,5 @@ First public review release.
 [0.11.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.11.0
 [0.11.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.11.1
 [0.12.0]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.12.0
-[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.12.0...master
+[0.12.1]: https://github.com/nspcc-dev/panel-fs-neo-org/tree/v0.12.1
+[Unreleased]: https://github.com/nspcc-dev/panel-fs-neo-org/compare/v0.12.1...master
