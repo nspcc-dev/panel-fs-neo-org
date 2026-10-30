@@ -142,6 +142,10 @@ const File = ({
 											<span>{`Object size: `}</span>
 											{objectDate.objectSize ? formatBytes(Number(objectDate.objectSize)) : ''}
 										</Heading>
+										<Heading size={6} weight="light">
+											<span>Expiration: </span>
+											{objectDate.expirationTimestamp ? new Date(objectDate.expirationTimestamp * 1000).toJSON() ?? '-' : '-'}
+										</Heading>
 									</Section>
 									<Section style={{ paddingTop: 0 }}>
 										<Heading size={5} weight="bolder" style={{ color: '#00e599' }}>Attributes</Heading>
